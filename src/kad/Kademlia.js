@@ -1,3 +1,4 @@
+require("babel-polyfill");
 import WebRTC from "simple-datachannel";
 import Helper from "./KUtil";
 import Events from "events";
@@ -6,6 +7,8 @@ import KResponder from "./KResponder";
 import def from "./KConst";
 
 let buffer = {};
+
+const callback = { onAddPeer: () => {} };
 
 export function networkFormat(nodeId, type, data) {
   let packet = {
@@ -48,6 +51,10 @@ export default class Kademlia {
       this.f = new Helper(this.k, this.kbuckets);
       this.kresponder = new KResponder(this);
     }
+  }
+
+  onAddPeer(cb = () => {}) {
+    callback.onAddPeer = cb;
   }
 
   async ping(peer) {
@@ -158,6 +165,7 @@ export default class Kademlia {
       } else {
         console.log("kbucket ready", this.f.getKbucketNum());
       }
+      callback.onAddPeer(this.kbuckets);
     }
   }
 
