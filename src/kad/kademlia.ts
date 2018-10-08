@@ -147,7 +147,7 @@ export default class Kademlia {
         this.findNewPeer(peer);
       }, 1000);
 
-      this.callback.onAddPeer(this.kbuckets);
+      this.callback.onAddPeer(this.f.getAllPeerIds());
     }
   }
 
