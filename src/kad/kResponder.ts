@@ -119,7 +119,7 @@ export default class KResponder {
       if (data.target === k.nodeId) {
         console.log("pong received", network.nodeId);
         //pingのコールバック
-        k.callback.onPing();
+        k.callback.onPing[network.nodeId]();
       }
     };
 

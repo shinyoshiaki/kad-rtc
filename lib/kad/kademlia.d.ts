@@ -19,13 +19,16 @@ export default class Kademlia {
         findNode: string;
         hash: {};
     };
+    private onPing;
     callback: {
         onAddPeer: (v?: any) => void;
         onPeerDisconnect: (v?: any) => void;
         onCommand: (v?: any) => void;
         onFindValue: (v?: any) => void;
         onFindNode: (v?: any) => void;
-        onPing: () => void;
+        onPing: {
+            [key: string]: () => void;
+        };
     };
     constructor(_nodeId: string);
     ping(peer: WebRTC): Promise<{}>;

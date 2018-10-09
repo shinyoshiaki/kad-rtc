@@ -49,7 +49,7 @@ function connectNode(nodeId: string) {
 const Kads: Array<Kademlia> = [];
 
 (async () => {
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < 10; i++) {
     const nodeId = sha1(Math.random().toString()).toString();
     const node = await connectNode(nodeId);
     const kad = new Kademlia(nodeId);

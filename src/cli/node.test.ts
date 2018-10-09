@@ -1,3 +1,3 @@
-import Node from "./node";
+import Node from "../node/node";
 
 new Node("localhost", "20001");

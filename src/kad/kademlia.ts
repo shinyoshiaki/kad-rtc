@@ -20,13 +20,15 @@ export default class Kademlia {
     hash: {}
   };
 
+  private onPing: { [key: string]: () => void } = {};
+
   callback = {
     onAddPeer: (v?: any) => {},
     onPeerDisconnect: (v?: any) => {},
     onCommand: (v?: any) => {},
     onFindValue: (v?: any) => {},
     onFindNode: (v?: any) => {},
-    onPing: () => {}
+    onPing: this.onPing
   };
 
   constructor(_nodeId: string) {
@@ -58,7 +60,7 @@ export default class Kademlia {
       }, 10 * 1000);
 
       //ping完了時のコールバック
-      this.callback.onPing = () => {
+      this.callback.onPing[peer.nodeId] = () => {
         console.log("ping success", peer.nodeId);
         clearTimeout(timeout);
         resolve(true);
@@ -92,7 +94,8 @@ export default class Kademlia {
   async findNode(targetId: string, peer: WebRTC) {
     console.log("findnode");
     //接続確認
-
+    const ping = this.ping(peer).catch(console.log);
+    if (!ping) return;
     console.log("findnode", targetId);
     this.state.findNode = targetId;
     const sendData = { targetKey: targetId };
@@ -122,15 +125,14 @@ export default class Kademlia {
   }
 
   addknode(peer: WebRTC) {
-    peer.ev.on("data", (data: any) => {
-      console.log("on data", data);
-      this.onCommand(data);
-    });
+    peer.data = raw => {
+      this.onCommand(raw);
+    };
 
-    peer.ev.on("disconnect", () => {
+    peer.disconnect = () => {
       console.log("kad node disconnected");
       this.f.cleanDiscon();
-    });
+    };
 
     if (!this.f.isNodeExist(peer.nodeId)) {
       //自分のノードIDと追加するノードIDの距離

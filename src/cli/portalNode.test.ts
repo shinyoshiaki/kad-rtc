@@ -1,5 +1,5 @@
 import "source-map-support/register";
-import PortalNode from "./portalNode";
+import PortalNode from "../node/portalNode";
 import inquire from "inquirer";
 
 const quesMyPort = {
