@@ -26,7 +26,7 @@ export default class Kademlia {
         onCommand: (v?: any) => void;
         onFindValue: (v?: any) => void;
         onFindNode: (v?: any) => void;
-        onPing: {
+        _onPing: {
             [key: string]: () => void;
         };
     };

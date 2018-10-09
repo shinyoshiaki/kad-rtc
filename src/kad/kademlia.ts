@@ -28,7 +28,7 @@ export default class Kademlia {
     onCommand: (v?: any) => {},
     onFindValue: (v?: any) => {},
     onFindNode: (v?: any) => {},
-    onPing: this.onPing
+    _onPing: this.onPing
   };
 
   constructor(_nodeId: string) {
@@ -60,7 +60,7 @@ export default class Kademlia {
       }, 10 * 1000);
 
       //ping完了時のコールバック
-      this.callback.onPing[peer.nodeId] = () => {
+      this.callback._onPing[peer.nodeId] = () => {
         console.log("ping success", peer.nodeId);
         clearTimeout(timeout);
         resolve(true);
