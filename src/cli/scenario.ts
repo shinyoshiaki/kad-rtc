@@ -1,4 +1,4 @@
-import WebRTC from "simple-datachannel/lib/NodeRTC";
+import WebRTC from "webrtc4me";
 import Kademlia from "../kad/kademlia";
 import sha1 from "sha1";
 
@@ -19,12 +19,11 @@ function portalNodeAnswer(
   callback: (local: any) => void
 ) {
   const PortalNode = new WebRTC();
-  PortalNode.connecting(nodeId);
   PortalNode.connect = () => {
     console.log("portalnode connected", portalNodeId, nodeId);
     portalNodeKad.addknode(PortalNode);
   };
-  PortalNode.makeAnswer(sdp, { disable_stun: true });
+  PortalNode.makeAnswer(sdp, { disable_stun: true, nodeId: nodeId });
   PortalNode.signal = local => {
     callback(local);
   };
@@ -33,8 +32,7 @@ function portalNodeAnswer(
 function connectNode(nodeId: string) {
   return new Promise<WebRTC>(resolve => {
     const Node = new WebRTC();
-    Node.connecting(portalNodeId);
-    Node.makeOffer({ disable_stun: true });
+    Node.makeOffer({ disable_stun: true, nodeId: portalNodeId });
     Node.signal = local => {
       portalNodeAnswer(local, nodeId, sdp => {
         Node.setAnswer(sdp);

@@ -1,4 +1,4 @@
-import WebRTC from "simple-datachannel";
+import WebRTC from "webrtc4me";
 import { distance } from "kad-distance";
 
 export default class KUtil {

@@ -1,4 +1,4 @@
-import WebRTC from "simple-datachannel";
+import WebRTC from "webrtc4me";
 export default class KUtil {
     kbuckets: Array<Array<WebRTC>>;
     k: number;

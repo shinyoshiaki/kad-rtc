@@ -32,11 +32,11 @@
     "events": "^3.0.0",
     "inquirer": "^6.2.0",
     "kad-distance": "git+https://git@github.com/shinyoshiaki/kad-distance.git",
-    "sha1": "^1.1.1",
-    "simple-datachannel": "^0.0.20",
+    "sha1": "^1.1.1",    
     "socket.io": "^2.1.1",
     "socket.io-client": "^2.1.1",
     "source-map-support": "^0.5.9",
+    "webrtc4me": "git+https://git@github.com/shinyoshiaki/webrtc4me.git",
     "wrtc": "^0.1.6"
   }
 }

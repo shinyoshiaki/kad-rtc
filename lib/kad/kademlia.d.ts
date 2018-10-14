@@ -1,4 +1,4 @@
-import WebRTC from "simple-datachannel/lib/NodeRTC";
+import WebRTC from "webrtc4me";
 import Helper from "./kUtil";
 import KResponder from "./kResponder";
 export default class Kademlia {

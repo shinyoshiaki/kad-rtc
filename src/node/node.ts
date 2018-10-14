@@ -1,4 +1,4 @@
-import WebRTC from "simple-datachannel/lib/NodeRTC";
+import WebRTC from "webrtc4me";
 import client from "socket.io-client";
 import sha1 from "sha1";
 import events from "events";
@@ -28,8 +28,7 @@ export default class Node {
         this.offerFirst(socket);
       });
       socket.on(def.ANSWER, (data: any) => {
-        peerOffer.connecting(data.nodeId);
-        peerOffer.setAnswer(data.sdp);
+        peerOffer.setAnswer(data.sdp, data.nodeId);
       });
     } else {
       this.targetUrl = null;

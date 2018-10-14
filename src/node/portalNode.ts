@@ -1,4 +1,4 @@
-import WebRTC from "simple-datachannel/lib/NodeRTC";
+import WebRTC from "webrtc4me";
 import http from "http";
 import socketio from "socket.io";
 import client from "socket.io-client";
@@ -30,8 +30,7 @@ export default class PortalNode {
         this.offerFirst(socket);
       });
       socket.on(def.ANSWER, (data: any) => {
-        peerOffer.connecting(data.nodeId);
-        peerOffer.setAnswer(data.sdp);
+        peerOffer.setAnswer(data.sdp, data.nodeId);
       });
     }
 
@@ -62,7 +61,7 @@ export default class PortalNode {
     };
 
     peer.connect = () => {
-      console.log("first offer connected");
+      console.log("first offer connected", peer.nodeId);
       this.kad.addknode(peer);
     };
     peerOffer = peer;
@@ -71,8 +70,8 @@ export default class PortalNode {
   answerFirst(data: any, socketId: string) {
     return new Promise((resolve, reject) => {
       const peer = new WebRTC();
-      peer.makeAnswer(data.sdp);
-      peer.connecting(data.nodeId);
+      console.log("answer first", data);
+      peer.makeAnswer(data.sdp, data.nodeId);
 
       const timeout = setTimeout(() => {
         reject("timeout");
@@ -86,7 +85,8 @@ export default class PortalNode {
       };
 
       peer.connect = () => {
-        console.log("first answer connected");
+        peer.nodeId = data.nodeId;//謎のバグ
+        console.log("first answer connected", peer.nodeId);
         clearTimeout(timeout);
         resolve(true);
         this.kad.addknode(peer);

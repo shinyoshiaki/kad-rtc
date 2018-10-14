@@ -1,5 +1,5 @@
 require("babel-polyfill");
-import WebRTC from "simple-datachannel/lib/NodeRTC";
+import WebRTC from "webrtc4me";
 import Helper from "./kUtil";
 import KResponder from "./kResponder";
 import def, { networkFormat } from "./KConst";
@@ -199,26 +199,26 @@ export default class Kademlia {
       const r = this.ref;
       const peer = (r[target] = new WebRTC());
       peer.makeOffer();
-      peer.connecting(target);
 
       const timeout = setTimeout(() => {
         reject("kad offer timeout");
       }, 10 * 1000);
 
-      peer.ev.on("signal", (sdp: string) => {
+      peer.signal = sdp => {
         console.log("kad offer store", target);
         const _ = this.f.getCloseEstPeer(target);
         if (!_) return;
         if (_.nodeId !== target)
           this.store(this.nodeId, target, { sdp, proxy });
-      });
+      };
 
-      peer.ev.on("connect", () => {
+      peer.connect = () => {
+        peer.nodeId = target;
         console.log("kad offer connected", target);
         this.addknode(peer);
         clearTimeout(timeout);
         resolve(true);
-      });
+      };
     });
   }
 
@@ -227,24 +227,24 @@ export default class Kademlia {
       const r = this.ref;
       const peer = (r[target] = new WebRTC());
       peer.makeAnswer(sdp);
-      peer.connecting(target);
       console.log("kad answer", target);
 
       const timeout = setTimeout(() => {
         reject("kad answer timeout");
       }, 10 * 1000);
 
-      peer.ev.on("signal", (sdp: string) => {
+      peer.signal = sdp => {
         const _ = this.f.getPeerFromnodeId(proxy);
         if (_) _.send(this.storeFormat(this.nodeId, target, { sdp }), "kad");
-      });
+      };
 
-      peer.ev.on("connect", () => {
+      peer.connect = () => {
+        peer.nodeId = target;
         console.log("kad answer connected", target);
         this.addknode(peer);
         clearTimeout(timeout);
         resolve(true);
-      });
+      };
     });
   }
 
