@@ -28,6 +28,7 @@ export default class Kademlia {
     onCommand: (v?: any) => {},
     onFindValue: (v?: any) => {},
     onFindNode: (v?: any) => {},
+    onStore: (v?: any) => {},
     _onPing: this.onPing
   };
 
@@ -116,6 +117,7 @@ export default class Kademlia {
   }
 
   async doFindvalue(key: string, peer: WebRTC) {
+    console.log("dofindvalue");
     peer.send(
       networkFormat(this.nodeId, def.FINDVALUE, {
         targetKey: key

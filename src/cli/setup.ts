@@ -54,4 +54,10 @@ inquire.prompt([quesMyPort, quesAddress, quesPort]).then((answer: any) => {
       console.log("on findvalue", value);
     });
   };
+
+  responce.keyValueList = () => {
+    console.log(node.kad.keyValueList);
+  };
+
+  console.log({ responce });
 });

@@ -26,6 +26,7 @@ export default class KResponder {
         console.log("store arrived", mine, close, "\ndata", data);
         //受け取る
         k.keyValueList[sha1(data.value).toString()] = data.value;
+        k.callback.onStore(k.keyValueList);
       }
 
       const target = data.sender;
@@ -92,7 +93,7 @@ export default class KResponder {
         console.log("findvalue found");
         k.callback.onFindValue(data.value);
       } else if (data.to === k.nodeId) {
-        console.log(def.FINDVALUE_R, "re find");
+        console.log(def.FINDVALUE_R, "re find", data);
         //発見できていなければ候補に対して再探索
         for (let id in data.ids) {
           const peer = k.f.getPeerFromnodeId(id);
