@@ -63,5 +63,9 @@ inquire.prompt([quesMyPort, quesAddress, quesPort]).then((answer: any) => {
     console.log(node.kad.nodeId);
   };
 
+  responce.help = () => {
+    console.log({ responce });
+  };
+
   console.log({ responce });
 });

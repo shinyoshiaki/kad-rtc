@@ -118,7 +118,7 @@ export default class Kademlia {
   }
 
   async doFindvalue(key: string, peer: WebRTC) {
-    console.log("dofindvalue");
+    console.log("dofindvalue", peer.nodeId);
     peer.send(
       networkFormat(this.nodeId, def.FINDVALUE, {
         targetKey: key

@@ -44,7 +44,7 @@ export default class PortalNode {
       });
     });
     this.ev = new events.EventEmitter();
-    this.kad = new Kademlia(this.nodeId);
+    this.kad = new Kademlia(this.nodeId, { kLength: 2 });
   }
 
   offerFirst(socket: any) {
@@ -85,7 +85,7 @@ export default class PortalNode {
       };
 
       peer.connect = () => {
-        peer.nodeId = data.nodeId;//謎のバグ
+        peer.nodeId = data.nodeId; //謎のバグ
         console.log("first answer connected", peer.nodeId);
         clearTimeout(timeout);
         resolve(true);

@@ -71,9 +71,19 @@ export default class KResponder {
       } else {
         //キーに最も近いピア
         const ids = k.f.getCloseEstIdsList;
-        const _ = k.f.getPeerFromnodeId(network.nodeId);
-        if (_)
-          _.send(
+        const peer = k.f.getPeerFromnodeId(network.nodeId);
+        console.log(
+          "re send value",
+          networkFormat(k.nodeId, def.FINDVALUE_R, {
+            find: false,
+            ids: ids,
+            targetNode: data.targetNode,
+            targetKey: data.targetKey,
+            to: network.nodeId
+          })
+        );
+        if (peer)
+          peer.send(
             networkFormat(k.nodeId, def.FINDVALUE_R, {
               find: false,
               ids: ids,
