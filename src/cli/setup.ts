@@ -59,5 +59,9 @@ inquire.prompt([quesMyPort, quesAddress, quesPort]).then((answer: any) => {
     console.log(node.kad.keyValueList);
   };
 
+  responce.id = () => {
+    console.log(node.kad.nodeId);
+  };
+
   console.log({ responce });
 });

@@ -32,9 +32,10 @@ export default class Kademlia {
     _onPing: this.onPing
   };
 
-  constructor(_nodeId: string) {
+  constructor(_nodeId: string, opt?: { kLength?: number }) {
     console.log("start kad", _nodeId);
     this.k = 20;
+    if (opt) if (opt.kLength) this.k = opt.kLength;
     this.nodeId = _nodeId;
 
     this.kbuckets = new Array(160);

@@ -31,7 +31,9 @@ export default class Kademlia {
             [key: string]: () => void;
         };
     };
-    constructor(_nodeId: string);
+    constructor(_nodeId: string, opt?: {
+        kLength?: number;
+    });
     ping(peer: WebRTC): Promise<{}>;
     storeFormat(sender: string, key: string, value: any): string;
     store(sender: string, key: string, value: any): Promise<void>;
