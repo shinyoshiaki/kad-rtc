@@ -4,6 +4,7 @@ import Helper from "./kUtil";
 import KResponder from "./kResponder";
 import def, { networkFormat } from "./KConst";
 import { distance } from "kad-distance";
+import { message } from "webrtc4me/lib/interface";
 
 export default class Kademlia {
   nodeId: string;
@@ -14,6 +15,7 @@ export default class Kademlia {
   dataList: Array<any> = [];
   keyValueList: { [key: string]: any } = {};
   ref: { [key: string]: WebRTC } = {};
+  buffer: { [key: string]: Array<any> } = {};
   state = {
     isOffer: false,
     findNode: "",
@@ -25,11 +27,11 @@ export default class Kademlia {
   callback = {
     onAddPeer: (v?: any) => {},
     onPeerDisconnect: (v?: any) => {},
-    onCommand: (v?: any) => {},
     onFindValue: (v?: any) => {},
     onFindNode: (v?: any) => {},
     onStore: (v?: any) => {},
-    _onPing: this.onPing
+    _onPing: this.onPing,
+    onApp: (v?: any) => {}
   };
 
   constructor(_nodeId: string, opt?: { kLength?: number }) {
@@ -256,15 +258,34 @@ export default class Kademlia {
     if (_) _.send(networkFormat(this.nodeId, def.SEND, data), "kad");
   }
 
-  onCommand(datachannel: any) {
-    const dataLink = datachannel.data;
-    const networkLayer = JSON.parse(dataLink);
-
-    if (!JSON.stringify(this.dataList).includes(networkLayer.hash)) {
-      this.dataList.push(networkLayer.hash);
-      this.f.cleanDiscon();
-      this.onRequest(dataLink);
-      this.callback.onCommand(networkLayer);
+  onCommand(message: message) {
+    switch (message.label) {
+      case "kad":
+        const dataLink = message.data;
+        const networkLayer: network = JSON.parse(dataLink);
+        if (!JSON.stringify(this.dataList).includes(networkLayer.hash)) {
+          this.dataList.push(networkLayer.hash);
+          this.f.cleanDiscon();
+          this.onRequest(dataLink);
+        }
+        break;
+      case "app":
+        this.callback.onApp(JSON.parse(message.data));
+        break;
+      case "bin":
+        try {
+          const json = JSON.parse(message.data);
+          if (json.type === "start") {
+            this.buffer[message.nodeId] = [];
+          } else if (json.type === "end") {
+          }
+        } catch (error) {
+          if (!this.buffer[message.nodeId]) {
+            this.buffer[message.nodeId] = [];
+          }
+          this.buffer[message.nodeId].push(message.data);
+        }
+        break;
     }
   }
 }

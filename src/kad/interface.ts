@@ -33,3 +33,12 @@ interface StoreSignaling {
   sdp: any;
   proxy: any;
 }
+
+interface network {
+  layer: "networkLayer";
+  type: string;
+  nodeId: string;
+  data: any;
+  date: any;
+  hash: any;
+}

@@ -1,6 +1,7 @@
 import WebRTC from "webrtc4me";
 import Helper from "./kUtil";
 import KResponder from "./kResponder";
+import { message } from "webrtc4me/lib/interface";
 export default class Kademlia {
     nodeId: string;
     k: number;
@@ -14,6 +15,9 @@ export default class Kademlia {
     ref: {
         [key: string]: WebRTC;
     };
+    buffer: {
+        [key: string]: Array<any>;
+    };
     state: {
         isOffer: boolean;
         findNode: string;
@@ -23,13 +27,13 @@ export default class Kademlia {
     callback: {
         onAddPeer: (v?: any) => void;
         onPeerDisconnect: (v?: any) => void;
-        onCommand: (v?: any) => void;
         onFindValue: (v?: any) => void;
         onFindNode: (v?: any) => void;
         onStore: (v?: any) => void;
         _onPing: {
             [key: string]: () => void;
         };
+        onApp: (v?: any) => void;
     };
     constructor(_nodeId: string, opt?: {
         kLength?: number;
@@ -47,5 +51,5 @@ export default class Kademlia {
     offer(target: string, proxy?: null): Promise<{}>;
     answer(target: string, sdp: string, proxy: string): Promise<{}>;
     send(target: string, data: any): void;
-    onCommand(datachannel: any): void;
+    onCommand(message: message): void;
 }

@@ -1,7 +1,6 @@
 import WebRTC from "webrtc4me";
 import client from "socket.io-client";
 import sha1 from "sha1";
-import events from "events";
 import Kademlia from "../kad/kademlia";
 
 const def = {
@@ -15,13 +14,11 @@ let peerOffer: WebRTC;
 export default class Node {
   targetUrl: string | null;
   nodeId: string;
-  ev: events.EventEmitter;
   kad: Kademlia;
 
   constructor(targetAddress: string, targetPort: string) {
     this.nodeId = sha1(Math.random().toString()).toString();
-    this.ev = new events.EventEmitter();
-    if (targetAddress != null) {
+    if (targetAddress) {
       this.targetUrl = "http://" + targetAddress + ":" + targetPort;
       const socket = client.connect(this.targetUrl);
       socket.on("connect", () => {
