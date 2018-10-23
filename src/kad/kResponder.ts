@@ -7,8 +7,10 @@ import { distance } from "kad-distance";
 const responder: any = {};
 
 export default class KResponder {
+  offerQueue: Array<any> = [];
   constructor(kad: Kademlia) {
     const k = kad;
+    this.playOfferQueue();
 
     responder[def.STORE] = async (network: any) => {
       console.log("on store", network.nodeId);
@@ -155,10 +157,12 @@ export default class KResponder {
       console.log("on findnode-r", ids);
 
       for (let target in ids) {
-        if (target !== k.nodeId && !k.f.isNodeExist(target)) {
-          //IDが接続されていないものなら接続する
-          await k.offer(target, network.nodeId).catch(console.log);
-        }
+        this.offerQueue.push(async () => {
+          if (target !== k.nodeId && !k.f.isNodeExist(target)) {
+            //IDが接続されていないものなら接続する
+            await k.offer(target, network.nodeId).catch(console.log);
+          }
+        });
         //ノードIDが見つかったらコールバック
         if (k.state.findNode === target) {
           k.callback.onFindNode();
@@ -181,6 +185,19 @@ export default class KResponder {
         }
       }
     };
+  }
+
+  async playOfferQueue() {
+    while (true) {
+      if (this.offerQueue.length > 0) {
+        const job = this.offerQueue[0];
+        console.log("do job", { job }, this.offerQueue);
+        await job();
+        this.offerQueue.shift();
+      } else {
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    }
   }
 
   response(rpc: string, req: any) {
