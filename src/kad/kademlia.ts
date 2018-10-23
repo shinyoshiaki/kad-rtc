@@ -240,6 +240,7 @@ export default class Kademlia {
 
       peer.signal = sdp => {
         const _ = this.f.getPeerFromnodeId(proxy);
+        //来たルートに送り返す
         if (_) _.send(this.storeFormat(this.nodeId, target, { sdp }), "kad");
       };
 
@@ -270,6 +271,7 @@ export default class Kademlia {
         }
         break;
       case "app":
+        console.log("kad onapp", message.data);
         this.callback.onApp(JSON.parse(message.data));
         break;
       case "bin":

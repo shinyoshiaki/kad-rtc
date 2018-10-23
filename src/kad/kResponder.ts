@@ -43,6 +43,7 @@ export default class KResponder {
           } else if (data.value.sdp.type === "answer") {
             console.log("kad received answer", data.sender);
             try {
+              console.log(k.ref[target]);
               k.ref[target].setAnswer(data.value.sdp);
             } catch (error) {
               console.log(error);
@@ -141,7 +142,7 @@ export default class KResponder {
       const sendData = { closeIDs: k.f.getCloseIDs(data.targetKey) };
       const peer = k.f.getPeerFromnodeId(network.nodeId);
       if (peer) {
-        console.log("sendback findnode");
+        console.log("sendback findnode", sendData.closeIDs);
         //送り返す
         peer.send(networkFormat(k.nodeId, def.FINDNODE_R, sendData), "kad");
       }
@@ -153,19 +154,16 @@ export default class KResponder {
       const ids = data.closeIDs;
       console.log("on findnode-r", ids);
 
-      //非同期をまとめてやる
-      Promise.all(
-        ids.map(async (target: string) => {
-          if (target !== k.nodeId && !k.f.isNodeExist(target)) {
-            //IDが接続されていないものなら接続する
-            await k.offer(target, network.nodeId).catch(console.log);
-          }
-          //ノードIDが見つかったらコールバック
-          if (k.state.findNode === target) {
-            k.callback.onFindNode();
-          }
-        })
-      );
+      for (let target in ids) {
+        if (target !== k.nodeId && !k.f.isNodeExist(target)) {
+          //IDが接続されていないものなら接続する
+          await k.offer(target, network.nodeId).catch(console.log);
+        }
+        //ノードIDが見つかったらコールバック
+        if (k.state.findNode === target) {
+          k.callback.onFindNode();
+        }
+      }
 
       //初期動作のfindnodeでなければ
       if (k.state.findNode !== k.nodeId) {

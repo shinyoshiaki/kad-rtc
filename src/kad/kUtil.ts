@@ -41,11 +41,11 @@ export default class KUtil {
         if (list.length < this.k) {
           list.push(peer.nodeId);
         } else {
-          for (let i = 0; i < list.length; i++) {
-            if (distance(list[i], targetID) > distance(peer.nodeId, targetID)) {
+          list.forEach((v, i) => {
+            if (distance(v, targetID) > distance(peer.nodeId, targetID)) {
               list[i] = peer.nodeId;
             }
-          }
+          });
         }
       }
     });
