@@ -1,7 +1,7 @@
 {
   "name": "kad-rtc",
-  "version": "0.0.13",
-  "license": "MIT",
+  "version": "0.0.14",
+  "license": "prop",
   "scripts": {
     "type-check": "tsc --noEmit",
     "type-check:watch": "npm run type-check -- --watch",
