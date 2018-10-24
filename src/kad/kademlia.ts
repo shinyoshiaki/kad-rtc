@@ -131,7 +131,7 @@ export default class Kademlia {
   }
 
   addknode(peer: WebRTC) {
-    peer.data = raw => {
+    peer.events.data["kademlia.ts"] = raw => {
       this.onCommand(raw);
     };
 

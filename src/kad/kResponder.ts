@@ -24,6 +24,8 @@ export default class KResponder {
         console.log("store transfer", "\ndata", data);
         //storeし直す
         k.store(data.sender, data.key, data.value);
+        //レプリケーション
+        k.keyValueList[sha1(data.value).toString()] = data.value;
       } else {
         console.log("store arrived", mine, close, "\ndata", data);
         //受け取る
@@ -96,6 +98,8 @@ export default class KResponder {
       if (data.find) {
         console.log("findvalue found");
         k.callback.onFindValue(data.value);
+        //レプリケーション
+        k.keyValueList[sha1(data.value).toString()] = data.value;
       } else if (data.to === k.nodeId) {
         console.log(def.FINDVALUE_R, "re find", data);
         //発見できていなければ候補に対して再探索
@@ -133,9 +137,12 @@ export default class KResponder {
       const data = network.data;
       //要求されたキーに近い複数のキーを送る
       const sendData = { closeIDs: k.f.getCloseIDs(data.targetKey) };
-      
-      console.log(network.nodeId,{ allpeer: k.f.getAllPeerIds(), ids: sendData.closeIDs });
-      
+
+      console.log(network.nodeId, {
+        allpeer: k.f.getAllPeerIds(),
+        ids: sendData.closeIDs
+      });
+
       const peer = k.f.getPeerFromnodeId(network.nodeId);
       if (peer) {
         console.log("sendback findnode", sendData.closeIDs);

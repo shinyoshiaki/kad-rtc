@@ -3949,9 +3949,9 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-"webrtc4me@git+https://git@github.com/shinyoshiaki/webrtc4me.git":
-  version "0.0.10"
-  resolved "git+https://git@github.com/shinyoshiaki/webrtc4me.git#5c83e0bf52a322fd4e9ee368e868ad6b3239bd99"
+"webrtc4me@git+https://git@github.com/shinyoshiaki/webrtc4me.git#stream":
+  version "0.0.3"
+  resolved "git+https://git@github.com/shinyoshiaki/webrtc4me.git#d58115ee4f81f397b4aad55499f743402de66317"
   dependencies:
     babel-polyfill "^6.26.0"
     wrtc "^0.1.6"
