@@ -199,8 +199,7 @@ export default class Kademlia {
           key: target,
           value: { sdp }
         };
-        const network = networkFormat(this.nodeId, def.STORE, sendData);
-        if (_) _.send(JSON.stringify(network), "kad");
+        if (_) _.send(networkFormat(this.nodeId, def.STORE, sendData), "kad");
       };
 
       peer.connect = () => {
