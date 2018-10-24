@@ -52,9 +52,10 @@ export default class Kademlia {
     const peer = this.f.getCloseEstPeer(key);
     if (!peer) return;
     console.log(def.STORE, "next", peer.nodeId, "target", key);
-    const storeFormat: StoreFormat = { sender, key, value };
-    peer.send(JSON.stringify(storeFormat), "kad");
-    console.log("store done", storeFormat);
+    const sendData: StoreFormat = { sender, key, value };
+    const network = networkFormat(this.nodeId, def.STORE, sendData);
+    peer.send(network, "kad");
+    console.log("store done", { network });
     this.keyValueList[key] = value;
   }
 
@@ -193,12 +194,13 @@ export default class Kademlia {
       peer.signal = sdp => {
         const _ = this.f.getPeerFromnodeId(proxy);
         //来たルートに送り返す
-        const storeFormat: StoreFormat = {
+        const sendData: StoreFormat = {
           sender: this.nodeId,
           key: target,
           value: { sdp }
         };
-        if (_) _.send(JSON.stringify(storeFormat), "kad");
+        const network = networkFormat(this.nodeId, def.STORE, sendData);
+        if (_) _.send(JSON.stringify(network), "kad");
       };
 
       peer.connect = () => {
