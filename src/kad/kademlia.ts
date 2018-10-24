@@ -57,6 +57,7 @@ export default class Kademlia {
     peer.send(network, "kad");
     console.log("store done", { network });
     this.keyValueList[key] = value;
+    this.callback.onStore(this.keyValueList);
   }
 
   async findNode(targetId: string, peer: WebRTC) {
@@ -73,10 +74,7 @@ export default class Kademlia {
     const peers = this.f.getClosePeers(key);
     peers.forEach(peer => {
       this.doFindvalue(key, peer);
-    });
-    // const peer = this.f.getCloseEstPeer(key);
-    // if (!peer) return;
-    // this.doFindvalue(key, peer);
+    });    
   }
 
   async doFindvalue(key: string, peer: WebRTC) {
