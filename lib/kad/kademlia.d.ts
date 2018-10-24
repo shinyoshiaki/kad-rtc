@@ -22,6 +22,7 @@ export default class Kademlia {
         isOffer: boolean;
         findNode: string;
         hash: {};
+        maintain: boolean;
     };
     private onPing;
     callback: {

@@ -19,7 +19,8 @@ export default class Kademlia {
   state = {
     isOffer: false,
     findNode: "",
-    hash: {}
+    hash: {},
+    maintain: false
   };
 
   private onPing: { [key: string]: () => void } = {};
@@ -170,7 +171,7 @@ export default class Kademlia {
   onRequest(datalink: string) {
     const network = JSON.parse(datalink);
     this.responder.response(network.type, network);
-    this.maintain(network);
+    if (!this.state.maintain) this.maintain(network);
   }
 
   async maintain(network: any) {
@@ -191,8 +192,10 @@ export default class Kademlia {
     //k-bucketがすでに満杯な場合、
     //そのk-bucket中の先頭のノードがオンラインなら先頭のノードを残す
     if (kbucket.length > this.k) {
+      this.state.maintain = true;
       console.log("maintain", "bucket fulled", network.nodeId);
       const result = await this.ping(kbucket[0]).catch(console.log);
+      this.state.maintain = false;
       if (!result) {
         kbucket.splice(0, 1);
       }
@@ -207,7 +210,7 @@ export default class Kademlia {
 
       const timeout = setTimeout(() => {
         reject("kad offer timeout");
-      }, 10 * 1000);
+      }, 5 * 1000);
 
       peer.signal = sdp => {
         console.log("kad offer store", target);
@@ -236,7 +239,7 @@ export default class Kademlia {
 
       const timeout = setTimeout(() => {
         reject("kad answer timeout");
-      }, 10 * 1000);
+      }, 5 * 1000);
 
       peer.signal = sdp => {
         const _ = this.f.getPeerFromnodeId(proxy);

@@ -44,7 +44,7 @@ export default class PortalNode {
       });
     });
     this.ev = new events.EventEmitter();
-    this.kad = new Kademlia(this.nodeId, { kLength: 2 });
+    this.kad = new Kademlia(this.nodeId, { kLength: 20 });
   }
 
   offerFirst(socket: any) {

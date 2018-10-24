@@ -75,16 +75,7 @@ export default class KResponder {
         //キーに最も近いピア
         const ids = k.f.getCloseEstIdsList;
         const peer = k.f.getPeerFromnodeId(network.nodeId);
-        console.log(
-          "re send value",
-          networkFormat(k.nodeId, def.FINDVALUE_R, {
-            find: false,
-            ids: ids,
-            targetNode: data.targetNode,
-            targetKey: data.targetKey,
-            to: network.nodeId
-          })
-        );
+        console.log("re send value");
         if (peer)
           peer.send(
             networkFormat(k.nodeId, def.FINDVALUE_R, {
@@ -142,6 +133,9 @@ export default class KResponder {
       const data = network.data;
       //要求されたキーに近い複数のキーを送る
       const sendData = { closeIDs: k.f.getCloseIDs(data.targetKey) };
+      
+      console.log(network.nodeId,{ allpeer: k.f.getAllPeerIds(), ids: sendData.closeIDs });
+      
       const peer = k.f.getPeerFromnodeId(network.nodeId);
       if (peer) {
         console.log("sendback findnode", sendData.closeIDs);

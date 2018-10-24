@@ -39,13 +39,16 @@ export default class KUtil {
     this.getAllPeers().forEach(peer => {
       if (peer.nodeId !== targetID) {
         if (list.length < this.k) {
+          console.log("getcloseids push", peer.nodeId);
           list.push(peer.nodeId);
         } else {
-          list.forEach((v, i) => {
-            if (distance(v, targetID) > distance(peer.nodeId, targetID)) {
+          console.log("getcloseids fulled", { list });
+          for (let i = 0; i < list.length; i++) {
+            if (distance(list[i], targetID) > distance(peer.nodeId, targetID)) {
               list[i] = peer.nodeId;
+              break;
             }
-          });
+          }
         }
       }
     });
