@@ -84,7 +84,7 @@ export default class Kademlia {
     if (!peer) return;
     console.log(def.STORE, "next", peer.nodeId, "target", key);
     const storeFormat: StoreFormat = { sender, key, value };
-    peer.send(storeFormat, "kad");
+    peer.send(JSON.stringify(storeFormat), "kad");
     console.log("store done", storeFormat);
     this.keyValueList[key] = value;
   }
@@ -239,7 +239,7 @@ export default class Kademlia {
           key: target,
           value: { sdp }
         };
-        if (_) _.send(storeFormat, "kad");
+        if (_) _.send(JSON.stringify(storeFormat), "kad");
       };
 
       peer.connect = () => {
@@ -261,11 +261,15 @@ export default class Kademlia {
     switch (message.label) {
       case "kad":
         const dataLink = message.data;
-        const networkLayer: network = JSON.parse(dataLink);
-        if (!JSON.stringify(this.dataList).includes(networkLayer.hash)) {
-          this.dataList.push(networkLayer.hash);
-          this.f.cleanDiscon();
-          this.onRequest(dataLink);
+        try {
+          console.log("oncommand kad", { message });
+          const networkLayer: network = JSON.parse(dataLink);
+          if (!JSON.stringify(this.dataList).includes(networkLayer.hash)) {
+            this.dataList.push(networkLayer.hash);
+            this.onRequest(dataLink);
+          }
+        } catch (error) {
+          console.log(error);
         }
         break;
       case "app":

@@ -136,9 +136,11 @@ export default class KUtil {
 
   cleanDiscon() {
     this.kbuckets.forEach((kbucket, i) => {
-      console.log({ before: this.kbuckets[i] });
-      this.kbuckets[i] = kbucket.filter(peer => !peer.isDisconnected);
-      console.log({ after: this.kbuckets[i] });
+      if (kbucket.length > 0) {
+        console.log({ before: this.kbuckets[i] });
+        this.kbuckets[i] = kbucket.filter(peer => !peer.isDisconnected);
+        console.log({ after: this.kbuckets[i] });
+      }
     });
   }
 

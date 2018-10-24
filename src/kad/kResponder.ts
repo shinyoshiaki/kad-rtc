@@ -68,7 +68,10 @@ export default class KResponder {
         const sendData: FindValueR = {
           success: { value, key: data.targetKey }
         };
-        peer.send(networkFormat(k.nodeId, def.FINDVALUE_R, sendData), "kad");
+        peer.send(
+          networkFormat(k.nodeId, def.FINDVALUE_R, JSON.stringify(sendData)),
+          "kad"
+        );
       } else {
         //キーに最も近いピア
         const ids = k.f.getCloseEstIdsList(data.targetKey);
@@ -83,7 +86,10 @@ export default class KResponder {
               to: network.nodeId
             }
           };
-          peer.send(networkFormat(k.nodeId, def.FINDVALUE_R, sendData), "kad");
+          peer.send(
+            networkFormat(k.nodeId, def.FINDVALUE_R, JSON.stringify(sendData)),
+            "kad"
+          );
         }
       }
     };
@@ -115,7 +121,10 @@ export default class KResponder {
         const peer = k.f.getPeerFromnodeId(network.nodeId);
         if (!peer) return;
         const sendData = { target: network.nodeId };
-        peer.send(networkFormat(k.nodeId, def.PONG, sendData), "kad");
+        peer.send(
+          networkFormat(k.nodeId, def.PONG, JSON.stringify(sendData)),
+          "kad"
+        );
       }
     };
 
@@ -143,7 +152,10 @@ export default class KResponder {
       if (peer) {
         console.log("sendback findnode", sendData.closeIDs);
         //送り返す
-        peer.send(networkFormat(k.nodeId, def.FINDNODE_R, sendData), "kad");
+        peer.send(
+          networkFormat(k.nodeId, def.FINDNODE_R, JSON.stringify(sendData)),
+          "kad"
+        );
       }
     };
 
