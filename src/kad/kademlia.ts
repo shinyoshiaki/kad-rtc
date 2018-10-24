@@ -78,22 +78,15 @@ export default class Kademlia {
     });
   }
 
-  storeFormat(sender: string, key: string, value: any) {
-    const sendData = {
-      sender,
-      key,
-      value
-    };
-    return networkFormat(this.nodeId, def.STORE, sendData);
-  }
-
   async store(sender: string, key: string, value: any) {
     //自分に一番近いピアを取得
     const peer = this.f.getCloseEstPeer(key);
     if (!peer) return;
     console.log(def.STORE, "next", peer.nodeId, "target", key);
-    peer.send(this.storeFormat(sender, key, value), "kad");
-    console.log("store done", this.storeFormat(sender, key, value));
+    const storeFormat: StoreFormat = { sender, key, value };
+    peer.send(storeFormat, "kad");
+    console.log("store done", storeFormat);
+    this.keyValueList[key] = value;
   }
 
   async findNode(targetId: string, peer: WebRTC) {
@@ -111,23 +104,19 @@ export default class Kademlia {
   findValue(key: string, cb = (value: any) => {}) {
     this.callback.onFindValue = cb;
     //keyに近いピアを取得
-    // const peers = this.f.getClosePeers(key);
-    // peers.forEach(peer => {
-    //   this.doFindvalue(key, peer);
-    // });
-    const peer = this.f.getCloseEstPeer(key);
-    if (!peer) return;
-    this.doFindvalue(key, peer);
+    const peers = this.f.getClosePeers(key);
+    peers.forEach(peer => {
+      this.doFindvalue(key, peer);
+    });
+    // const peer = this.f.getCloseEstPeer(key);
+    // if (!peer) return;
+    // this.doFindvalue(key, peer);
   }
 
   async doFindvalue(key: string, peer: WebRTC) {
     console.log("dofindvalue", peer.nodeId);
-    peer.send(
-      networkFormat(this.nodeId, def.FINDVALUE, {
-        targetKey: key
-      }),
-      "kad"
-    );
+    const findvalue: FindValue = { targetKey: key };
+    peer.send(networkFormat(this.nodeId, def.FINDVALUE, findvalue), "kad");
   }
 
   addknode(peer: WebRTC) {
@@ -138,6 +127,7 @@ export default class Kademlia {
     peer.disconnect = () => {
       console.log("kad node disconnected");
       this.f.cleanDiscon();
+      this.callback.onAddPeer(this.f.getAllPeerIds());
     };
 
     if (!this.f.isNodeExist(peer.nodeId)) {
@@ -159,7 +149,7 @@ export default class Kademlia {
     }
   }
 
-  findNewPeer(peer: WebRTC) {
+  private findNewPeer(peer: WebRTC) {
     if (this.f.getKbucketNum() < this.k) {
       //自身のノードIDをkeyとしてFIND_NODE
       this.findNode(this.nodeId, peer);
@@ -168,13 +158,13 @@ export default class Kademlia {
     }
   }
 
-  onRequest(datalink: string) {
+  private onRequest(datalink: string) {
     const network = JSON.parse(datalink);
     this.responder.response(network.type, network);
     if (!this.state.maintain) this.maintain(network);
   }
 
-  async maintain(network: any) {
+  private async maintain(network: any) {
     const inx = distance(this.nodeId, network.nodeId);
     const kbucket = this.kbuckets[inx];
 
@@ -244,7 +234,12 @@ export default class Kademlia {
       peer.signal = sdp => {
         const _ = this.f.getPeerFromnodeId(proxy);
         //来たルートに送り返す
-        if (_) _.send(this.storeFormat(this.nodeId, target, { sdp }), "kad");
+        const storeFormat: StoreFormat = {
+          sender: this.nodeId,
+          key: target,
+          value: { sdp }
+        };
+        if (_) _.send(storeFormat, "kad");
       };
 
       peer.connect = () => {
@@ -262,7 +257,7 @@ export default class Kademlia {
     if (_) _.send(networkFormat(this.nodeId, def.SEND, data), "kad");
   }
 
-  onCommand(message: message) {
+  private onCommand(message: message) {
     switch (message.label) {
       case "kad":
         const dataLink = message.data;

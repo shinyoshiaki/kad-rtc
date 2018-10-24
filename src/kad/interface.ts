@@ -2,7 +2,7 @@ interface Req {
   nodeId: string;
   data: any;
 }
-interface Store {
+interface StoreFormat {
   sender: string;
   key: string;
   value: any;
@@ -22,9 +22,16 @@ interface FindValue {
 }
 
 interface FindValueR {
-  targetKey: string;
-  keys?: Array<string>;
-  value?: any;
+  success?: {
+    value: string;
+    key: string;
+  };
+  fail?: {
+    ids: string[];
+    targetNode: string;
+    targetKey: string;
+    to: string;
+  };
 }
 
 interface StoreSignaling {

@@ -1,4 +1,3 @@
-import sha1 from "sha1";
 import { networkFormat } from "./KConst";
 import def from "./KConst";
 import Kademlia from "./kademlia";
@@ -15,7 +14,7 @@ export default class KResponder {
     responder[def.STORE] = async (network: any) => {
       console.log("on store", network.nodeId);
 
-      const data = network.data;
+      const data: StoreFormat = network.data;
       //自分と送信元の距離
       const mine = distance(k.nodeId, data.key);
       //自分のkbuckets中で送信元に一番近い距離
@@ -25,11 +24,11 @@ export default class KResponder {
         //storeし直す
         k.store(data.sender, data.key, data.value);
         //レプリケーション
-        k.keyValueList[sha1(data.value).toString()] = data.value;
+        k.keyValueList[data.key] = data.value;
       } else {
         console.log("store arrived", mine, close, "\ndata", data);
         //受け取る
-        k.keyValueList[sha1(data.value).toString()] = data.value;
+        k.keyValueList[data.key] = data.value;
         k.callback.onStore(k.keyValueList);
       }
 
@@ -66,47 +65,44 @@ export default class KResponder {
         const peer = k.f.getPeerFromnodeId(network.nodeId);
         //キーを見つかったというメッセージを戻す
         if (!peer) return;
-        peer.send(
-          networkFormat(k.nodeId, def.FINDVALUE_R, {
-            find: true,
-            value: value
-          }),
-          "kad"
-        );
+        const sendData: FindValueR = {
+          success: { value, key: data.targetKey }
+        };
+        peer.send(networkFormat(k.nodeId, def.FINDVALUE_R, sendData), "kad");
       } else {
         //キーに最も近いピア
-        const ids = k.f.getCloseEstIdsList;
+        const ids = k.f.getCloseEstIdsList(data.targetKey);
         const peer = k.f.getPeerFromnodeId(network.nodeId);
         console.log("re send value");
-        if (peer)
-          peer.send(
-            networkFormat(k.nodeId, def.FINDVALUE_R, {
-              find: false,
+        if (peer) {
+          const sendData: FindValueR = {
+            fail: {
               ids: ids,
               targetNode: data.targetNode,
               targetKey: data.targetKey,
               to: network.nodeId
-            }),
-            "kad"
-          );
+            }
+          };
+          peer.send(networkFormat(k.nodeId, def.FINDVALUE_R, sendData), "kad");
+        }
       }
     };
 
     responder[def.FINDVALUE_R] = (network: any) => {
-      const data = network.data;
+      const data: FindValueR = network.data;
       //valueを発見していれば
-      if (data.find) {
+      if (data.success) {
         console.log("findvalue found");
-        k.callback.onFindValue(data.value);
+        k.callback.onFindValue(data.success.value);
         //レプリケーション
-        k.keyValueList[sha1(data.value).toString()] = data.value;
-      } else if (data.to === k.nodeId) {
+        k.keyValueList[data.success.key] = data.success.value;
+      } else if (data.fail && data.fail.to === k.nodeId) {
         console.log(def.FINDVALUE_R, "re find", data);
         //発見できていなければ候補に対して再探索
-        for (let id in data.ids) {
+        for (let id in data.fail.ids) {
           const peer = k.f.getPeerFromnodeId(id);
           if (!peer) return;
-          k.doFindvalue(data.targetKey, peer);
+          k.doFindvalue(data.fail.targetKey, peer);
         }
       }
     };
