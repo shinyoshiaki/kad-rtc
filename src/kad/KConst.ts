@@ -3,6 +3,7 @@ import { BSON } from "bson";
 
 export default {
   STORE: "STORE",
+  STORE_CHUNKS: "STORE_CHUNKS",
   FINDNODE: "FINDNODE",
   FINDNODE_R: "FINDNODE_R",
   FINDVALUE: "FINDVALUE",

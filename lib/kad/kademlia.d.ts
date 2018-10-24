@@ -33,8 +33,9 @@ export default class Kademlia {
     constructor(_nodeId: string, opt?: {
         kLength?: number;
     });
-    store(sender: string, key: string, value: any): Promise<void>;
-    findNode(targetId: string, peer: WebRTC): Promise<void>;
+    store(sender: string, key: string, value: any): void;
+    storeChunks(sender: string, key: string, chunks: ArrayBuffer[]): void;
+    findNode(targetId: string, peer: WebRTC): void;
     findValue(key: string, cb?: (value: any) => void): void;
     doFindvalue(key: string, peer: WebRTC): Promise<void>;
     addknode(peer: WebRTC): void;

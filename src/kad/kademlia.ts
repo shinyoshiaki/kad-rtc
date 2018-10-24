@@ -50,7 +50,7 @@ export default class Kademlia {
     this.responder = new KResponder(this);
   }
 
-  async store(sender: string, key: string, value: any) {
+  store(sender: string, key: string, value: any) {
     //自分に一番近いピアを取得
     const peer = this.f.getCloseEstPeer(key);
     if (!peer) return;
@@ -63,7 +63,25 @@ export default class Kademlia {
     this.callback.onStore(this.keyValueList);
   }
 
-  async findNode(targetId: string, peer: WebRTC) {
+  storeChunks(sender: string, key: string, chunks: ArrayBuffer[]) {
+    const peer = this.f.getCloseEstPeer(key);
+    if (!peer) return;
+    chunks.forEach((chunk, i) => {
+      const sendData: StoreChunks = {
+        sender: this.nodeId,
+        key,
+        value: chunk,
+        index: i,
+        size: chunks.length
+      };
+      const network = networkFormat(sender, def.STORE_CHUNKS, sendData);
+      peer.send(network, "kad");
+      this.keyValueList[key] = chunks;
+      this.callback.onStore(this.keyValueList);
+    });
+  }
+
+  findNode(targetId: string, peer: WebRTC) {
     console.log("findnode", targetId);
     this.state.findNode = targetId;
     const sendData = { targetKey: targetId };

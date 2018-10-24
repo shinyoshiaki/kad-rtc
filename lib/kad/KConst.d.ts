@@ -1,6 +1,7 @@
 /// <reference types="node" />
 declare const _default: {
     STORE: string;
+    STORE_CHUNKS: string;
     FINDNODE: string;
     FINDNODE_R: string;
     FINDVALUE: string;

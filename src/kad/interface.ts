@@ -9,6 +9,14 @@ interface StoreFormat {
   persist?: boolean;
 }
 
+interface StoreChunks {
+  sender: string;
+  key: string;
+  value: any;
+  index: number;
+  size: number;
+}
+
 interface Findnode {
   targetKey: string;
 }
@@ -31,6 +39,12 @@ interface FindValueR {
     targetNode: string;
     targetKey: string;
     to: string;
+  };
+  chunks?: {
+    value: any;
+    key: string;
+    index: number;
+    size: number;
   };
 }
 
