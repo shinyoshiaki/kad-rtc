@@ -2,7 +2,9 @@ import { networkFormat } from "./KConst";
 import def from "./KConst";
 import Kademlia from "./kademlia";
 import { distance } from "kad-distance";
+import { BSON } from "bson";
 
+const bson = new BSON();
 const responder: any = {};
 
 export default class KResponder {

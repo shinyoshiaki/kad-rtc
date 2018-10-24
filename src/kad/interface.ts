@@ -46,6 +46,6 @@ interface network {
   type: string;
   nodeId: string;
   data: any;
-  date: any;
+  date: Buffer;
   hash: any;
 }

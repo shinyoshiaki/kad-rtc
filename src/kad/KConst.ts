@@ -1,4 +1,5 @@
 import sha1 from "sha1";
+import { BSON } from "bson";
 
 export default {
   STORE: "STORE",
@@ -15,15 +16,17 @@ export default {
   SEND: "SEND"
 };
 
-export function networkFormat(nodeId: string, type: string, data: any) {
+export function networkFormat(nodeId: string, type: string, data: any): Buffer {
   let packet = {
     layer: "networkLayer",
     type: type,
     nodeId: nodeId,
     data: data,
-    date: Date.now(),
+    date: Date.now().toString(),
     hash: ""
   };
   packet.hash = sha1(JSON.stringify(packet)).toString();
-  return JSON.stringify(packet);
+  const bson = new BSON();
+
+  return bson.serialize(packet);
 }

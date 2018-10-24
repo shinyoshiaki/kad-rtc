@@ -39,10 +39,10 @@ export default class Kademlia {
     doFindvalue(key: string, peer: WebRTC): Promise<void>;
     addknode(peer: WebRTC): void;
     private findNewPeer;
-    private onRequest;
     private maintain;
     offer(target: string, proxy?: null): Promise<{}>;
     answer(target: string, sdp: string, proxy: string): Promise<{}>;
     send(target: string, data: any): void;
     private onCommand;
+    private onRequest;
 }

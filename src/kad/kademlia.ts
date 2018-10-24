@@ -5,6 +5,9 @@ import KResponder from "./kResponder";
 import def, { networkFormat } from "./KConst";
 import { distance } from "kad-distance";
 import { message } from "webrtc4me/lib/interface";
+import { BSON } from "bson";
+
+const bson = new BSON();
 
 export default class Kademlia {
   nodeId: string;
@@ -74,13 +77,13 @@ export default class Kademlia {
     const peers = this.f.getClosePeers(key);
     peers.forEach(peer => {
       this.doFindvalue(key, peer);
-    });    
+    });
   }
 
   async doFindvalue(key: string, peer: WebRTC) {
     console.log("dofindvalue", peer.nodeId);
-    const findvalue: FindValue = { targetKey: key };
-    peer.send(networkFormat(this.nodeId, def.FINDVALUE, findvalue), "kad");
+    const sendData: FindValue = { targetKey: key };
+    peer.send(networkFormat(this.nodeId, def.FINDVALUE, sendData), "kad");
   }
 
   addknode(peer: WebRTC) {
@@ -120,12 +123,6 @@ export default class Kademlia {
     } else {
       console.log("kbucket ready", this.f.getKbucketNum());
     }
-  }
-
-  private onRequest(datalink: string) {
-    const network = JSON.parse(datalink);
-    this.responder.response(network.type, network);
-    this.maintain(network);
   }
 
   private async maintain(network: any) {
@@ -218,36 +215,24 @@ export default class Kademlia {
   private onCommand(message: message) {
     switch (message.label) {
       case "kad":
-        const dataLink = message.data;
+        const dataLink: Buffer = Buffer.from(message.data);
+        console.log({ dataLink });
         try {
-          console.log("oncommand kad", { message });
-          const networkLayer: network = JSON.parse(dataLink);
+          console.log("oncommand kad", { message }, { dataLink });
+          const networkLayer: network = bson.deserialize(dataLink);
           if (!JSON.stringify(this.dataList).includes(networkLayer.hash)) {
             this.dataList.push(networkLayer.hash);
-            this.onRequest(dataLink);
+            this.onRequest(networkLayer);
           }
         } catch (error) {
           console.log(error);
         }
         break;
-      case "app":
-        console.log("kad onapp", message.data);
-        this.callback.onApp(JSON.parse(message.data));
-        break;
-      case "bin":
-        try {
-          const json = JSON.parse(message.data);
-          if (json.type === "start") {
-            this.buffer[message.nodeId] = [];
-          } else if (json.type === "end") {
-          }
-        } catch (error) {
-          if (!this.buffer[message.nodeId]) {
-            this.buffer[message.nodeId] = [];
-          }
-          this.buffer[message.nodeId].push(message.data);
-        }
-        break;
     }
+  }
+
+  private onRequest(network: any) {
+    this.responder.response(network.type, network);
+    this.maintain(network);
   }
 }

@@ -1,3 +1,4 @@
+/// <reference types="node" />
 interface Req {
     nodeId: string;
     data: any;
@@ -40,6 +41,6 @@ interface network {
     type: string;
     nodeId: string;
     data: any;
-    date: any;
+    date: Buffer;
     hash: any;
 }
