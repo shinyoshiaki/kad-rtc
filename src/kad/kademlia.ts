@@ -19,11 +19,8 @@ export default class Kademlia {
   state = {
     isOffer: false,
     findNode: "",
-    hash: {},
-    maintain: false
+    hash: {}
   };
-
-  private onPing: { [key: string]: () => void } = {};
 
   callback = {
     onAddPeer: (v?: any) => {},
@@ -31,7 +28,6 @@ export default class Kademlia {
     onFindValue: (v?: any) => {},
     onFindNode: (v?: any) => {},
     onStore: (v?: any) => {},
-    _onPing: this.onPing,
     onApp: (v?: any) => {}
   };
 
@@ -51,33 +47,6 @@ export default class Kademlia {
     this.responder = new KResponder(this);
   }
 
-  ping(peer: WebRTC) {
-    return new Promise((resolve, reject) => {
-      console.log("ping", peer.nodeId);
-
-      //10秒以内にpingのフラグが立てば成功
-      const timeout = setTimeout(() => {
-        console.log("ping fail", peer.nodeId);
-        peer.isDisconnected = true;
-        this.f.cleanDiscon();
-        this.callback.onPeerDisconnect(this.kbuckets);
-        reject("ping timeout " + peer.nodeId);
-      }, 10 * 1000);
-
-      //ping完了時のコールバック
-      this.callback._onPing[peer.nodeId] = () => {
-        console.log("ping success", peer.nodeId);
-        clearTimeout(timeout);
-        resolve(true);
-      };
-
-      //自分のノードIDを含める
-      const sendData = { target: peer.nodeId };
-      //pingを送る
-      peer.send(networkFormat(this.nodeId, def.PING, sendData), "kad");
-    });
-  }
-
   async store(sender: string, key: string, value: any) {
     //自分に一番近いピアを取得
     const peer = this.f.getCloseEstPeer(key);
@@ -90,10 +59,6 @@ export default class Kademlia {
   }
 
   async findNode(targetId: string, peer: WebRTC) {
-    console.log("findnode");
-    //接続確認
-    const ping = this.ping(peer).catch(console.log);
-    if (!ping) return;
     console.log("findnode", targetId);
     this.state.findNode = targetId;
     const sendData = { targetKey: targetId };
@@ -161,7 +126,7 @@ export default class Kademlia {
   private onRequest(datalink: string) {
     const network = JSON.parse(datalink);
     this.responder.response(network.type, network);
-    if (!this.state.maintain) this.maintain(network);
+    this.maintain(network);
   }
 
   private async maintain(network: any) {
@@ -182,13 +147,7 @@ export default class Kademlia {
     //k-bucketがすでに満杯な場合、
     //そのk-bucket中の先頭のノードがオンラインなら先頭のノードを残す
     if (kbucket.length > this.k) {
-      this.state.maintain = true;
-      console.log("maintain", "bucket fulled", network.nodeId);
-      const result = await this.ping(kbucket[0]).catch(console.log);
-      this.state.maintain = false;
-      if (!result) {
-        kbucket.splice(0, 1);
-      }
+      kbucket.shift();
     }
   }
 

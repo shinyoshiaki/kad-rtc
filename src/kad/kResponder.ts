@@ -113,30 +113,6 @@ export default class KResponder {
       }
     };
 
-    responder[def.PING] = (network: any) => {
-      const data = network.data;
-      if (data.target === k.nodeId) {
-        console.log("ping received");
-        //ノードIDからピアを取得
-        const peer = k.f.getPeerFromnodeId(network.nodeId);
-        if (!peer) return;
-        const sendData = { target: network.nodeId };
-        peer.send(
-          networkFormat(k.nodeId, def.PONG, JSON.stringify(sendData)),
-          "kad"
-        );
-      }
-    };
-
-    responder[def.PONG] = (network: any) => {
-      const data = network.data;
-      if (data.target === k.nodeId) {
-        console.log("pong received", network.nodeId);
-        //pingのコールバック
-        k.callback._onPing[network.nodeId]();
-      }
-    };
-
     responder[def.FINDNODE] = (network: any) => {
       console.log("on findnode", network.nodeId);
       const data = network.data;

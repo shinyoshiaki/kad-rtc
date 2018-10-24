@@ -21,24 +21,18 @@ export default class Kademlia {
         isOffer: boolean;
         findNode: string;
         hash: {};
-        maintain: boolean;
     };
-    private onPing;
     callback: {
         onAddPeer: (v?: any) => void;
         onPeerDisconnect: (v?: any) => void;
         onFindValue: (v?: any) => void;
         onFindNode: (v?: any) => void;
         onStore: (v?: any) => void;
-        _onPing: {
-            [key: string]: () => void;
-        };
         onApp: (v?: any) => void;
     };
     constructor(_nodeId: string, opt?: {
         kLength?: number;
     });
-    ping(peer: WebRTC): Promise<{}>;
     store(sender: string, key: string, value: any): Promise<void>;
     findNode(targetId: string, peer: WebRTC): Promise<void>;
     findValue(key: string, cb?: (value: any) => void): void;
