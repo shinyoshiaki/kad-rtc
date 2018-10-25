@@ -116,6 +116,7 @@ export default class Kademlia {
 
   connect(peer: WebRTC) {
     if (!this.state.isConnect) {
+      console.log("kad connect");
       this.state.isConnect = true;
       this.addknode(peer);
       this.callback.onConnect();
@@ -251,11 +252,11 @@ export default class Kademlia {
   private onCommand(message: message) {
     switch (message.label) {
       case "kad":
-        const dataLink: Buffer = Buffer.from(message.data);
-        console.log({ dataLink });
+        const buffer: Buffer = Buffer.from(message.data);
+        console.log({ buffer });
         try {
-          console.log("oncommand kad", { message }, { dataLink });
-          const networkLayer: network = bson.deserialize(dataLink);
+          console.log("oncommand kad", { message });
+          const networkLayer: network = bson.deserialize(buffer);
           if (!JSON.stringify(this.dataList).includes(networkLayer.hash)) {
             this.dataList.push(networkLayer.hash);
             this.onRequest(networkLayer);
