@@ -23,6 +23,7 @@ export default class Kademlia {
         hash: {};
     };
     callback: {
+        onConnect: () => void;
         onAddPeer: (v?: any) => void;
         onPeerDisconnect: (v?: any) => void;
         onFindValue: (v?: any) => void;
@@ -38,6 +39,7 @@ export default class Kademlia {
     findNode(targetId: string, peer: WebRTC): void;
     findValue(key: string, cb?: (value: any) => void): void;
     doFindvalue(key: string, peer: WebRTC): Promise<void>;
+    connect(peer: WebRTC): void;
     addknode(peer: WebRTC): void;
     private findNewPeer;
     private maintain;

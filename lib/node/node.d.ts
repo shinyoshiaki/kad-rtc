@@ -1,6 +1,6 @@
 import Kademlia from "../kad/kademlia";
 export default class Node {
-    targetUrl: string | null;
+    targetUrl: string | undefined;
     nodeId: string;
     kad: Kademlia;
     constructor(targetAddress: string, targetPort: string);

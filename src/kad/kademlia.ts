@@ -26,6 +26,7 @@ export default class Kademlia {
   };
 
   callback = {
+    onConnect: () => {},
     onAddPeer: (v?: any) => {},
     onPeerDisconnect: (v?: any) => {},
     onFindValue: (v?: any) => {},
@@ -102,6 +103,10 @@ export default class Kademlia {
     console.log("dofindvalue", peer.nodeId);
     const sendData: FindValue = { targetKey: key };
     peer.send(networkFormat(this.nodeId, def.FINDVALUE, sendData), "kad");
+  }
+
+  connect(peer: WebRTC) {
+    this.addknode(peer);
   }
 
   addknode(peer: WebRTC) {
