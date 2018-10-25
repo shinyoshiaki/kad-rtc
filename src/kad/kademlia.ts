@@ -107,6 +107,7 @@ export default class Kademlia {
 
   connect(peer: WebRTC) {
     this.addknode(peer);
+    this.callback.onConnect();
   }
 
   addknode(peer: WebRTC) {
