@@ -92,7 +92,7 @@ export default class Kademlia {
   }
 
   findValue(key: string) {
-    return new Promise((resolve, reject) => {
+    return new Promise<any>((resolve, reject) => {
       const timeout = setTimeout(() => {
         reject("findvalue timeout");
       }, 10 * 1000);
