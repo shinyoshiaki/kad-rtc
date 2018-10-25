@@ -3974,8 +3974,8 @@ verror@1.10.0:
     extsprintf "^1.2.0"
 
 "webrtc4me@git+https://git@github.com/shinyoshiaki/webrtc4me.git#stream":
-  version "0.0.3"
-  resolved "git+https://git@github.com/shinyoshiaki/webrtc4me.git#d58115ee4f81f397b4aad55499f743402de66317"
+  version "0.0.4"
+  resolved "git+https://git@github.com/shinyoshiaki/webrtc4me.git#fef4eaa1628a616c83ff9644ad2fb445f91551fb"
   dependencies:
     babel-polyfill "^6.26.0"
     wrtc "^0.1.6"

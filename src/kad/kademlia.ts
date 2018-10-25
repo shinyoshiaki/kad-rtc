@@ -20,7 +20,7 @@ export default class Kademlia {
   ref: { [key: string]: WebRTC } = {};
   buffer: { [key: string]: Array<any> } = {};
   state = {
-    isConnect: false,
+    isFirstConnect: true,
     isOffer: false,
     findNode: "",
     hash: {}
@@ -115,12 +115,10 @@ export default class Kademlia {
   }
 
   connect(peer: WebRTC) {
-    if (!this.state.isConnect) {
-      console.log("kad connect");
-      this.state.isConnect = true;
-      this.addknode(peer);
-      this.callback.onConnect();
-    }
+    console.log("kad connect");
+    if (this.state.isFirstConnect) this.callback.onConnect();
+    this.state.isFirstConnect = false;
+    this.addknode(peer);
   }
 
   addknode(peer: WebRTC) {

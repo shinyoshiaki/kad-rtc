@@ -18,7 +18,7 @@ export default class Kademlia {
         [key: string]: Array<any>;
     };
     state: {
-        isConnect: boolean;
+        isFirstConnect: boolean;
         isOffer: boolean;
         findNode: string;
         hash: {};
