@@ -30,7 +30,7 @@ export default class Kademlia {
     onConnect: () => {},
     onAddPeer: (v?: any) => {},
     onPeerDisconnect: (v?: any) => {},
-    onFindValue: (v?: any) => {},
+    _onFindValue: (v?: any) => {},
     onFindNode: (v?: any) => {},
     onStore: (v?: any) => {},
     onApp: (v?: any) => {}
@@ -91,12 +91,20 @@ export default class Kademlia {
     peer.send(networkFormat(this.nodeId, def.FINDNODE, sendData), "kad");
   }
 
-  findValue(key: string, cb = (value: any) => {}) {
-    this.callback.onFindValue = cb;
-    //keyに近いピアを取得
-    const peers = this.f.getClosePeers(key);
-    peers.forEach(peer => {
-      this.doFindvalue(key, peer);
+  findValue(key: string) {
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject("findvalue timeout");
+      }, 10 * 1000);
+      this.callback._onFindValue = value => {
+        clearTimeout(timeout);
+        resolve(value);
+      };
+      //keyに近いピアを取得
+      const peers = this.f.getClosePeers(key);
+      peers.forEach(peer => {
+        this.doFindvalue(key, peer);
+      });
     });
   }
 

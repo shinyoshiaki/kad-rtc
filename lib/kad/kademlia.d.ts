@@ -27,7 +27,7 @@ export default class Kademlia {
         onConnect: () => void;
         onAddPeer: (v?: any) => void;
         onPeerDisconnect: (v?: any) => void;
-        onFindValue: (v?: any) => void;
+        _onFindValue: (v?: any) => void;
         onFindNode: (v?: any) => void;
         onStore: (v?: any) => void;
         onApp: (v?: any) => void;
@@ -38,7 +38,7 @@ export default class Kademlia {
     store(sender: string, key: string, value: any): void;
     storeChunks(sender: string, key: string, chunks: ArrayBuffer[]): void;
     findNode(targetId: string, peer: WebRTC): void;
-    findValue(key: string, cb?: (value: any) => void): void;
+    findValue(key: string): Promise<{}>;
     doFindvalue(key: string, peer: WebRTC): Promise<void>;
     connect(peer: WebRTC): void;
     addknode(peer: WebRTC): void;

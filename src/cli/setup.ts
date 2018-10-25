@@ -49,10 +49,8 @@ inquire.prompt([quesMyPort, quesAddress, quesPort]).then((answer: any) => {
     node.kad.store(node.kad.nodeId, sha1(data).toString(), data);
   };
 
-  responce.findvalue = (key: string) => {
-    node.kad.findValue(key, (value: any) => {
-      console.log("on findvalue", value);
-    });
+  responce.findvalue = async (key: string) => {
+    await node.kad.findValue(key);
   };
 
   responce.keyValueList = () => {

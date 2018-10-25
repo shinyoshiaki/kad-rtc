@@ -134,11 +134,12 @@ export default class KResponder {
       const data: FindValueR = network.data;
       //valueを発見していれば
       if (data.success) {
+        //通常ファイル
         console.log("findvalue found");
-        k.callback.onFindValue(data.success.value);
-        //レプリケーション
+        k.callback._onFindValue(data.success.value);
         k.keyValueList[data.success.key] = data.success.value;
       } else if (data.chunks) {
+        //ラージファイル
         if (data.chunks.index === 0) {
           this.storeChunks[data.chunks.key] = [];
         }
@@ -147,7 +148,7 @@ export default class KResponder {
           k.keyValueList[data.chunks.key] = {
             chunks: this.storeChunks[data.chunks.key]
           };
-          k.callback.onFindValue(this.storeChunks[data.chunks.key]);
+          k.callback._onFindValue(this.storeChunks[data.chunks.key]);
         }
       } else if (data.fail && data.fail.to === k.nodeId) {
         console.log(def.FINDVALUE_R, "re find", data);
