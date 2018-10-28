@@ -91,13 +91,9 @@ export default class Kademlia {
     peer.send(networkFormat(this.nodeId, def.FINDNODE, sendData), "kad");
   }
 
-  findValue(key: string) {
-    return new Promise<any>((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject("findvalue timeout");
-      }, 10 * 1000);
+  findValue(key: string, opt?: { ownerId?: string }) {
+    return new Promise<any>(async (resolve, reject) => {
       this.callback._onFindValue = value => {
-        clearTimeout(timeout);
         resolve(value);
       };
       //keyに近いピアを取得
@@ -105,6 +101,17 @@ export default class Kademlia {
       peers.forEach(peer => {
         this.doFindvalue(key, peer);
       });
+
+      await new Promise(r => setTimeout(r, 5000));
+      if (opt && opt.ownerId) {
+        const ownerId = opt.ownerId;
+        const peers = this.f.getClosePeers(ownerId);
+        peers.forEach(peer => {
+          this.doFindvalue(ownerId, peer);
+        });
+        await new Promise(r => setTimeout(r, 5000));
+      }
+      reject("findvalue timeout");
     });
   }
 
