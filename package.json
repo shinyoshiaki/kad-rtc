@@ -1,6 +1,6 @@
 {
   "name": "kad-rtc",
-  "version": "0.0.19",
+  "version": "0.0.29",
   "license": "prop",
   "scripts": {
     "type-check": "tsc --noEmit",
@@ -22,14 +22,18 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "@babel/preset-typescript": "^7.0.0",
+    "@types/bson": "^1.0.11",
     "@types/events": "^1.2.0",
     "@types/inquirer": "^0.0.43",
     "@types/sha1": "^1.1.1",
     "@types/socket.io": "^1.4.38",
     "@types/socket.io-client": "^1.4.32",
+    "@types/source-map-support": "^0.4.1",
     "typescript": "^3.0.3"
   },
   "dependencies": {
+    "bson": "^3.0.2",
+    "buffer-to-arraybuffer": "^0.0.5",
     "events": "^3.0.0",
     "inquirer": "^6.2.0",
     "kad-distance": "git+https://git@github.com/shinyoshiaki/kad-distance.git",
@@ -38,6 +42,6 @@
     "socket.io-client": "^2.1.1",
     "source-map-support": "^0.5.9",
     "webrtc4me": "git+https://git@github.com/shinyoshiaki/webrtc4me.git#stream",
-    "wrtc": "^0.1.6"
+    "wrtc": "^0.2.1"
   }
 }

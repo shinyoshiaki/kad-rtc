@@ -5,6 +5,15 @@ import KResponder from "./kResponder";
 import def, { networkFormat } from "./KConst";
 import { distance } from "kad-distance";
 import { message } from "webrtc4me/lib/interface";
+import { BSON } from "bson";
+
+const bson = new BSON();
+export function excuteEvent(ev: any, v?: any) {
+  console.log("excuteEvent", ev);
+  Object.keys(ev).forEach(key => {
+    ev[key](v);
+  });
+}
 
 export default class Kademlia {
   nodeId: string;
@@ -17,18 +26,28 @@ export default class Kademlia {
   ref: { [key: string]: WebRTC } = {};
   buffer: { [key: string]: Array<any> } = {};
   state = {
+    isFirstConnect: true,
     isOffer: false,
     findNode: "",
     hash: {}
   };
 
   callback = {
+    onConnect: () => {},
     onAddPeer: (v?: any) => {},
     onPeerDisconnect: (v?: any) => {},
-    onFindValue: (v?: any) => {},
-    onFindNode: (v?: any) => {},
-    onStore: (v?: any) => {},
+    _onFindValue: (v?: any) => {},
+    _onFindNode: (v?: any) => {},
     onApp: (v?: any) => {}
+  };
+
+  onStore: { [key: string]: (v: any) => void } = {};
+  onFindValue: { [key: string]: (v: any) => void } = {};
+  onFindNode: { [key: string]: (v: any) => void } = {};
+  events = {
+    store: this.onStore,
+    findvalue: this.onFindValue,
+    findnode: this.onFindNode
   };
 
   constructor(_nodeId: string, opt?: { kLength?: number }) {
@@ -47,7 +66,7 @@ export default class Kademlia {
     this.responder = new KResponder(this);
   }
 
-  async store(sender: string, key: string, value: any) {
+  store(sender: string, key: string, value: any) {
     //自分に一番近いピアを取得
     const peer = this.f.getCloseEstPeer(key);
     if (!peer) return;
@@ -57,30 +76,73 @@ export default class Kademlia {
     peer.send(network, "kad");
     console.log("store done", { network });
     this.keyValueList[key] = value;
-    this.callback.onStore(this.keyValueList);
   }
 
-  async findNode(targetId: string, peer: WebRTC) {
+  storeChunks(sender: string, key: string, chunks: ArrayBuffer[]) {
+    const peer = this.f.getCloseEstPeer(key);
+    if (!peer) return;
+    chunks.forEach((chunk, i) => {
+      const sendData: StoreChunks = {
+        sender: this.nodeId,
+        key,
+        value: chunk,
+        index: i,
+        size: chunks.length
+      };
+      const network = networkFormat(sender, def.STORE_CHUNKS, sendData);
+      peer.send(network, "kad");
+      this.keyValueList[key] = chunks;
+    });
+  }
+
+  findNode(targetId: string, peer: WebRTC) {
     console.log("findnode", targetId);
     this.state.findNode = targetId;
     const sendData = { targetKey: targetId };
     //送る
     peer.send(networkFormat(this.nodeId, def.FINDNODE, sendData), "kad");
+
+    this.callback._onFindNode((nodeId: string) => {
+      excuteEvent(this.events.findnode, nodeId);
+    });
   }
 
-  findValue(key: string, cb = (value: any) => {}) {
-    this.callback.onFindValue = cb;
-    //keyに近いピアを取得
-    const peers = this.f.getClosePeers(key);
-    peers.forEach(peer => {
-      this.doFindvalue(key, peer);
-    });    
+  findValue(key: string, opt?: { ownerId?: string }) {
+    return new Promise<any>(async (resolve, reject) => {
+      this.callback._onFindValue = value => {
+        excuteEvent(this.events.findvalue, value);
+        resolve(value);
+      };
+      //keyに近いピアを取得
+      const peers = this.f.getClosePeers(key);
+      peers.forEach(peer => {
+        this.doFindvalue(key, peer);
+      });
+
+      await new Promise(r => setTimeout(r, 5000));
+      if (opt && opt.ownerId) {
+        const ownerId = opt.ownerId;
+        const peers = this.f.getClosePeers(ownerId);
+        peers.forEach(peer => {
+          this.doFindvalue(ownerId, peer);
+        });
+        await new Promise(r => setTimeout(r, 5000));
+      }
+      reject("findvalue timeout");
+    });
   }
 
   async doFindvalue(key: string, peer: WebRTC) {
     console.log("dofindvalue", peer.nodeId);
-    const findvalue: FindValue = { targetKey: key };
-    peer.send(networkFormat(this.nodeId, def.FINDVALUE, findvalue), "kad");
+    const sendData: FindValue = { targetKey: key };
+    peer.send(networkFormat(this.nodeId, def.FINDVALUE, sendData), "kad");
+  }
+
+  connect(peer: WebRTC) {
+    console.log("kad connect");
+    if (this.state.isFirstConnect) this.callback.onConnect();
+    this.state.isFirstConnect = false;
+    this.addknode(peer);
   }
 
   addknode(peer: WebRTC) {
@@ -120,12 +182,6 @@ export default class Kademlia {
     } else {
       console.log("kbucket ready", this.f.getKbucketNum());
     }
-  }
-
-  private onRequest(datalink: string) {
-    const network = JSON.parse(datalink);
-    this.responder.response(network.type, network);
-    this.maintain(network);
   }
 
   private async maintain(network: any) {
@@ -218,36 +274,24 @@ export default class Kademlia {
   private onCommand(message: message) {
     switch (message.label) {
       case "kad":
-        const dataLink = message.data;
+        const buffer: Buffer = Buffer.from(message.data);
+        console.log({ buffer });
         try {
           console.log("oncommand kad", { message });
-          const networkLayer: network = JSON.parse(dataLink);
+          const networkLayer: network = bson.deserialize(buffer);
           if (!JSON.stringify(this.dataList).includes(networkLayer.hash)) {
             this.dataList.push(networkLayer.hash);
-            this.onRequest(dataLink);
+            this.onRequest(networkLayer);
           }
         } catch (error) {
           console.log(error);
         }
         break;
-      case "app":
-        console.log("kad onapp", message.data);
-        this.callback.onApp(JSON.parse(message.data));
-        break;
-      case "bin":
-        try {
-          const json = JSON.parse(message.data);
-          if (json.type === "start") {
-            this.buffer[message.nodeId] = [];
-          } else if (json.type === "end") {
-          }
-        } catch (error) {
-          if (!this.buffer[message.nodeId]) {
-            this.buffer[message.nodeId] = [];
-          }
-          this.buffer[message.nodeId].push(message.data);
-        }
-        break;
     }
+  }
+
+  private onRequest(network: any) {
+    this.responder.response(network.type, network);
+    this.maintain(network);
   }
 }
