@@ -1,6 +1,7 @@
 import WebRTC from "webrtc4me";
 import Helper from "./kUtil";
 import KResponder from "./kResponder";
+export declare function excuteEvent(ev: any, v?: any): void;
 export default class Kademlia {
     nodeId: string;
     k: number;
@@ -28,9 +29,28 @@ export default class Kademlia {
         onAddPeer: (v?: any) => void;
         onPeerDisconnect: (v?: any) => void;
         _onFindValue: (v?: any) => void;
-        onFindNode: (v?: any) => void;
-        onStore: (v?: any) => void;
+        _onFindNode: (v?: any) => void;
         onApp: (v?: any) => void;
+    };
+    onStore: {
+        [key: string]: (v: any) => void;
+    };
+    onFindValue: {
+        [key: string]: (v: any) => void;
+    };
+    onFindNode: {
+        [key: string]: (v: any) => void;
+    };
+    events: {
+        store: {
+            [key: string]: (v: any) => void;
+        };
+        findvalue: {
+            [key: string]: (v: any) => void;
+        };
+        findnode: {
+            [key: string]: (v: any) => void;
+        };
     };
     constructor(_nodeId: string, opt?: {
         kLength?: number;

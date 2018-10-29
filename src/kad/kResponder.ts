@@ -1,6 +1,6 @@
 import { networkFormat } from "./KConst";
 import def from "./KConst";
-import Kademlia from "./kademlia";
+import Kademlia, { excuteEvent } from "./kademlia";
 import { distance } from "kad-distance";
 import { BSON } from "bson";
 
@@ -32,7 +32,7 @@ export default class KResponder {
         console.log("store arrived", mine, close, "\ndata", data);
         //受け取る
         k.keyValueList[data.key] = data.value;
-        k.callback.onStore(k.keyValueList);
+        excuteEvent(kad.onStore, data.value);
       }
 
       const target = data.sender;
@@ -74,7 +74,7 @@ export default class KResponder {
           k.storeChunks(data.sender, data.key, this.storeChunks[data.key]);
         } else {
           console.log("store arrived", mine, close, "\ndata", data);
-          k.callback.onStore(k.keyValueList);
+          excuteEvent(kad.onStore, data.value);
         }
       }
     };
@@ -197,7 +197,7 @@ export default class KResponder {
         });
         //ノードIDが見つかったらコールバック
         if (k.state.findNode === target) {
-          k.callback.onFindNode();
+          k.callback._onFindNode(target);
         }
       }
 

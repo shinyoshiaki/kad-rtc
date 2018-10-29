@@ -1,6 +1,6 @@
 {
   "name": "kad-rtc",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "license": "prop",
   "scripts": {
     "type-check": "tsc --noEmit",
@@ -42,6 +42,6 @@
     "socket.io-client": "^2.1.1",
     "source-map-support": "^0.5.9",
     "webrtc4me": "git+https://git@github.com/shinyoshiaki/webrtc4me.git#stream",
-    "wrtc": "^0.1.6"
+    "wrtc": "^0.2.1"
   }
 }

@@ -8,6 +8,12 @@ import { message } from "webrtc4me/lib/interface";
 import { BSON } from "bson";
 
 const bson = new BSON();
+export function excuteEvent(ev: any, v?: any) {
+  console.log("excuteEvent", ev);
+  Object.keys(ev).forEach(key => {
+    ev[key](v);
+  });
+}
 
 export default class Kademlia {
   nodeId: string;
@@ -31,9 +37,17 @@ export default class Kademlia {
     onAddPeer: (v?: any) => {},
     onPeerDisconnect: (v?: any) => {},
     _onFindValue: (v?: any) => {},
-    onFindNode: (v?: any) => {},
-    onStore: (v?: any) => {},
+    _onFindNode: (v?: any) => {},
     onApp: (v?: any) => {}
+  };
+
+  onStore: { [key: string]: (v: any) => void } = {};
+  onFindValue: { [key: string]: (v: any) => void } = {};
+  onFindNode: { [key: string]: (v: any) => void } = {};
+  events = {
+    store: this.onStore,
+    findvalue: this.onFindValue,
+    findnode: this.onFindNode
   };
 
   constructor(_nodeId: string, opt?: { kLength?: number }) {
@@ -62,7 +76,6 @@ export default class Kademlia {
     peer.send(network, "kad");
     console.log("store done", { network });
     this.keyValueList[key] = value;
-    this.callback.onStore(this.keyValueList);
   }
 
   storeChunks(sender: string, key: string, chunks: ArrayBuffer[]) {
@@ -79,7 +92,6 @@ export default class Kademlia {
       const network = networkFormat(sender, def.STORE_CHUNKS, sendData);
       peer.send(network, "kad");
       this.keyValueList[key] = chunks;
-      this.callback.onStore(this.keyValueList);
     });
   }
 
@@ -89,11 +101,16 @@ export default class Kademlia {
     const sendData = { targetKey: targetId };
     //送る
     peer.send(networkFormat(this.nodeId, def.FINDNODE, sendData), "kad");
+
+    this.callback._onFindNode((nodeId: string) => {
+      excuteEvent(this.events.findnode, nodeId);
+    });
   }
 
   findValue(key: string, opt?: { ownerId?: string }) {
     return new Promise<any>(async (resolve, reject) => {
       this.callback._onFindValue = value => {
+        excuteEvent(this.events.findvalue, value);
         resolve(value);
       };
       //keyに近いピアを取得
