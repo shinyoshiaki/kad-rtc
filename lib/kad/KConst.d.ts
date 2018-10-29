@@ -1,5 +1,7 @@
+/// <reference types="node" />
 declare const _default: {
     STORE: string;
+    STORE_CHUNKS: string;
     FINDNODE: string;
     FINDNODE_R: string;
     FINDVALUE: string;
@@ -13,4 +15,4 @@ declare const _default: {
     SEND: string;
 };
 export default _default;
-export declare function networkFormat(nodeId: string, type: string, data: any): string;
+export declare function networkFormat(nodeId: string, type: string, data: any): Buffer;

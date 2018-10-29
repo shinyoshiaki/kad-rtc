@@ -1,12 +1,15 @@
 import { networkFormat } from "./KConst";
 import def from "./KConst";
-import Kademlia from "./kademlia";
+import Kademlia, { excuteEvent } from "./kademlia";
 import { distance } from "kad-distance";
+import { BSON } from "bson";
 
+const bson = new BSON();
 const responder: any = {};
 
 export default class KResponder {
   offerQueue: Array<any> = [];
+  storeChunks: { [key: string]: any[] } = {};
   constructor(kad: Kademlia) {
     const k = kad;
     this.playOfferQueue();
@@ -23,14 +26,12 @@ export default class KResponder {
         console.log("store transfer", "\ndata", data);
         //storeし直す
         k.store(data.sender, data.key, data.value);
-        //レプリケーション
-        k.keyValueList[data.key] = data.value;
       } else {
         console.log("store arrived", mine, close, "\ndata", data);
-        //受け取る
-        k.keyValueList[data.key] = data.value;
-        k.callback.onStore(k.keyValueList);
       }
+      //レプリケーション
+      k.keyValueList[data.key] = data.value;
+      excuteEvent(kad.onStore, data.value);
 
       const target = data.sender;
 
@@ -56,6 +57,26 @@ export default class KResponder {
       }
     };
 
+    responder[def.STORE_CHUNKS] = (network: any) => {
+      const data: StoreChunks = network.data;
+      if (data.index === 0) {
+        this.storeChunks[data.key] = [];
+      }
+      this.storeChunks[data.key].push(data.value);
+      if (data.index === data.size - 1) {
+        k.keyValueList[data.key] = { chunks: this.storeChunks[data.key] };
+        excuteEvent(kad.onStore, data.value);
+        const mine = distance(k.nodeId, data.key);
+        const close = k.f.getCloseEstDist(data.key);
+        if (mine > close) {
+          console.log("store transfer", "\ndata", data);
+          k.storeChunks(data.sender, data.key, this.storeChunks[data.key]);
+        } else {
+          console.log("store arrived", mine, close, "\ndata", data);
+        }
+      }
+    };
+
     responder[def.FINDVALUE] = (network: any) => {
       console.log("on findvalue", network.nodeId);
       const data = network.data;
@@ -65,10 +86,29 @@ export default class KResponder {
         const peer = k.f.getPeerFromnodeId(network.nodeId);
         //キーを見つかったというメッセージを戻す
         if (!peer) return;
-        const sendData: FindValueR = {
-          success: { value, key: data.targetKey }
-        };
-        peer.send(networkFormat(k.nodeId, def.FINDVALUE_R, sendData), "kad");
+        let sendData: FindValueR;
+        if (value.chunks) {
+          const chunks: any[] = value.chunks;
+          chunks.forEach((chunk, i) => {
+            sendData = {
+              chunks: {
+                value: chunk,
+                key: data.targetKey,
+                index: i,
+                size: chunks.length
+              }
+            };
+            peer.send(
+              networkFormat(k.nodeId, def.FINDVALUE_R, sendData),
+              "kad"
+            );
+          });
+        } else {
+          sendData = {
+            success: { value, key: data.targetKey }
+          };
+          peer.send(networkFormat(k.nodeId, def.FINDVALUE_R, sendData), "kad");
+        }
       } else {
         //キーに最も近いピア
         const ids = k.f.getCloseEstIdsList(data.targetKey);
@@ -92,10 +132,22 @@ export default class KResponder {
       const data: FindValueR = network.data;
       //valueを発見していれば
       if (data.success) {
+        //通常ファイル
         console.log("findvalue found");
-        k.callback.onFindValue(data.success.value);
-        //レプリケーション
+        k.callback._onFindValue(data.success.value);
         k.keyValueList[data.success.key] = data.success.value;
+      } else if (data.chunks) {
+        //ラージファイル
+        if (data.chunks.index === 0) {
+          this.storeChunks[data.chunks.key] = [];
+        }
+        this.storeChunks[data.chunks.key].push(data.chunks.value);
+        if (data.chunks.index === data.chunks.size - 1) {
+          k.keyValueList[data.chunks.key] = {
+            chunks: this.storeChunks[data.chunks.key]
+          };
+          k.callback._onFindValue(this.storeChunks[data.chunks.key]);
+        }
       } else if (data.fail && data.fail.to === k.nodeId) {
         console.log(def.FINDVALUE_R, "re find", data);
         //発見できていなければ候補に対して再探索
@@ -143,7 +195,7 @@ export default class KResponder {
         });
         //ノードIDが見つかったらコールバック
         if (k.state.findNode === target) {
-          k.callback.onFindNode();
+          k.callback._onFindNode(target);
         }
       }
 

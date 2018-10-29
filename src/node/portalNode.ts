@@ -62,7 +62,7 @@ export default class PortalNode {
 
     peer.connect = () => {
       console.log("first offer connected", peer.nodeId);
-      this.kad.addknode(peer);
+      this.kad.connect(peer);
     };
     peerOffer = peer;
   }
@@ -89,7 +89,7 @@ export default class PortalNode {
         console.log("first answer connected", peer.nodeId);
         clearTimeout(timeout);
         resolve(true);
-        this.kad.addknode(peer);
+        this.kad.connect(peer);
       };
     });
   }

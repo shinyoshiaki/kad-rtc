@@ -12,7 +12,7 @@ const def = {
 let peerOffer: WebRTC;
 
 export default class Node {
-  targetUrl: string | null;
+  targetUrl: string | undefined;
   nodeId: string;
   kad: Kademlia;
 
@@ -27,8 +27,6 @@ export default class Node {
       socket.on(def.ANSWER, (data: any) => {
         peerOffer.setAnswer(data.sdp, data.nodeId);
       });
-    } else {
-      this.targetUrl = null;
     }
     this.kad = new Kademlia(this.nodeId);
   }
@@ -48,7 +46,7 @@ export default class Node {
 
     peer.connect = () => {
       console.log("first connected");
-      this.kad.addknode(peer);
+      this.kad.connect(peer);
     };
 
     peerOffer = peer;
