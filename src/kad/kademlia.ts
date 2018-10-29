@@ -68,13 +68,13 @@ export default class Kademlia {
 
   store(sender: string, key: string, value: any) {
     //自分に一番近いピアを取得
-    const peer = this.f.getCloseEstPeer(key);
-    if (!peer) return;
-    console.log(def.STORE, "next", peer.nodeId, "target", key);
-    const sendData: StoreFormat = { sender, key, value };
-    const network = networkFormat(this.nodeId, def.STORE, sendData);
-    peer.send(network, "kad");
-    console.log("store done", { network });
+    const peers = this.f.getClosePeers(key);
+    peers.forEach(peer => {
+      console.log(def.STORE, "next", peer.nodeId, "target", key);
+      const sendData: StoreFormat = { sender, key, value };
+      const network = networkFormat(this.nodeId, def.STORE, sendData);
+      peer.send(network, "kad");
+    });
     this.keyValueList[key] = value;
   }
 
