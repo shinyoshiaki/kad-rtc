@@ -26,14 +26,12 @@ export default class KResponder {
         console.log("store transfer", "\ndata", data);
         //storeし直す
         k.store(data.sender, data.key, data.value);
-        //レプリケーション
-        k.keyValueList[data.key] = data.value;
       } else {
         console.log("store arrived", mine, close, "\ndata", data);
-        //受け取る
-        k.keyValueList[data.key] = data.value;
-        excuteEvent(kad.onStore, data.value);
       }
+      //レプリケーション
+      k.keyValueList[data.key] = data.value;
+      excuteEvent(kad.onStore, data.value);
 
       const target = data.sender;
 
@@ -67,6 +65,7 @@ export default class KResponder {
       this.storeChunks[data.key].push(data.value);
       if (data.index === data.size - 1) {
         k.keyValueList[data.key] = { chunks: this.storeChunks[data.key] };
+        excuteEvent(kad.onStore, data.value);
         const mine = distance(k.nodeId, data.key);
         const close = k.f.getCloseEstDist(data.key);
         if (mine > close) {
@@ -74,7 +73,6 @@ export default class KResponder {
           k.storeChunks(data.sender, data.key, this.storeChunks[data.key]);
         } else {
           console.log("store arrived", mine, close, "\ndata", data);
-          excuteEvent(kad.onStore, data.value);
         }
       }
     };
