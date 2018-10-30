@@ -76,7 +76,14 @@ export default class KResponder {
           console.log("store transfer", "\ndata", data);
           k.storeChunks(data.sender, data.key, this.storeChunks[data.key]);
         } else {
-          console.log("store arrived", mine, close, "\ndata", data);
+          console.log(
+            "store arrived",
+            mine,
+            close,
+            "\ndata",
+            data,
+            this.storeChunks[data.key]
+          );
         }
       }
     };
@@ -150,7 +157,9 @@ export default class KResponder {
           k.keyValueList[data.chunks.key] = {
             chunks: this.storeChunks[data.chunks.key]
           };
-          k.callback._onFindValue(this.storeChunks[data.chunks.key]);
+          k.callback._onFindValue({
+            chunks: this.storeChunks[data.chunks.key]
+          });
         }
       } else if (data.fail && data.fail.to === k.nodeId) {
         console.log(def.FINDVALUE_R, "re find", data);

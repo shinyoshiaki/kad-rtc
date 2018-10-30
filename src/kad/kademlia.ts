@@ -81,6 +81,7 @@ export default class Kademlia {
   storeChunks(sender: string, key: string, chunks: ArrayBuffer[]) {
     const peer = this.f.getCloseEstPeer(key);
     if (!peer) return;
+    console.log("store chunks", { chunks });
     chunks.forEach((chunk, i) => {
       const sendData: StoreChunks = {
         sender: this.nodeId,
