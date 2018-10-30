@@ -29,16 +29,13 @@ export default class KResponder {
       } else {
         console.log("store arrived", mine, close, "\ndata", data);
       }
-      //レプリケーション
-      k.keyValueList[data.key] = data.value;
-      excuteEvent(kad.onStore, data.value);
 
       const target = data.sender;
-
+      let isSdp = false;
       if (data.key === k.nodeId && !k.f.isNodeExist(target)) {
         if (data.value.sdp) {
           console.log("is signaling");
-
+          isSdp = true;
           if (data.value.sdp.type === "offer") {
             console.log("kad received offer", data.sender);
             await k
@@ -54,6 +51,12 @@ export default class KResponder {
             }
           }
         }
+      }
+
+      //レプリケーション
+      if (!isSdp) {
+        k.keyValueList[data.key] = data.value;
+        excuteEvent(kad.onStore, data.value);
       }
     };
 
