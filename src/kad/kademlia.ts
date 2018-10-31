@@ -75,7 +75,8 @@ export default class Kademlia {
       console.log(def.STORE, "next", peer.nodeId, "target", key);
       peer.send(network, "kad");
     });
-    this.keyValueList[key] = value;
+    //no sdp
+    if (!value.sdp) this.keyValueList[key] = value;
   }
 
   storeChunks(sender: string, key: string, chunks: ArrayBuffer[]) {
@@ -94,8 +95,9 @@ export default class Kademlia {
         console.log(def.STORE, "next", peer.nodeId, "target", key);
         peer.send(network, "kad");
       });
-      this.keyValueList[key] = chunks;
     });
+    //レプリケーション
+    this.keyValueList[key] = { chunks };
   }
 
   findNode(targetId: string, peer: WebRTC) {
