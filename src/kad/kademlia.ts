@@ -72,9 +72,9 @@ export default class Kademlia {
 
   store(sender: string, key: string, value: any, opt?: { excludeId?: string }) {
     // const peers = this.f.getClosePeers(key, opt);
-    const peer = this.f.getCloseEstPeer(key);
+    const peer = this.f.getCloseEstPeer(key, opt);
     if (!peer) return;
-    const hash = sha1(Math.random().toString()).toString();
+    const hash = sha1(JSON.stringify(value)).toString();
     const sendData: StoreFormat = {
       sender,
       key,
@@ -101,11 +101,11 @@ export default class Kademlia {
     opt?: { excludeId?: string }
   ) {
     // const peers = this.f.getClosePeers(key, opt);
-    const peer = this.f.getCloseEstPeer(key);
+    const peer = this.f.getCloseEstPeer(key, opt);
     if (!peer) return;
     console.log("store chunks", { chunks });
     chunks.forEach((chunk, i) => {
-      const hash = sha1(Math.random().toString()).toString();
+      const hash = sha1(Buffer.from(chunk)).toString();
       const sendData: StoreChunks = {
         sender: this.nodeId,
         key,
