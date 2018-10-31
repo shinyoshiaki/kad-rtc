@@ -4,9 +4,11 @@ import { distance } from "kad-distance";
 export default class KUtil {
   kbuckets: Array<Array<WebRTC>>;
   k: number;
-  constructor(k: number, kbuckets: Array<Array<WebRTC>>) {
+  nodeId: string;
+  constructor(k: number, kbuckets: Array<Array<WebRTC>>, nodeId: string) {
     this.k = k;
     this.kbuckets = kbuckets;
+    this.nodeId = nodeId;
   }
 
   getAllPeers(): Array<WebRTC> {
@@ -77,7 +79,13 @@ export default class KUtil {
     this.kbuckets.forEach(kbucket => {
       kbucket.forEach(peer => {
         console.log("distance", peer.nodeId, distance(_key, peer.nodeId));
-        if (!(opt && peer.nodeId === opt.excludeId)) {
+        if (peer.nodeId === this.nodeId) {
+          console.log("getcloseestpeer only me", this.nodeId);
+        }
+        if (
+          !(opt && peer.nodeId === opt.excludeId) &&
+          peer.nodeId !== this.nodeId
+        ) {
           if (distance(_key, peer.nodeId) < mini) {
             mini = distance(_key, peer.nodeId);
             closePeer = peer;

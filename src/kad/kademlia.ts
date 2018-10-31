@@ -66,12 +66,14 @@ export default class Kademlia {
       this.kbuckets[i] = kbucket;
     }
 
-    this.f = new Helper(this.k, this.kbuckets);
+    this.f = new Helper(this.k, this.kbuckets, this.nodeId);
     this.responder = new KResponder(this);
   }
 
   store(sender: string, key: string, value: any, opt?: { excludeId?: string }) {
-    const peers = this.f.getClosePeers(key, opt);
+    // const peers = this.f.getClosePeers(key, opt);
+    const peer = this.f.getCloseEstPeer(key);
+    if (!peer) return;
     const hash = sha1(Math.random().toString()).toString();
     const sendData: StoreFormat = {
       sender,
@@ -82,10 +84,12 @@ export default class Kademlia {
       sign: this.cypher.encrypt(hash)
     };
     const network = networkFormat(this.nodeId, def.STORE, sendData);
-    peers.forEach(peer => {
-      console.log(def.STORE, "next", peer.nodeId, "target", key);
-      peer.send(network, "kad");
-    });
+    // peers.forEach(peer => {
+    //   console.log(def.STORE, "next", peer.nodeId, "target", key);
+    //   peer.send(network, "kad");
+    // });
+    console.log(def.STORE, "next", peer.nodeId, "target", key);
+    peer.send(network, "kad");
     //no sdp
     if (!value.sdp) this.keyValueList[key] = value;
   }
@@ -96,7 +100,9 @@ export default class Kademlia {
     chunks: ArrayBuffer[],
     opt?: { excludeId?: string }
   ) {
-    const peers = this.f.getClosePeers(key, opt);
+    // const peers = this.f.getClosePeers(key, opt);
+    const peer = this.f.getCloseEstPeer(key);
+    if (!peer) return;
     console.log("store chunks", { chunks });
     chunks.forEach((chunk, i) => {
       const hash = sha1(Math.random().toString()).toString();
@@ -111,10 +117,12 @@ export default class Kademlia {
         size: chunks.length
       };
       const network = networkFormat(sender, def.STORE_CHUNKS, sendData);
-      peers.forEach(peer => {
-        console.log(def.STORE, "next", peer.nodeId, "target", key);
-        peer.send(network, "kad");
-      });
+      // peers.forEach(peer => {
+      //   console.log(def.STORE, "next", peer.nodeId, "target", key);
+      //   peer.send(network, "kad");
+      // });
+      console.log(def.STORE, "next", peer.nodeId, "target", key);
+      peer.send(network, "kad");
     });
     //レプリケーション
     this.keyValueList[key] = { chunks };

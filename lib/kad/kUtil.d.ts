@@ -2,7 +2,8 @@ import WebRTC from "webrtc4me";
 export default class KUtil {
     kbuckets: Array<Array<WebRTC>>;
     k: number;
-    constructor(k: number, kbuckets: Array<Array<WebRTC>>);
+    nodeId: string;
+    constructor(k: number, kbuckets: Array<Array<WebRTC>>, nodeId: string);
     getAllPeers(): Array<WebRTC>;
     getPeer(targetId: string): WebRTC | undefined;
     getCloseEstPeersList(key: string, opt?: {
