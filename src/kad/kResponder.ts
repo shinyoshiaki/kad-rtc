@@ -13,7 +13,7 @@ export default class KResponder {
     const k = kad;
     this.playOfferQueue();
 
-    responder[def.STORE] = async (network: any) => {
+    responder[def.STORE] = async (network: network) => {
       console.log("on store", network.nodeId);
 
       const data: StoreFormat = network.data;
@@ -24,7 +24,9 @@ export default class KResponder {
       if (mine > close) {
         console.log("store transfer", "\ndata", data);
         //storeし直す
-        k.store(data.sender, data.key, data.value);
+        k.store(data.sender, data.key, data.value, {
+          excludeId: network.nodeId
+        });
       } else {
         console.log("store arrived", mine, close, "\ndata", data);
       }
@@ -61,7 +63,7 @@ export default class KResponder {
       }
     };
 
-    responder[def.STORE_CHUNKS] = (network: any) => {
+    responder[def.STORE_CHUNKS] = (network: network) => {
       const data: StoreChunks = network.data;
       if (data.index === 0) {
         this.storeChunks[data.key] = [];
@@ -85,7 +87,9 @@ export default class KResponder {
             data,
             this.storeChunks[data.key]
           );
-          k.storeChunks(data.sender, data.key, this.storeChunks[data.key]);
+          k.storeChunks(data.sender, data.key, this.storeChunks[data.key], {
+            excludeId: network.nodeId
+          });
         } else {
           console.log(
             "store arrived",

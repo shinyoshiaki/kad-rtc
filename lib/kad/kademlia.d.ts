@@ -55,8 +55,12 @@ export default class Kademlia {
     constructor(_nodeId: string, opt?: {
         kLength?: number;
     });
-    store(sender: string, key: string, value: any): void;
-    storeChunks(sender: string, key: string, chunks: ArrayBuffer[]): void;
+    store(sender: string, key: string, value: any, opt?: {
+        excludeId?: string;
+    }): void;
+    storeChunks(sender: string, key: string, chunks: ArrayBuffer[], opt?: {
+        excludeId?: string;
+    }): void;
     findNode(targetId: string, peer: WebRTC): void;
     findValue(key: string, opt?: {
         ownerId?: string;

@@ -66,9 +66,8 @@ export default class Kademlia {
     this.responder = new KResponder(this);
   }
 
-  store(sender: string, key: string, value: any) {
-    //自分に一番近いピアを取得
-    const peers = this.f.getClosePeers(key);
+  store(sender: string, key: string, value: any, opt?: { excludeId?: string }) {
+    const peers = this.f.getClosePeers(key, opt);
     const sendData: StoreFormat = { sender, key, value };
     const network = networkFormat(this.nodeId, def.STORE, sendData);
     peers.forEach(peer => {
@@ -79,8 +78,13 @@ export default class Kademlia {
     if (!value.sdp) this.keyValueList[key] = value;
   }
 
-  storeChunks(sender: string, key: string, chunks: ArrayBuffer[]) {
-    const peers = this.f.getClosePeers(key);
+  storeChunks(
+    sender: string,
+    key: string,
+    chunks: ArrayBuffer[],
+    opt?: { excludeId?: string }
+  ) {
+    const peers = this.f.getClosePeers(key, opt);
     console.log("store chunks", { chunks });
     chunks.forEach((chunk, i) => {
       const sendData: StoreChunks = {

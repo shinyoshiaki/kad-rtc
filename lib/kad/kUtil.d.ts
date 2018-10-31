@@ -14,7 +14,7 @@ export default class KUtil {
     }): string[];
     getPeerFromnodeId(nodeId: string): WebRTC | undefined;
     getCloseEstPeer(_key: string, opt?: {
-        excludeId: null;
+        excludeId?: string;
     }): WebRTC | undefined;
     getCloseEstDist(key: string): number;
     getCloseIds(targetId: string): string[];
@@ -24,5 +24,7 @@ export default class KUtil {
     cleanDiscon(): void;
     getKbucketNum(): number;
     isNodeExist(nodeId: string): boolean;
-    getClosePeers(targetId: string): WebRTC[];
+    getClosePeers(targetId: string, opt?: {
+        excludeId?: string;
+    }): WebRTC[];
 }
