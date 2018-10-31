@@ -1,6 +1,6 @@
 {
   "name": "kad-rtc",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "license": "prop",
   "scripts": {
     "type-check": "tsc --noEmit",
@@ -37,6 +37,7 @@
     "events": "^3.0.0",
     "inquirer": "^6.2.0",
     "kad-distance": "git+https://git@github.com/shinyoshiaki/kad-distance.git",
+    "keypair": "^1.0.1",
     "sha1": "^1.1.1",
     "socket.io": "^2.1.1",
     "socket.io-client": "^2.1.1",

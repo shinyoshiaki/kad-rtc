@@ -1,6 +1,5 @@
 import WebRTC from "webrtc4me";
 import Kademlia from "../kad/kademlia";
-import sha1 from "sha1";
 
 const sleep = (waitSeconds: number) => {
   return new Promise(resolve => {
@@ -10,8 +9,7 @@ const sleep = (waitSeconds: number) => {
   });
 };
 
-const portalNodeId = sha1("portalnode").toString();
-const portalNodeKad = new Kademlia(portalNodeId);
+const portalNodeKad = new Kademlia();
 
 function portalNodeAnswer(
   sdp: any,
@@ -20,7 +18,7 @@ function portalNodeAnswer(
 ) {
   const PortalNode = new WebRTC();
   PortalNode.connect = () => {
-    console.log("portalnode connected", portalNodeId, nodeId);
+    console.log("portalnode connected", portalNodeKad.nodeId, nodeId);
     portalNodeKad.addknode(PortalNode);
   };
   PortalNode.makeAnswer(sdp, { disable_stun: true, nodeId: nodeId });
@@ -32,7 +30,7 @@ function portalNodeAnswer(
 function connectNode(nodeId: string) {
   return new Promise<WebRTC>(resolve => {
     const Node = new WebRTC();
-    Node.makeOffer({ disable_stun: true, nodeId: portalNodeId });
+    Node.makeOffer({ disable_stun: true, nodeId: portalNodeKad.nodeId });
     Node.signal = local => {
       portalNodeAnswer(local, nodeId, sdp => {
         Node.setAnswer(sdp);
@@ -48,9 +46,8 @@ const Kads: Array<Kademlia> = [];
 
 (async () => {
   for (let i = 0; i < 10; i++) {
-    const nodeId = sha1(Math.random().toString()).toString();
-    const node = await connectNode(nodeId);
-    const kad = new Kademlia(nodeId);
+    const kad = new Kademlia();
+    const node = await connectNode(kad.nodeId);
     Kads.push(kad);
     kad.addknode(node);
     await sleep(1);

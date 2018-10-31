@@ -6,6 +6,9 @@ interface StoreFormat {
   sender: string;
   key: string;
   value: any;
+  pubKey:string;
+  hash: string;
+  sign: string;
   persist?: boolean;
 }
 
@@ -14,6 +17,9 @@ interface StoreChunks {
   key: string;
   value: any;
   index: number;
+  pubKey:string;
+  hash: string;
+  sign: string;
   size: number;
 }
 

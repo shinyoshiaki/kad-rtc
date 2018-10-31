@@ -2,7 +2,6 @@ import { networkFormat } from "./KConst";
 import def from "./KConst";
 import Kademlia, { excuteEvent } from "./kademlia";
 import { distance } from "kad-distance";
-// import buffer2ab from "buffer-to-arraybuffer";
 
 const responder: any = {};
 
@@ -17,6 +16,12 @@ export default class KResponder {
       console.log("on store", network.nodeId);
 
       const data: StoreFormat = network.data;
+
+      if (!(k.cypher.decrypt(data.sign, data.pubKey) === data.hash)) {
+        console.log("invalid store");
+        return;
+      }
+
       //自分と送信元の距離
       const mine = distance(k.nodeId, data.key);
       //自分のkbuckets中で送信元に一番近い距離
@@ -65,6 +70,12 @@ export default class KResponder {
 
     responder[def.STORE_CHUNKS] = (network: network) => {
       const data: StoreChunks = network.data;
+
+      if (!(k.cypher.decrypt(data.sign, data.pubKey) === data.hash)) {
+        console.log("invalid store chunks");
+        return;
+      }
+
       if (data.index === 0) {
         this.storeChunks[data.key] = [];
       }

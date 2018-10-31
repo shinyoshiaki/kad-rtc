@@ -6,6 +6,8 @@ import def, { networkFormat } from "./KConst";
 import { distance } from "kad-distance";
 import { message } from "webrtc4me/lib/interface";
 import { BSON } from "bson";
+import Cypher from "../lib/cypher";
+import sha1 from "sha1";
 
 const bson = new BSON();
 export function excuteEvent(ev: any, v?: any) {
@@ -49,12 +51,14 @@ export default class Kademlia {
     findvalue: this.onFindValue,
     findnode: this.onFindNode
   };
+  cypher: Cypher;
 
-  constructor(_nodeId: string, opt?: { kLength?: number }) {
-    console.log("start kad", _nodeId);
+  constructor(opt?: { pubkey?: string; secKey?: string; kLength?: number }) {
     this.k = 20;
-    if (opt) if (opt.kLength) this.k = opt.kLength;
-    this.nodeId = _nodeId;
+    if (opt && opt.kLength) this.k = opt.kLength;
+    if (opt) this.cypher = new Cypher(opt.secKey, opt.pubkey);
+    else this.cypher = new Cypher();
+    this.nodeId = sha1(this.cypher.pubKey).toString();
 
     this.kbuckets = new Array(160);
     for (let i = 0; i < 160; i++) {
@@ -68,7 +72,15 @@ export default class Kademlia {
 
   store(sender: string, key: string, value: any, opt?: { excludeId?: string }) {
     const peers = this.f.getClosePeers(key, opt);
-    const sendData: StoreFormat = { sender, key, value };
+    const hash = sha1(Math.random().toString()).toString();
+    const sendData: StoreFormat = {
+      sender,
+      key,
+      value,
+      pubKey: this.cypher.pubKey,
+      hash,
+      sign: this.cypher.encrypt(hash)
+    };
     const network = networkFormat(this.nodeId, def.STORE, sendData);
     peers.forEach(peer => {
       console.log(def.STORE, "next", peer.nodeId, "target", key);
@@ -87,11 +99,15 @@ export default class Kademlia {
     const peers = this.f.getClosePeers(key, opt);
     console.log("store chunks", { chunks });
     chunks.forEach((chunk, i) => {
+      const hash = sha1(Math.random().toString()).toString();
       const sendData: StoreChunks = {
         sender: this.nodeId,
         key,
         value: Buffer.from(chunk),
         index: i,
+        pubKey: this.cypher.pubKey,
+        hash,
+        sign: this.cypher.encrypt(hash),
         size: chunks.length
       };
       const network = networkFormat(sender, def.STORE_CHUNKS, sendData);
@@ -256,11 +272,14 @@ export default class Kademlia {
 
       peer.signal = sdp => {
         const _ = this.f.getPeerFromnodeId(proxy);
-        //来たルートに送り返す
+        const hash = sha1(Math.random().toString()).toString();
         const sendData: StoreFormat = {
           sender: this.nodeId,
           key: target,
-          value: { sdp }
+          value: { sdp },
+          pubKey: this.cypher.pubKey,
+          hash,
+          sign: this.cypher.encrypt(hash)
         };
         if (_) _.send(networkFormat(this.nodeId, def.STORE, sendData), "kad");
       };

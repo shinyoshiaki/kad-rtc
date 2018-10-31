@@ -1,6 +1,7 @@
 import WebRTC from "webrtc4me";
 import Helper from "./kUtil";
 import KResponder from "./kResponder";
+import Cypher from "../lib/cypher";
 export declare function excuteEvent(ev: any, v?: any): void;
 export default class Kademlia {
     nodeId: string;
@@ -52,7 +53,10 @@ export default class Kademlia {
             [key: string]: (v: any) => void;
         };
     };
-    constructor(_nodeId: string, opt?: {
+    cypher: Cypher;
+    constructor(opt?: {
+        pubkey?: string;
+        secKey?: string;
         kLength?: number;
     });
     store(sender: string, key: string, value: any, opt?: {

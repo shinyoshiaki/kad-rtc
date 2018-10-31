@@ -13,11 +13,9 @@ let peerOffer: WebRTC;
 
 export default class Node {
   targetUrl: string | undefined;
-  nodeId: string;
   kad: Kademlia;
 
   constructor(targetAddress: string, targetPort: string) {
-    this.nodeId = sha1(Math.random().toString()).toString();
     if (targetAddress) {
       this.targetUrl = "http://" + targetAddress + ":" + targetPort;
       const socket = client.connect(this.targetUrl);
@@ -28,7 +26,7 @@ export default class Node {
         peerOffer.setAnswer(data.sdp, data.nodeId);
       });
     }
-    this.kad = new Kademlia(this.nodeId);
+    this.kad = new Kademlia();
   }
 
   offerFirst(socket: any) {
@@ -39,7 +37,7 @@ export default class Node {
     peer.signal = sdp => {
       socket.emit(def.OFFER, {
         type: def.OFFER,
-        nodeId: this.nodeId,
+        nodeId: this.kad.nodeId,
         sdp: sdp
       });
     };
