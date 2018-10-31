@@ -158,6 +158,7 @@ export default class KResponder {
 
     responder[def.FINDVALUE_R] = (network: network) => {
       const data: FindValueR = network.data;
+      console.log("findvalue r", { data });
       //valueを発見していれば
       if (data.success) {
         //通常ファイル
@@ -169,7 +170,11 @@ export default class KResponder {
         if (data.chunks.index === 0) {
           this.storeChunks[data.chunks.key] = [];
         }
-        console.log("findvalue r chunks bf2ab", buffer2ab(data.chunks.value));
+        console.log(
+          "findvalue r chunks bf2ab",
+          data.chunks,
+          buffer2ab(data.chunks.value)
+        );
         this.storeChunks[data.chunks.key].push(
           buffer2ab(data.chunks.value).buffer
         );
