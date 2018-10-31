@@ -85,7 +85,7 @@ export default class Kademlia {
       const sendData: StoreChunks = {
         sender: this.nodeId,
         key,
-        value: chunk,
+        value: Buffer.from(chunk),
         index: i,
         size: chunks.length
       };

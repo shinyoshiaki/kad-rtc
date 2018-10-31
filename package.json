@@ -1,6 +1,6 @@
 {
   "name": "kad-rtc",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "license": "prop",
   "scripts": {
     "type-check": "tsc --noEmit",

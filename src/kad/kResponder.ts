@@ -3,6 +3,7 @@ import def from "./KConst";
 import Kademlia, { excuteEvent } from "./kademlia";
 import { distance } from "kad-distance";
 import { BSON } from "bson";
+import buffer2ab from "buffer-to-arraybuffer";
 
 const bson = new BSON();
 const responder: any = {};
@@ -67,7 +68,8 @@ export default class KResponder {
       if (data.index === 0) {
         this.storeChunks[data.key] = [];
       }
-      this.storeChunks[data.key].push(data.value);
+      this.storeChunks[data.key].push(buffer2ab(data.value));
+      
       if (data.index === data.size - 1) {
         k.keyValueList[data.key] = { chunks: this.storeChunks[data.key] };
         excuteEvent(kad.onStore, data.value);
