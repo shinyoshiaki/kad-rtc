@@ -1,6 +1,6 @@
 {
   "name": "kad-rtc",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "license": "prop",
   "scripts": {
     "type-check": "tsc --noEmit",
@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "bson": "^3.0.2",
+    "buffer": "^5.2.1",
     "buffer-to-arraybuffer": "^0.0.5",
     "events": "^3.0.0",
     "inquirer": "^6.2.0",
