@@ -280,10 +280,9 @@ export default class Kademlia {
     switch (message.label) {
       case "kad":
         const buffer: Buffer = Buffer.from(message.data);
-        console.log({ buffer });
         try {
-          console.log("oncommand kad", { message });
           const networkLayer: network = bson.deserialize(buffer);
+          console.log("oncommand kad", { message }, { networkLayer });
           if (!JSON.stringify(this.dataList).includes(networkLayer.hash)) {
             this.dataList.push(networkLayer.hash);
             this.onRequest(networkLayer);

@@ -2,10 +2,8 @@ import { networkFormat } from "./KConst";
 import def from "./KConst";
 import Kademlia, { excuteEvent } from "./kademlia";
 import { distance } from "kad-distance";
-import { BSON } from "bson";
 import buffer2ab from "buffer-to-arraybuffer";
 
-const bson = new BSON();
 const responder: any = {};
 
 export default class KResponder {
@@ -72,10 +70,12 @@ export default class KResponder {
       this.storeChunks[data.key].push(buffer2ab(data.value).buffer);
 
       if (data.index === data.size - 1) {
+        console.log("store chunks chunks received", this.storeChunks[data.key]);
         //レプリケーション
         k.keyValueList[data.key] = { chunks: this.storeChunks[data.key] };
 
-        excuteEvent(kad.onStore, data.value);
+        excuteEvent(kad.onStore, { chunks: this.storeChunks[data.key] });
+
         const mine = distance(k.nodeId, data.key);
         const close = k.f.getCloseEstDist(data.key);
         if (mine > close) {
@@ -105,10 +105,12 @@ export default class KResponder {
       //ターゲットのキーを持っていたら
       if (Object.keys(k.keyValueList).includes(data.targetKey)) {
         const value = k.keyValueList[data.targetKey];
+        console.log("onfindvalue i have value", { value });
         const peer = k.f.getPeerFromnodeId(network.nodeId);
-        //キーを見つかったというメッセージを戻す
+
         if (!peer) return;
         let sendData: FindValueR;
+
         if (value.chunks) {
           //ラージファイル
           console.log("on findvalue send chunks");
@@ -122,6 +124,7 @@ export default class KResponder {
                 size: chunks.length
               }
             };
+            console.log("findvalue senddata", { chunk }, { sendData });
             peer.send(
               networkFormat(k.nodeId, def.FINDVALUE_R, sendData),
               "kad"
@@ -153,7 +156,7 @@ export default class KResponder {
       }
     };
 
-    responder[def.FINDVALUE_R] = (network: any) => {
+    responder[def.FINDVALUE_R] = (network: network) => {
       const data: FindValueR = network.data;
       //valueを発見していれば
       if (data.success) {
@@ -171,7 +174,7 @@ export default class KResponder {
           buffer2ab(data.chunks.value).buffer
         );
         if (data.chunks.index === data.chunks.size - 1) {
-          console.log("findvalue r");
+          console.log("findvalue r", this.storeChunks[data.chunks.key]);
           k.keyValueList[data.chunks.key] = {
             chunks: this.storeChunks[data.chunks.key]
           };
