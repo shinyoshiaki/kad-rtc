@@ -68,7 +68,8 @@ export default class KResponder {
       if (data.index === 0) {
         this.storeChunks[data.key] = [];
       }
-      this.storeChunks[data.key].push(buffer2ab(data.value));
+      console.log("storechunks buffer2ab", buffer2ab(data.value));
+      this.storeChunks[data.key].push(buffer2ab(data.value).buffer);
 
       if (data.index === data.size - 1) {
         //レプリケーション
@@ -165,8 +166,12 @@ export default class KResponder {
         if (data.chunks.index === 0) {
           this.storeChunks[data.chunks.key] = [];
         }
-        this.storeChunks[data.chunks.key].push(data.chunks.value);
+        console.log("findvalue r chunks bf2ab", buffer2ab(data.chunks.value));
+        this.storeChunks[data.chunks.key].push(
+          buffer2ab(data.chunks.value).buffer
+        );
         if (data.chunks.index === data.chunks.size - 1) {
+          console.log("findvalue r");
           k.keyValueList[data.chunks.key] = {
             chunks: this.storeChunks[data.chunks.key]
           };
