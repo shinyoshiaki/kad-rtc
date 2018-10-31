@@ -69,14 +69,20 @@ export default class KResponder {
         this.storeChunks[data.key] = [];
       }
       this.storeChunks[data.key].push(buffer2ab(data.value));
-      
+
       if (data.index === data.size - 1) {
         k.keyValueList[data.key] = { chunks: this.storeChunks[data.key] };
+        
         excuteEvent(kad.onStore, data.value);
         const mine = distance(k.nodeId, data.key);
         const close = k.f.getCloseEstDist(data.key);
         if (mine > close) {
-          console.log("store transfer", "\ndata", data);
+          console.log(
+            "store transfer",
+            "\ndata",
+            data,
+            this.storeChunks[data.key]
+          );
           k.storeChunks(data.sender, data.key, this.storeChunks[data.key]);
         } else {
           console.log(
@@ -102,11 +108,12 @@ export default class KResponder {
         if (!peer) return;
         let sendData: FindValueR;
         if (value.chunks) {
+          console.log("on findvalue send chunks")
           const chunks: any[] = value.chunks;
           chunks.forEach((chunk, i) => {
             sendData = {
               chunks: {
-                value: chunk,
+                value: Buffer.from(chunk),
                 key: data.targetKey,
                 index: i,
                 size: chunks.length
