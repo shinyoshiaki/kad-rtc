@@ -2,7 +2,7 @@ import { networkFormat } from "./KConst";
 import def from "./KConst";
 import Kademlia, { excuteEvent } from "./kademlia";
 import { distance } from "kad-distance";
-import buffer2ab from "buffer-to-arraybuffer";
+// import buffer2ab from "buffer-to-arraybuffer";
 
 const responder: any = {};
 
@@ -66,8 +66,8 @@ export default class KResponder {
       if (data.index === 0) {
         this.storeChunks[data.key] = [];
       }
-      console.log("storechunks buffer2ab", buffer2ab(data.value));
-      this.storeChunks[data.key].push(buffer2ab(data.value).buffer);
+      console.log("storechunks buffer2ab", data.value.buffer);
+      this.storeChunks[data.key].push(data.value.buffer);
 
       if (data.index === data.size - 1) {
         console.log("store chunks chunks received", this.storeChunks[data.key]);
@@ -173,11 +173,9 @@ export default class KResponder {
         console.log(
           "findvalue r chunks bf2ab",
           data.chunks,
-          buffer2ab(data.chunks.value)
+          data.chunks.value.buffer
         );
-        this.storeChunks[data.chunks.key].push(
-          buffer2ab(data.chunks.value).buffer
-        );
+        this.storeChunks[data.chunks.key].push(data.chunks.value.buffer);
         if (data.chunks.index === data.chunks.size - 1) {
           console.log("findvalue r", this.storeChunks[data.chunks.key]);
           k.keyValueList[data.chunks.key] = {
