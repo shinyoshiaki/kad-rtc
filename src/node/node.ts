@@ -15,7 +15,11 @@ export default class Node {
   targetUrl: string | undefined;
   kad: Kademlia;
 
-  constructor(targetAddress: string, targetPort: string) {
+  constructor(
+    targetAddress: string,
+    targetPort: string,
+    opt?: { pubkey?: string; seckey?: string }
+  ) {
     if (targetAddress) {
       this.targetUrl = "http://" + targetAddress + ":" + targetPort;
       const socket = client.connect(this.targetUrl);
@@ -26,7 +30,10 @@ export default class Node {
         peerOffer.setAnswer(data.sdp, data.nodeId);
       });
     }
-    this.kad = new Kademlia();
+
+    if (opt)
+      this.kad = new Kademlia({ pubkey: opt.pubkey, secKey: opt.seckey });
+    else this.kad = new Kademlia();
   }
 
   offerFirst(socket: any) {
