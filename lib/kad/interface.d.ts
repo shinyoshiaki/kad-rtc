@@ -72,3 +72,8 @@ interface p2pMessage {
     };
     text?: string;
 }
+interface p2pMessageEvent {
+    nodeId: string;
+    file?: any;
+    text?: string;
+}

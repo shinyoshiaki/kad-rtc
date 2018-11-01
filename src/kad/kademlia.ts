@@ -27,6 +27,7 @@ export default class Kademlia {
   keyValueList: { [key: string]: any } = {};
   ref: { [key: string]: WebRTC } = {};
   buffer: { [key: string]: Array<any> } = {};
+  p2pMsgBuffer: { [key: string]: any[] } = {};
   state = {
     isFirstConnect: true,
     isOffer: false,
@@ -363,7 +364,23 @@ export default class Kademlia {
         {
           const buffer: Buffer = Buffer.from(message.data);
           const packet: p2pMessage = bson.deserialize(buffer);
-          excuteEvent(this.events.p2p, packet);
+          if (packet.text) {
+            const payload: p2pMessageEvent = {
+              nodeId: packet.sender,
+              text: packet.text
+            };
+            excuteEvent(this.events.p2p, payload);
+          } else if (packet.file) {
+            if (packet.file.index === 0) this.p2pMsgBuffer[packet.sender] = [];
+            this.p2pMsgBuffer[packet.sender].push(packet.file.chunk);
+            if (packet.file.index === packet.file.length - 1) {
+              const payload: p2pMessageEvent = {
+                nodeId: packet.sender,
+                file: this.p2pMsgBuffer[packet.sender]
+              };
+              excuteEvent(this.events.p2p, payload);
+            }
+          }
         }
         break;
     }

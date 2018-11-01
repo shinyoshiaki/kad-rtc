@@ -76,3 +76,9 @@ interface p2pMessage {
   file?: { index: number; length: number; chunk: any };
   text?: string;
 }
+
+interface p2pMessageEvent {
+  nodeId: string;
+  file?: any;
+  text?: string;
+}

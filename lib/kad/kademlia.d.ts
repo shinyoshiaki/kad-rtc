@@ -19,6 +19,9 @@ export default class Kademlia {
     buffer: {
         [key: string]: Array<any>;
     };
+    p2pMsgBuffer: {
+        [key: string]: any[];
+    };
     state: {
         isFirstConnect: boolean;
         isOffer: boolean;
