@@ -60,7 +60,7 @@ export default class KResponder {
       }
 
       //レプリケーション
-      if (!isSdp) {        
+      if (!isSdp) {
         excuteEvent(kad.onStore, data.value);
         k.keyValueList[data.key] = data.value;
       }
@@ -261,7 +261,7 @@ export default class KResponder {
           if (!close) return;
           console.log("findnode-r keep find node", k.state.findNode);
           //再探索
-          k.findNode(k.state.findNode, close);
+          await k.findNode(k.state.findNode, close).catch(console.log);
         }
       }
     };

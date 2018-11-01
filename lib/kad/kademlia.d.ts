@@ -43,7 +43,7 @@ export default class Kademlia {
         [key: string]: (v: any) => void;
     };
     onP2P: {
-        [key: string]: (v: any) => void;
+        [key: string]: (nodeId: string, data: string) => void;
     };
     events: {
         store: {
@@ -56,7 +56,7 @@ export default class Kademlia {
             [key: string]: (v: any) => void;
         };
         p2p: {
-            [key: string]: (v: any) => void;
+            [key: string]: (nodeId: string, data: string) => void;
         };
     };
     cypher: Cypher;

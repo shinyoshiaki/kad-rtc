@@ -46,7 +46,7 @@ export default class Kademlia {
   onStore: { [key: string]: (v: any) => void } = {};
   onFindValue: { [key: string]: (v: any) => void } = {};
   onFindNode: { [key: string]: (v: any) => void } = {};
-  onP2P: { [key: string]: (v: any) => void } = {};
+  onP2P: { [key: string]: (nodeId: string, data: string) => void } = {};
   events = {
     store: this.onStore,
     findvalue: this.onFindValue,
@@ -209,10 +209,10 @@ export default class Kademlia {
     }
   }
 
-  private findNewPeer(peer: WebRTC) {
+  private async findNewPeer(peer: WebRTC) {
     if (this.f.getKbucketNum() < this.k) {
       //自身のノードIDをkeyとしてFIND_NODE
-      this.findNode(this.nodeId, peer);
+      await this.findNode(this.nodeId, peer).catch(console.log);
     } else {
       console.log("kbucket ready", this.f.getKbucketNum());
     }
@@ -338,7 +338,10 @@ export default class Kademlia {
         }
         break;
       case "p2p":
-        excuteEvent(this.events.p2p, message.data);
+        excuteEvent(this.events.p2p, {
+          nodeId: message.nodeId,
+          data: message.data
+        });
         break;
     }
   }
