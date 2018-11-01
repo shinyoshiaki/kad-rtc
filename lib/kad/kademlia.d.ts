@@ -42,6 +42,9 @@ export default class Kademlia {
     onFindNode: {
         [key: string]: (v: any) => void;
     };
+    onP2P: {
+        [key: string]: (v: any) => void;
+    };
     events: {
         store: {
             [key: string]: (v: any) => void;
@@ -50,6 +53,9 @@ export default class Kademlia {
             [key: string]: (v: any) => void;
         };
         findnode: {
+            [key: string]: (v: any) => void;
+        };
+        p2p: {
             [key: string]: (v: any) => void;
         };
     };
@@ -65,7 +71,7 @@ export default class Kademlia {
     storeChunks(sender: string, key: string, chunks: ArrayBuffer[], opt?: {
         excludeId?: string;
     }): void;
-    findNode(targetId: string, peer: WebRTC): void;
+    findNode(targetId: string, peer: WebRTC): Promise<WebRTC>;
     findValue(key: string, opt?: {
         ownerId?: string;
     }): Promise<any>;
@@ -74,9 +80,9 @@ export default class Kademlia {
     addknode(peer: WebRTC): void;
     private findNewPeer;
     private maintain;
-    offer(target: string, proxy?: null): Promise<{}>;
-    answer(target: string, sdp: string, proxy: string): Promise<{}>;
-    send(target: string, data: any): void;
+    offer(target: string, proxy?: null): Promise<any>;
+    answer(target: string, sdp: string, proxy: string): Promise<any>;
+    send(target: string, data: any): Promise<any>;
     private onCommand;
     private onRequest;
 }

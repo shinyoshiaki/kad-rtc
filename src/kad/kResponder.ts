@@ -60,9 +60,7 @@ export default class KResponder {
       }
 
       //レプリケーション
-      if (!isSdp) {
-        // //キーが衝突しない前提
-        // if (!k.keyValueList[data.key])
+      if (!isSdp) {        
         excuteEvent(kad.onStore, data.value);
         k.keyValueList[data.key] = data.value;
       }

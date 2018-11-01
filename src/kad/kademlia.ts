@@ -46,10 +46,12 @@ export default class Kademlia {
   onStore: { [key: string]: (v: any) => void } = {};
   onFindValue: { [key: string]: (v: any) => void } = {};
   onFindNode: { [key: string]: (v: any) => void } = {};
+  onP2P: { [key: string]: (v: any) => void } = {};
   events = {
     store: this.onStore,
     findvalue: this.onFindValue,
-    findnode: this.onFindNode
+    findnode: this.onFindNode,
+    p2p: this.onP2P
   };
   cypher: Cypher;
 
@@ -71,7 +73,6 @@ export default class Kademlia {
   }
 
   store(sender: string, key: string, value: any, opt?: { excludeId?: string }) {
-    // const peers = this.f.getClosePeers(key, opt);
     const peer = this.f.getCloseEstPeer(key, opt);
     if (!peer) return;
     const hash = sha1(JSON.stringify(value)).toString();
@@ -84,10 +85,7 @@ export default class Kademlia {
       sign: this.cypher.encrypt(hash)
     };
     const network = networkFormat(this.nodeId, def.STORE, sendData);
-    // peers.forEach(peer => {
-    //   console.log(def.STORE, "next", peer.nodeId, "target", key);
-    //   peer.send(network, "kad");
-    // });
+
     console.log(def.STORE, "next", peer.nodeId, "target", key);
     peer.send(network, "kad");
     //no sdp
@@ -117,10 +115,7 @@ export default class Kademlia {
         size: chunks.length
       };
       const network = networkFormat(sender, def.STORE_CHUNKS, sendData);
-      // peers.forEach(peer => {
-      //   console.log(def.STORE, "next", peer.nodeId, "target", key);
-      //   peer.send(network, "kad");
-      // });
+
       console.log(def.STORE, "next", peer.nodeId, "target", key);
       peer.send(network, "kad");
     });
@@ -129,14 +124,20 @@ export default class Kademlia {
   }
 
   findNode(targetId: string, peer: WebRTC) {
-    console.log("findnode", targetId);
-    this.state.findNode = targetId;
-    const sendData = { targetKey: targetId };
-    //送る
-    peer.send(networkFormat(this.nodeId, def.FINDNODE, sendData), "kad");
+    return new Promise<WebRTC>(async (resolve, reject) => {
+      console.log("findnode", targetId);
+      this.state.findNode = targetId;
+      const sendData = { targetKey: targetId };
+      //送る
+      peer.send(networkFormat(this.nodeId, def.FINDNODE, sendData), "kad");
 
-    this.callback._onFindNode((nodeId: string) => {
-      excuteEvent(this.events.findnode, nodeId);
+      this.callback._onFindNode((nodeId: string) => {
+        excuteEvent(this.events.findnode, nodeId);
+        resolve(this.f.getPeerFromnodeId(nodeId));
+      });
+
+      await new Promise(r => setTimeout(r, 10 * 1000));
+      reject("timeout findnode");
     });
   }
 
@@ -240,7 +241,7 @@ export default class Kademlia {
   }
 
   offer(target: string, proxy = null) {
-    return new Promise((resolve, reject) => {
+    return new Promise<any>(async (resolve, reject) => {
       const r = this.ref;
       const peer = (r[target] = new WebRTC());
       peer.makeOffer();
@@ -268,7 +269,7 @@ export default class Kademlia {
   }
 
   answer(target: string, sdp: string, proxy: string) {
-    return new Promise((resolve, reject) => {
+    return new Promise<any>(async (resolve, reject) => {
       const r = this.ref;
       const peer = (r[target] = new WebRTC());
       peer.makeAnswer(sdp);
@@ -303,8 +304,22 @@ export default class Kademlia {
   }
 
   send(target: string, data: any) {
-    const _ = this.f.getPeerFromnodeId(target);
-    if (_) _.send(networkFormat(this.nodeId, def.SEND, data), "kad");
+    return new Promise<any>(async (resolve, reject) => {
+      const peer = this.f.getPeerFromnodeId(target);
+      if (peer) {
+        peer.send(networkFormat(this.nodeId, def.SEND, data), "kad");
+        resolve(true);
+      } else {
+        const close = this.f.getCloseEstPeer(target);
+        if (!close) return;
+        const result = await this.findNode(target, close).catch(console.log);
+        if (!result) return;
+        result.send(data, "p2p");
+        resolve(true);
+      }
+      await new Promise(r => setTimeout(r, 10 * 1000));
+      reject("send timeout");
+    });
   }
 
   private onCommand(message: message) {
@@ -321,6 +336,9 @@ export default class Kademlia {
         } catch (error) {
           console.log(error);
         }
+        break;
+      case "p2p":
+        excuteEvent(this.events.p2p, message.data);
         break;
     }
   }
