@@ -73,12 +73,13 @@ interface network {
 interface p2pMessage {
   sender: string;
   target: string;
-  file?: { index: number; length: number; chunk: any };
+  file?: { index: number; length: number; chunk: any; filename: string };
   text?: string;
 }
 
 interface p2pMessageEvent {
   nodeId: string;
   file?: any;
+  filename?: string;
   text?: string;
 }

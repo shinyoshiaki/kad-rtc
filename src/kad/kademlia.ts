@@ -304,7 +304,10 @@ export default class Kademlia {
     });
   }
 
-  send(target: string, data: { text?: string; file?: ArrayBuffer[] }) {
+  send(
+    target: string,
+    data: { text?: string; file?: { name: string; value: ArrayBuffer[] } }
+  ) {
     const send = (peer: WebRTC) => {
       const bson = new BSON();
       const packet: p2pMessage = {
@@ -317,11 +320,12 @@ export default class Kademlia {
         peer.send(bin, "p2p");
       } else if (data.file) {
         const file = data.file;
-        file.forEach((chunk, i) => {
+        file.value.forEach((chunk, i) => {
           packet.file = {
             index: i,
-            length: file.length,
-            chunk: Buffer.from(chunk)
+            length: file.value.length,
+            chunk: Buffer.from(chunk),
+            filename: file.name
           };
           const bin = bson.serialize(packet);
           peer.send(bin, "p2p");
@@ -380,7 +384,8 @@ export default class Kademlia {
             if (packet.file.index === packet.file.length - 1) {
               const payload: p2pMessageEvent = {
                 nodeId: packet.sender,
-                file: this.p2pMsgBuffer[packet.sender]
+                file: this.p2pMsgBuffer[packet.sender],
+                filename: packet.file.filename
               };
               excuteEvent(this.events.p2p, payload);
             }

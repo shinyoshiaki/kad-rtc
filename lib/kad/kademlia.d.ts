@@ -87,7 +87,10 @@ export default class Kademlia {
     answer(target: string, sdp: string, proxy: string): Promise<any>;
     send(target: string, data: {
         text?: string;
-        file?: ArrayBuffer[];
+        file?: {
+            name: string;
+            value: ArrayBuffer[];
+        };
     }): Promise<any>;
     private onCommand;
     private onRequest;
