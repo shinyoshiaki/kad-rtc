@@ -47,7 +47,7 @@ export default class Kademlia {
   onStore: { [key: string]: (v: any) => void } = {};
   onFindValue: { [key: string]: (v: any) => void } = {};
   onFindNode: { [key: string]: (v: any) => void } = {};
-  onP2P: { [key: string]: (nodeId: string, data: string) => void } = {};
+  onP2P: { [key: string]: (payload: p2pMessageEvent) => void } = {};
   events = {
     store: this.onStore,
     findvalue: this.onFindValue,
