@@ -82,7 +82,10 @@ export default class Kademlia {
     private maintain;
     offer(target: string, proxy?: null): Promise<any>;
     answer(target: string, sdp: string, proxy: string): Promise<any>;
-    send(target: string, data: any): Promise<any>;
+    send(target: string, data: {
+        text?: string;
+        file?: [];
+    }): Promise<any>;
     private onCommand;
     private onRequest;
 }

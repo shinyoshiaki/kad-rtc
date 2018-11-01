@@ -18,7 +18,7 @@ export default {
 };
 
 export function networkFormat(nodeId: string, type: string, data: any): Buffer {
-  let packet = {
+  let packet: network = {
     layer: "networkLayer",
     type: type,
     nodeId: nodeId,

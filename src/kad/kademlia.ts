@@ -303,18 +303,38 @@ export default class Kademlia {
     });
   }
 
-  send(target: string, data: any) {
+  send(target: string, data: { text?: string; file?: [] }) {
+    const send = (peer: WebRTC) => {
+      const bson = new BSON();
+      const packet: p2pMessage = {
+        sender: this.nodeId,
+        target
+      };
+      if (data.text) {
+        packet.text = data.text;
+        const bin = bson.serialize(packet);
+        peer.send(bin, "p2p");
+      } else if (data.file) {
+        const file = data.file;
+        file.forEach((chunk, i) => {
+          packet.file = { index: i, length: file.length, chunk };
+          const bin = bson.serialize(packet);
+          peer.send(bin, "p2p");
+        });
+      }
+    };
+
     return new Promise<any>(async (resolve, reject) => {
       const peer = this.f.getPeerFromnodeId(target);
       if (peer) {
-        peer.send(networkFormat(this.nodeId, def.SEND, data), "kad");
+        send(peer);
         resolve(true);
       } else {
         const close = this.f.getCloseEstPeer(target);
         if (!close) return;
         const result = await this.findNode(target, close).catch(console.log);
         if (!result) return;
-        result.send(data, "p2p");
+        send(result);
         resolve(true);
       }
       await new Promise(r => setTimeout(r, 10 * 1000));
@@ -325,23 +345,26 @@ export default class Kademlia {
   private onCommand(message: message) {
     switch (message.label) {
       case "kad":
-        const buffer: Buffer = Buffer.from(message.data);
-        try {
-          const networkLayer: network = bson.deserialize(buffer);
-          console.log("oncommand kad", { message }, { networkLayer });
-          if (!JSON.stringify(this.dataList).includes(networkLayer.hash)) {
-            this.dataList.push(networkLayer.hash);
-            this.onRequest(networkLayer);
+        {
+          const buffer: Buffer = Buffer.from(message.data);
+          try {
+            const networkLayer: network = bson.deserialize(buffer);
+            console.log("oncommand kad", { message }, { networkLayer });
+            if (!JSON.stringify(this.dataList).includes(networkLayer.hash)) {
+              this.dataList.push(networkLayer.hash);
+              this.onRequest(networkLayer);
+            }
+          } catch (error) {
+            console.log(error);
           }
-        } catch (error) {
-          console.log(error);
         }
         break;
       case "p2p":
-        excuteEvent(this.events.p2p, {
-          nodeId: message.nodeId,
-          data: message.data
-        });
+        {
+          const buffer: Buffer = Buffer.from(message.data);
+          const packet: p2pMessage = bson.deserialize(buffer);
+          excuteEvent(this.events.p2p, packet);
+        }
         break;
     }
   }

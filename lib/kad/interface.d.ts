@@ -1,4 +1,3 @@
-/// <reference types="node" />
 interface Req {
     nodeId: string;
     data: any;
@@ -60,6 +59,16 @@ interface network {
     type: string;
     nodeId: string;
     data: any;
-    date: Buffer;
+    date: string;
     hash: any;
+}
+interface p2pMessage {
+    sender: string;
+    target: string;
+    file?: {
+        index: number;
+        length: number;
+        chunk: any;
+    };
+    text?: string;
 }
