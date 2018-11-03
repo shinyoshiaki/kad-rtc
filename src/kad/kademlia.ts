@@ -304,11 +304,11 @@ export default class Kademlia {
     });
   }
 
-  send(
+  async send(
     target: string,
     data: { text?: string; file?: { name: string; value: ArrayBuffer[] } }
   ) {
-    const send = (peer: WebRTC) => {
+    const send = async (peer: WebRTC) => {
       const bson = new BSON();
       const packet: p2pMessage = {
         sender: this.nodeId,
@@ -320,7 +320,9 @@ export default class Kademlia {
         peer.send(bin, "p2p");
       } else if (data.file) {
         const file = data.file;
-        file.value.forEach((chunk, i) => {
+
+        for (let i = 0; i < file.value.length; i++) {
+          const chunk = file.value[i];
           packet.file = {
             index: i,
             length: file.value.length,
@@ -329,21 +331,22 @@ export default class Kademlia {
           };
           const bin = bson.serialize(packet);
           peer.send(bin, "p2p");
-        });
+          await new Promise(r => setTimeout(r, 10));
+        }
       }
     };
 
     return new Promise<any>(async (resolve, reject) => {
       const peer = this.f.getPeerFromnodeId(target);
       if (peer) {
-        send(peer);
+        await send(peer);
         resolve(true);
       } else {
         const close = this.f.getCloseEstPeer(target);
         if (!close) return;
         const result = await this.findNode(target, close).catch(console.log);
         if (!result) return;
-        send(result);
+        await send(result);
         resolve(true);
       }
       await new Promise(r => setTimeout(r, 10 * 1000));
