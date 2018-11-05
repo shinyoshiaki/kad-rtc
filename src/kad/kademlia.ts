@@ -6,6 +6,8 @@ import def, { networkFormat } from "./KConst";
 import { distance } from "kad-distance";
 import { message } from "webrtc4me/lib/interface";
 import { BSON } from "bson";
+import Cypher from "../lib/cypher";
+import sha1 from "sha1";
 
 const bson = new BSON();
 export function excuteEvent(ev: any, v?: any) {
@@ -25,6 +27,7 @@ export default class Kademlia {
   keyValueList: { [key: string]: any } = {};
   ref: { [key: string]: WebRTC } = {};
   buffer: { [key: string]: Array<any> } = {};
+  p2pMsgBuffer: { [key: string]: any[] } = {};
   state = {
     isFirstConnect: true,
     isOffer: false,
@@ -44,17 +47,21 @@ export default class Kademlia {
   onStore: { [key: string]: (v: any) => void } = {};
   onFindValue: { [key: string]: (v: any) => void } = {};
   onFindNode: { [key: string]: (v: any) => void } = {};
+  onP2P: { [key: string]: (payload: p2pMessageEvent) => void } = {};
   events = {
     store: this.onStore,
     findvalue: this.onFindValue,
-    findnode: this.onFindNode
+    findnode: this.onFindNode,
+    p2p: this.onP2P
   };
+  cypher: Cypher;
 
-  constructor(_nodeId: string, opt?: { kLength?: number }) {
-    console.log("start kad", _nodeId);
+  constructor(opt?: { pubkey?: string; secKey?: string; kLength?: number }) {
     this.k = 20;
-    if (opt) if (opt.kLength) this.k = opt.kLength;
-    this.nodeId = _nodeId;
+    if (opt && opt.kLength) this.k = opt.kLength;
+    if (opt) this.cypher = new Cypher(opt.secKey, opt.pubkey);
+    else this.cypher = new Cypher();
+    this.nodeId = sha1(this.cypher.pubKey).toString();
 
     this.kbuckets = new Array(160);
     for (let i = 0; i < 160; i++) {
@@ -62,48 +69,76 @@ export default class Kademlia {
       this.kbuckets[i] = kbucket;
     }
 
-    this.f = new Helper(this.k, this.kbuckets);
+    this.f = new Helper(this.k, this.kbuckets, this.nodeId);
     this.responder = new KResponder(this);
   }
 
-  store(sender: string, key: string, value: any) {
-    //自分に一番近いピアを取得
-    const peer = this.f.getCloseEstPeer(key);
+  store(sender: string, key: string, value: any, opt?: { excludeId?: string }) {
+    const peer = this.f.getCloseEstPeer(key, opt);
     if (!peer) return;
-    console.log(def.STORE, "next", peer.nodeId, "target", key);
-    const sendData: StoreFormat = { sender, key, value };
+    const hash = sha1(JSON.stringify(value)).toString();
+    const sendData: StoreFormat = {
+      sender,
+      key,
+      value,
+      pubKey: this.cypher.pubKey,
+      hash,
+      sign: this.cypher.encrypt(hash)
+    };
     const network = networkFormat(this.nodeId, def.STORE, sendData);
+
+    console.log(def.STORE, "next", peer.nodeId, "target", key);
     peer.send(network, "kad");
-    console.log("store done", { network });
-    this.keyValueList[key] = value;
+    //no sdp
+    if (!value.sdp) this.keyValueList[key] = value;
   }
 
-  storeChunks(sender: string, key: string, chunks: ArrayBuffer[]) {
-    const peer = this.f.getCloseEstPeer(key);
+  storeChunks(
+    sender: string,
+    key: string,
+    chunks: ArrayBuffer[],
+    opt?: { excludeId?: string }
+  ) {
+    // const peers = this.f.getClosePeers(key, opt);
+    const peer = this.f.getCloseEstPeer(key, opt);
     if (!peer) return;
+    console.log("store chunks", { chunks });
     chunks.forEach((chunk, i) => {
+      const hash = sha1(Buffer.from(chunk)).toString();
       const sendData: StoreChunks = {
         sender: this.nodeId,
         key,
-        value: chunk,
+        value: Buffer.from(chunk),
         index: i,
+        pubKey: this.cypher.pubKey,
+        hash,
+        sign: this.cypher.encrypt(hash),
         size: chunks.length
       };
       const network = networkFormat(sender, def.STORE_CHUNKS, sendData);
+
+      console.log(def.STORE, "next", peer.nodeId, "target", key);
       peer.send(network, "kad");
-      this.keyValueList[key] = chunks;
     });
+    //レプリケーション
+    this.keyValueList[key] = { chunks };
   }
 
   findNode(targetId: string, peer: WebRTC) {
-    console.log("findnode", targetId);
-    this.state.findNode = targetId;
-    const sendData = { targetKey: targetId };
-    //送る
-    peer.send(networkFormat(this.nodeId, def.FINDNODE, sendData), "kad");
+    return new Promise<WebRTC>(async (resolve, reject) => {
+      console.log("findnode", targetId);
+      this.state.findNode = targetId;
+      const sendData = { targetKey: targetId };
+      //送る
+      peer.send(networkFormat(this.nodeId, def.FINDNODE, sendData), "kad");
 
-    this.callback._onFindNode((nodeId: string) => {
-      excuteEvent(this.events.findnode, nodeId);
+      this.callback._onFindNode((nodeId: string) => {
+        excuteEvent(this.events.findnode, nodeId);
+        resolve(this.f.getPeerFromnodeId(nodeId));
+      });
+
+      await new Promise(r => setTimeout(r, 10 * 1000));
+      reject("timeout findnode");
     });
   }
 
@@ -175,10 +210,10 @@ export default class Kademlia {
     }
   }
 
-  private findNewPeer(peer: WebRTC) {
+  private async findNewPeer(peer: WebRTC) {
     if (this.f.getKbucketNum() < this.k) {
       //自身のノードIDをkeyとしてFIND_NODE
-      this.findNode(this.nodeId, peer);
+      await this.findNode(this.nodeId, peer).catch(console.log);
     } else {
       console.log("kbucket ready", this.f.getKbucketNum());
     }
@@ -207,7 +242,7 @@ export default class Kademlia {
   }
 
   offer(target: string, proxy = null) {
-    return new Promise((resolve, reject) => {
+    return new Promise<any>(async (resolve, reject) => {
       const r = this.ref;
       const peer = (r[target] = new WebRTC());
       peer.makeOffer();
@@ -235,7 +270,7 @@ export default class Kademlia {
   }
 
   answer(target: string, sdp: string, proxy: string) {
-    return new Promise((resolve, reject) => {
+    return new Promise<any>(async (resolve, reject) => {
       const r = this.ref;
       const peer = (r[target] = new WebRTC());
       peer.makeAnswer(sdp);
@@ -247,11 +282,14 @@ export default class Kademlia {
 
       peer.signal = sdp => {
         const _ = this.f.getPeerFromnodeId(proxy);
-        //来たルートに送り返す
+        const hash = sha1(Math.random().toString()).toString();
         const sendData: StoreFormat = {
           sender: this.nodeId,
           key: target,
-          value: { sdp }
+          value: { sdp },
+          pubKey: this.cypher.pubKey,
+          hash,
+          sign: this.cypher.encrypt(hash)
         };
         if (_) _.send(networkFormat(this.nodeId, def.STORE, sendData), "kad");
       };
@@ -266,25 +304,95 @@ export default class Kademlia {
     });
   }
 
-  send(target: string, data: any) {
-    const _ = this.f.getPeerFromnodeId(target);
-    if (_) _.send(networkFormat(this.nodeId, def.SEND, data), "kad");
+  async send(
+    target: string,
+    data: { text?: string; file?: { name: string; value: ArrayBuffer[] } }
+  ) {
+    const send = async (peer: WebRTC) => {
+      const bson = new BSON();
+      const packet: p2pMessage = {
+        sender: this.nodeId,
+        target
+      };
+      if (data.text) {
+        packet.text = data.text;
+        const bin = bson.serialize(packet);
+        peer.send(bin, "p2p");
+      } else if (data.file) {
+        const file = data.file;
+
+        for (let i = 0; i < file.value.length; i++) {
+          const chunk = file.value[i];
+          packet.file = {
+            index: i,
+            length: file.value.length,
+            chunk: Buffer.from(chunk),
+            filename: file.name
+          };
+          const bin = bson.serialize(packet);
+          peer.send(bin, "p2p");
+          await new Promise(r => setTimeout(r, 10));
+        }
+      }
+    };
+
+    return new Promise<any>(async (resolve, reject) => {
+      const peer = this.f.getPeerFromnodeId(target);
+      if (peer) {
+        await send(peer);
+        resolve(true);
+      } else {
+        const close = this.f.getCloseEstPeer(target);
+        if (!close) return;
+        const result = await this.findNode(target, close).catch(console.log);
+        if (!result) return;
+        await send(result);
+        resolve(true);
+      }
+      await new Promise(r => setTimeout(r, 10 * 1000));
+      reject("send timeout");
+    });
   }
 
   private onCommand(message: message) {
     switch (message.label) {
       case "kad":
-        const buffer: Buffer = Buffer.from(message.data);
-        console.log({ buffer });
-        try {
-          console.log("oncommand kad", { message });
-          const networkLayer: network = bson.deserialize(buffer);
-          if (!JSON.stringify(this.dataList).includes(networkLayer.hash)) {
-            this.dataList.push(networkLayer.hash);
-            this.onRequest(networkLayer);
+        {
+          const buffer: Buffer = Buffer.from(message.data);
+          try {
+            const networkLayer: network = bson.deserialize(buffer);
+            console.log("oncommand kad", { message }, { networkLayer });
+            if (!JSON.stringify(this.dataList).includes(networkLayer.hash)) {
+              this.dataList.push(networkLayer.hash);
+              this.onRequest(networkLayer);
+            }
+          } catch (error) {
+            console.log(error);
           }
-        } catch (error) {
-          console.log(error);
+        }
+        break;
+      case "p2p":
+        {
+          const buffer: Buffer = Buffer.from(message.data);
+          const packet: p2pMessage = bson.deserialize(buffer);
+          if (packet.text) {
+            const payload: p2pMessageEvent = {
+              nodeId: packet.sender,
+              text: packet.text
+            };
+            excuteEvent(this.events.p2p, payload);
+          } else if (packet.file) {
+            if (packet.file.index === 0) this.p2pMsgBuffer[packet.sender] = [];
+            this.p2pMsgBuffer[packet.sender].push(packet.file.chunk.buffer);
+            if (packet.file.index === packet.file.length - 1) {
+              const payload: p2pMessageEvent = {
+                nodeId: packet.sender,
+                file: this.p2pMsgBuffer[packet.sender],
+                filename: packet.file.filename
+              };
+              excuteEvent(this.events.p2p, payload);
+            }
+          }
         }
         break;
     }

@@ -4,9 +4,11 @@ import { distance } from "kad-distance";
 export default class KUtil {
   kbuckets: Array<Array<WebRTC>>;
   k: number;
-  constructor(k: number, kbuckets: Array<Array<WebRTC>>) {
+  nodeId: string;
+  constructor(k: number, kbuckets: Array<Array<WebRTC>>, nodeId: string) {
     this.k = k;
     this.kbuckets = kbuckets;
+    this.nodeId = nodeId;
   }
 
   getAllPeers(): Array<WebRTC> {
@@ -68,13 +70,22 @@ export default class KUtil {
     });
   }
 
-  getCloseEstPeer(_key: string, opt = { excludeId: null }): WebRTC | undefined {
+  getCloseEstPeer(
+    _key: string,
+    opt?: { excludeId?: string }
+  ): WebRTC | undefined {
     let mini = 160;
     let closePeer;
     this.kbuckets.forEach(kbucket => {
       kbucket.forEach(peer => {
         console.log("distance", peer.nodeId, distance(_key, peer.nodeId));
-        if (opt.excludeId === null || opt.excludeId !== peer.nodeId) {
+        if (peer.nodeId === this.nodeId) {
+          console.log("getcloseestpeer only me", this.nodeId);
+        }
+        if (
+          !(opt && peer.nodeId === opt.excludeId) &&
+          peer.nodeId !== this.nodeId
+        ) {
           if (distance(_key, peer.nodeId) < mini) {
             mini = distance(_key, peer.nodeId);
             closePeer = peer;
@@ -156,10 +167,10 @@ export default class KUtil {
     return this.getAllPeerIds().includes(nodeId);
   }
 
-  getClosePeers(targetId: string) {
+  getClosePeers(targetId: string, opt?: { excludeId?: string }) {
     const list: Array<WebRTC> = [];
     this.getAllPeers().forEach(peer => {
-      if (peer.nodeId !== targetId) {
+      if (!(opt && peer.nodeId === opt.excludeId)) {
         if (list.length < this.k) {
           list.push(peer);
         } else {

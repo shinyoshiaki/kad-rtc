@@ -2,7 +2,6 @@
 import events from "events";
 import Kademlia from "../kad/kademlia";
 export default class PortalNode {
-    nodeId: string;
     ev: events.EventEmitter;
     io: any;
     kad: Kademlia;

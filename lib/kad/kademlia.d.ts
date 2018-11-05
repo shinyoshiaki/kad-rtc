@@ -1,6 +1,7 @@
 import WebRTC from "webrtc4me";
 import Helper from "./kUtil";
 import KResponder from "./kResponder";
+import Cypher from "../lib/cypher";
 export declare function excuteEvent(ev: any, v?: any): void;
 export default class Kademlia {
     nodeId: string;
@@ -17,6 +18,9 @@ export default class Kademlia {
     };
     buffer: {
         [key: string]: Array<any>;
+    };
+    p2pMsgBuffer: {
+        [key: string]: any[];
     };
     state: {
         isFirstConnect: boolean;
@@ -41,6 +45,9 @@ export default class Kademlia {
     onFindNode: {
         [key: string]: (v: any) => void;
     };
+    onP2P: {
+        [key: string]: (payload: p2pMessageEvent) => void;
+    };
     events: {
         store: {
             [key: string]: (v: any) => void;
@@ -51,13 +58,23 @@ export default class Kademlia {
         findnode: {
             [key: string]: (v: any) => void;
         };
+        p2p: {
+            [key: string]: (payload: p2pMessageEvent) => void;
+        };
     };
-    constructor(_nodeId: string, opt?: {
+    cypher: Cypher;
+    constructor(opt?: {
+        pubkey?: string;
+        secKey?: string;
         kLength?: number;
     });
-    store(sender: string, key: string, value: any): void;
-    storeChunks(sender: string, key: string, chunks: ArrayBuffer[]): void;
-    findNode(targetId: string, peer: WebRTC): void;
+    store(sender: string, key: string, value: any, opt?: {
+        excludeId?: string;
+    }): void;
+    storeChunks(sender: string, key: string, chunks: ArrayBuffer[], opt?: {
+        excludeId?: string;
+    }): void;
+    findNode(targetId: string, peer: WebRTC): Promise<WebRTC>;
     findValue(key: string, opt?: {
         ownerId?: string;
     }): Promise<any>;
@@ -66,9 +83,15 @@ export default class Kademlia {
     addknode(peer: WebRTC): void;
     private findNewPeer;
     private maintain;
-    offer(target: string, proxy?: null): Promise<{}>;
-    answer(target: string, sdp: string, proxy: string): Promise<{}>;
-    send(target: string, data: any): void;
+    offer(target: string, proxy?: null): Promise<any>;
+    answer(target: string, sdp: string, proxy: string): Promise<any>;
+    send(target: string, data: {
+        text?: string;
+        file?: {
+            name: string;
+            value: ArrayBuffer[];
+        };
+    }): Promise<any>;
     private onCommand;
     private onRequest;
 }

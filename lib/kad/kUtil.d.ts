@@ -2,7 +2,8 @@ import WebRTC from "webrtc4me";
 export default class KUtil {
     kbuckets: Array<Array<WebRTC>>;
     k: number;
-    constructor(k: number, kbuckets: Array<Array<WebRTC>>);
+    nodeId: string;
+    constructor(k: number, kbuckets: Array<Array<WebRTC>>, nodeId: string);
     getAllPeers(): Array<WebRTC>;
     getPeer(targetId: string): WebRTC | undefined;
     getCloseEstPeersList(key: string, opt?: {
@@ -14,7 +15,7 @@ export default class KUtil {
     }): string[];
     getPeerFromnodeId(nodeId: string): WebRTC | undefined;
     getCloseEstPeer(_key: string, opt?: {
-        excludeId: null;
+        excludeId?: string;
     }): WebRTC | undefined;
     getCloseEstDist(key: string): number;
     getCloseIds(targetId: string): string[];
@@ -24,5 +25,7 @@ export default class KUtil {
     cleanDiscon(): void;
     getKbucketNum(): number;
     isNodeExist(nodeId: string): boolean;
-    getClosePeers(targetId: string): WebRTC[];
+    getClosePeers(targetId: string, opt?: {
+        excludeId?: string;
+    }): WebRTC[];
 }

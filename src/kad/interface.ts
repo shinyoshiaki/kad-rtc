@@ -6,6 +6,9 @@ interface StoreFormat {
   sender: string;
   key: string;
   value: any;
+  pubKey: string;
+  hash: string;
+  sign: string;
   persist?: boolean;
 }
 
@@ -14,6 +17,9 @@ interface StoreChunks {
   key: string;
   value: any;
   index: number;
+  pubKey: string;
+  hash: string;
+  sign: string;
   size: number;
 }
 
@@ -60,6 +66,20 @@ interface network {
   type: string;
   nodeId: string;
   data: any;
-  date: Buffer;
+  date: string;
   hash: any;
+}
+
+interface p2pMessage {
+  sender: string;
+  target: string;
+  file?: { index: number; length: number; chunk: any; filename: string };
+  text?: string;
+}
+
+interface p2pMessageEvent {
+  nodeId: string;
+  file?: any;
+  filename?: string;
+  text?: string;
 }

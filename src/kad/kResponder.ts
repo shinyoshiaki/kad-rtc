@@ -2,9 +2,7 @@ import { networkFormat } from "./KConst";
 import def from "./KConst";
 import Kademlia, { excuteEvent } from "./kademlia";
 import { distance } from "kad-distance";
-import { BSON } from "bson";
 
-const bson = new BSON();
 const responder: any = {};
 
 export default class KResponder {
@@ -14,10 +12,16 @@ export default class KResponder {
     const k = kad;
     this.playOfferQueue();
 
-    responder[def.STORE] = async (network: any) => {
+    responder[def.STORE] = async (network: network) => {
       console.log("on store", network.nodeId);
 
       const data: StoreFormat = network.data;
+
+      if (!(k.cypher.decrypt(data.sign, data.pubKey) === data.hash)) {
+        console.log("invalid store");
+        return;
+      }
+
       //自分と送信元の距離
       const mine = distance(k.nodeId, data.key);
       //自分のkbuckets中で送信元に一番近い距離
@@ -25,20 +29,19 @@ export default class KResponder {
       if (mine > close) {
         console.log("store transfer", "\ndata", data);
         //storeし直す
-        k.store(data.sender, data.key, data.value);
+        k.store(data.sender, data.key, data.value, {
+          excludeId: network.nodeId
+        });
       } else {
         console.log("store arrived", mine, close, "\ndata", data);
       }
-      //レプリケーション
-      k.keyValueList[data.key] = data.value;
-      excuteEvent(kad.onStore, data.value);
 
       const target = data.sender;
-
+      let isSdp = false;
       if (data.key === k.nodeId && !k.f.isNodeExist(target)) {
         if (data.value.sdp) {
           console.log("is signaling");
-
+          isSdp = true;
           if (data.value.sdp.type === "offer") {
             console.log("kad received offer", data.sender);
             await k
@@ -55,24 +58,56 @@ export default class KResponder {
           }
         }
       }
+
+      //レプリケーション
+      if (!isSdp) {
+        excuteEvent(kad.onStore, data.value);
+        k.keyValueList[data.key] = data.value;
+      }
     };
 
-    responder[def.STORE_CHUNKS] = (network: any) => {
+    responder[def.STORE_CHUNKS] = (network: network) => {
       const data: StoreChunks = network.data;
+
+      if (!(k.cypher.decrypt(data.sign, data.pubKey) === data.hash)) {
+        console.log("invalid store chunks");
+        return;
+      }
+
       if (data.index === 0) {
         this.storeChunks[data.key] = [];
       }
-      this.storeChunks[data.key].push(data.value);
+      console.log("storechunks buffer2ab", data.value.buffer);
+      this.storeChunks[data.key].push(data.value.buffer);
+
       if (data.index === data.size - 1) {
+        console.log("store chunks chunks received", this.storeChunks[data.key]);
+        //レプリケーション
         k.keyValueList[data.key] = { chunks: this.storeChunks[data.key] };
-        excuteEvent(kad.onStore, data.value);
+
+        excuteEvent(kad.onStore, { chunks: this.storeChunks[data.key] });
+
         const mine = distance(k.nodeId, data.key);
         const close = k.f.getCloseEstDist(data.key);
         if (mine > close) {
-          console.log("store transfer", "\ndata", data);
-          k.storeChunks(data.sender, data.key, this.storeChunks[data.key]);
+          console.log(
+            "store transfer",
+            "\ndata",
+            data,
+            this.storeChunks[data.key]
+          );
+          k.storeChunks(data.sender, data.key, this.storeChunks[data.key], {
+            excludeId: network.nodeId
+          });
         } else {
-          console.log("store arrived", mine, close, "\ndata", data);
+          console.log(
+            "store arrived",
+            mine,
+            close,
+            "\ndata",
+            data,
+            this.storeChunks[data.key]
+          );
         }
       }
     };
@@ -83,27 +118,33 @@ export default class KResponder {
       //ターゲットのキーを持っていたら
       if (Object.keys(k.keyValueList).includes(data.targetKey)) {
         const value = k.keyValueList[data.targetKey];
+        console.log("onfindvalue i have value", { value });
         const peer = k.f.getPeerFromnodeId(network.nodeId);
-        //キーを見つかったというメッセージを戻す
+
         if (!peer) return;
         let sendData: FindValueR;
+
         if (value.chunks) {
+          //ラージファイル
+          console.log("on findvalue send chunks");
           const chunks: any[] = value.chunks;
           chunks.forEach((chunk, i) => {
             sendData = {
               chunks: {
-                value: chunk,
+                value: Buffer.from(chunk),
                 key: data.targetKey,
                 index: i,
                 size: chunks.length
               }
             };
+            console.log("findvalue senddata", { chunk }, { sendData });
             peer.send(
               networkFormat(k.nodeId, def.FINDVALUE_R, sendData),
               "kad"
             );
           });
         } else {
+          //スモールファイル
           sendData = {
             success: { value, key: data.targetKey }
           };
@@ -128,8 +169,9 @@ export default class KResponder {
       }
     };
 
-    responder[def.FINDVALUE_R] = (network: any) => {
+    responder[def.FINDVALUE_R] = (network: network) => {
       const data: FindValueR = network.data;
+      console.log("findvalue r", { data });
       //valueを発見していれば
       if (data.success) {
         //通常ファイル
@@ -141,12 +183,20 @@ export default class KResponder {
         if (data.chunks.index === 0) {
           this.storeChunks[data.chunks.key] = [];
         }
-        this.storeChunks[data.chunks.key].push(data.chunks.value);
+        console.log(
+          "findvalue r chunks bf2ab",
+          data.chunks,
+          data.chunks.value.buffer
+        );
+        this.storeChunks[data.chunks.key].push(data.chunks.value.buffer);
         if (data.chunks.index === data.chunks.size - 1) {
+          console.log("findvalue r", this.storeChunks[data.chunks.key]);
           k.keyValueList[data.chunks.key] = {
             chunks: this.storeChunks[data.chunks.key]
           };
-          k.callback._onFindValue(this.storeChunks[data.chunks.key]);
+          k.callback._onFindValue({
+            chunks: this.storeChunks[data.chunks.key]
+          });
         }
       } else if (data.fail && data.fail.to === k.nodeId) {
         console.log(def.FINDVALUE_R, "re find", data);
@@ -211,7 +261,7 @@ export default class KResponder {
           if (!close) return;
           console.log("findnode-r keep find node", k.state.findNode);
           //再探索
-          k.findNode(k.state.findNode, close);
+          await k.findNode(k.state.findNode, close).catch(console.log);
         }
       }
     };

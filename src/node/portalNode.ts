@@ -2,7 +2,6 @@ import WebRTC from "webrtc4me";
 import http from "http";
 import socketio from "socket.io";
 import client from "socket.io-client";
-import sha1 from "sha1";
 import events from "events";
 import Kademlia from "../kad/kademlia";
 
@@ -15,14 +14,11 @@ const def = {
 let peerOffer: WebRTC;
 
 export default class PortalNode {
-  nodeId: string;
   ev: events.EventEmitter;
   io: any;
   kad: Kademlia;
 
   constructor(myPort: number, target?: { address: string; port: string }) {
-    this.nodeId = sha1(Math.random().toString()).toString();
-    console.log("nodeid", this.nodeId);
     if (target) {
       const targetUrl = "http://" + target.address + ":" + target.port;
       const socket = client.connect(targetUrl);
@@ -44,7 +40,7 @@ export default class PortalNode {
       });
     });
     this.ev = new events.EventEmitter();
-    this.kad = new Kademlia(this.nodeId, { kLength: 20 });
+    this.kad = new Kademlia({ kLength: 20 });
   }
 
   offerFirst(socket: any) {
@@ -55,7 +51,7 @@ export default class PortalNode {
     peer.signal = sdp => {
       socket.emit(def.OFFER, {
         type: def.OFFER,
-        nodeId: this.nodeId,
+        nodeId: this.kad.nodeId,
         sdp: sdp
       });
     };
@@ -80,7 +76,7 @@ export default class PortalNode {
       peer.signal = sdp => {
         this.io.sockets.sockets[socketId].emit(def.ANSWER, {
           sdp: sdp,
-          nodeId: this.nodeId
+          nodeId: this.kad.nodeId
         });
       };
 
