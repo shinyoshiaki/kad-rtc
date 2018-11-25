@@ -1,6 +1,5 @@
 import WebRTC from "webrtc4me";
 import client from "socket.io-client";
-import sha1 from "sha1";
 import Kademlia from "../kad/kademlia";
 
 const def = {

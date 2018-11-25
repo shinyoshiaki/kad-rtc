@@ -1,14 +1,15 @@
 {
   "name": "kad-rtc",
   "version": "0.0.27",
-  "license": "prop",
+  "license": "Apache-2.0",
   "scripts": {
     "type-check": "tsc --noEmit",
     "type-check:watch": "npm run type-check -- --watch",
     "build": "npm run build:types && npm run build:js",
     "build:types": "tsc --emitDeclarationOnly",
     "build:js": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
-    "start": "yarn build && node ./lib/cli/setup.js"
+    "start": "yarn build && node ./lib/cli/setup.js",
+    "test": "tsc ; ava --verbose"
   },
   "main": "lib/kad/kademlia.js",
   "files": [
@@ -29,6 +30,8 @@
     "@types/socket.io": "^1.4.38",
     "@types/socket.io-client": "^1.4.32",
     "@types/source-map-support": "^0.4.1",
+    "ava": "^0.25.0",
+    "ts-node": "^7.0.1",
     "typescript": "^3.0.3"
   },
   "dependencies": {
@@ -45,5 +48,14 @@
     "source-map-support": "^0.5.9",
     "webrtc4me": "git+https://git@github.com/shinyoshiaki/webrtc4me.git#stream",
     "wrtc": "^0.2.1"
+  },
+  "ava": {
+    "compileEnhancements": false,
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ]
   }
 }
