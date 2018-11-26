@@ -8,6 +8,7 @@ import { message } from "webrtc4me/lib/interface";
 import { BSON } from "bson";
 import Cypher from "../lib/cypher";
 import sha1 from "sha1";
+import { IEvents } from "../util";
 
 const bson = new BSON();
 export function excuteEvent(ev: any, v?: any) {
@@ -27,7 +28,7 @@ export default class Kademlia {
   keyValueList: { [key: string]: any } = {};
   ref: { [key: string]: WebRTC } = {};
   buffer: { [key: string]: Array<any> } = {};
-  p2pMsgBuffer: { [key: string]: any[] } = {};
+
   state = {
     isFirstConnect: true,
     isOffer: false,
@@ -44,15 +45,15 @@ export default class Kademlia {
     onApp: (v?: any) => {}
   };
 
-  onStore: { [key: string]: (v: any) => void } = {};
-  onFindValue: { [key: string]: (v: any) => void } = {};
-  onFindNode: { [key: string]: (v: any) => void } = {};
-  onP2P: { [key: string]: (payload: p2pMessageEvent) => void } = {};
+  onStore: IEvents = {};
+  onFindValue: IEvents = {};
+  onFindNode: IEvents = {};
+  onResponder: IEvents = {};
   events = {
     store: this.onStore,
     findvalue: this.onFindValue,
     findnode: this.onFindNode,
-    p2p: this.onP2P
+    responder: this.onResponder
   };
   cypher: Cypher;
 
@@ -304,97 +305,21 @@ export default class Kademlia {
     });
   }
 
-  async send(
-    target: string,
-    data: { text?: string; file?: { name: string; value: ArrayBuffer[] } }
-  ) {
-    const send = async (peer: WebRTC) => {
-      const bson = new BSON();
-      const packet: p2pMessage = {
-        sender: this.nodeId,
-        target
-      };
-      if (data.text) {
-        packet.text = data.text;
-        const bin = bson.serialize(packet);
-        peer.send(bin, "p2p");
-      } else if (data.file) {
-        const file = data.file;
-
-        for (let i = 0; i < file.value.length; i++) {
-          const chunk = file.value[i];
-          packet.file = {
-            index: i,
-            length: file.value.length,
-            chunk: Buffer.from(chunk),
-            filename: file.name
-          };
-          const bin = bson.serialize(packet);
-          peer.send(bin, "p2p");
-          await new Promise(r => setTimeout(r, 10));
-        }
-      }
-    };
-
-    return new Promise<any>(async (resolve, reject) => {
-      const peer = this.f.getPeerFromnodeId(target);
-      if (peer) {
-        await send(peer);
-        resolve(true);
-      } else {
-        const close = this.f.getCloseEstPeer(target);
-        if (!close) return;
-        const result = await this.findNode(target, close).catch(console.log);
-        if (!result) return;
-        await send(result);
-        resolve(true);
-      }
-      await new Promise(r => setTimeout(r, 10 * 1000));
-      reject("send timeout");
-    });
-  }
-
   private onCommand(message: message) {
-    switch (message.label) {
-      case "kad":
-        {
-          const buffer: Buffer = Buffer.from(message.data);
-          try {
-            const networkLayer: network = bson.deserialize(buffer);
-            console.log("oncommand kad", { message }, { networkLayer });
-            if (!JSON.stringify(this.dataList).includes(networkLayer.hash)) {
-              this.dataList.push(networkLayer.hash);
-              this.onRequest(networkLayer);
-            }
-          } catch (error) {
-            console.log(error);
-          }
+    if (message.label === "kad") {
+      const buffer: Buffer = Buffer.from(message.data);
+      try {
+        const networkLayer: network = bson.deserialize(buffer);
+        console.log("oncommand kad", { message }, { networkLayer });
+        if (!JSON.stringify(this.dataList).includes(networkLayer.hash)) {
+          this.dataList.push(networkLayer.hash);
+          this.onRequest(networkLayer);
         }
-        break;
-      case "p2p":
-        {
-          const buffer: Buffer = Buffer.from(message.data);
-          const packet: p2pMessage = bson.deserialize(buffer);
-          if (packet.text) {
-            const payload: p2pMessageEvent = {
-              nodeId: packet.sender,
-              text: packet.text
-            };
-            excuteEvent(this.events.p2p, payload);
-          } else if (packet.file) {
-            if (packet.file.index === 0) this.p2pMsgBuffer[packet.sender] = [];
-            this.p2pMsgBuffer[packet.sender].push(packet.file.chunk.buffer);
-            if (packet.file.index === packet.file.length - 1) {
-              const payload: p2pMessageEvent = {
-                nodeId: packet.sender,
-                file: this.p2pMsgBuffer[packet.sender],
-                filename: packet.file.filename
-              };
-              excuteEvent(this.events.p2p, payload);
-            }
-          }
-        }
-        break;
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      excuteEvent(this.events.responder, message);
     }
   }
 

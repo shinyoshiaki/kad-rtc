@@ -2,6 +2,7 @@ import WebRTC from "webrtc4me";
 import Helper from "./kUtil";
 import KResponder from "./kResponder";
 import Cypher from "../lib/cypher";
+import { IEvents } from "../util";
 export declare function excuteEvent(ev: any, v?: any): void;
 export default class Kademlia {
     nodeId: string;
@@ -19,9 +20,6 @@ export default class Kademlia {
     buffer: {
         [key: string]: Array<any>;
     };
-    p2pMsgBuffer: {
-        [key: string]: any[];
-    };
     state: {
         isFirstConnect: boolean;
         isOffer: boolean;
@@ -36,31 +34,15 @@ export default class Kademlia {
         _onFindNode: (v?: any) => void;
         onApp: (v?: any) => void;
     };
-    onStore: {
-        [key: string]: (v: any) => void;
-    };
-    onFindValue: {
-        [key: string]: (v: any) => void;
-    };
-    onFindNode: {
-        [key: string]: (v: any) => void;
-    };
-    onP2P: {
-        [key: string]: (payload: p2pMessageEvent) => void;
-    };
+    onStore: IEvents;
+    onFindValue: IEvents;
+    onFindNode: IEvents;
+    onResponder: IEvents;
     events: {
-        store: {
-            [key: string]: (v: any) => void;
-        };
-        findvalue: {
-            [key: string]: (v: any) => void;
-        };
-        findnode: {
-            [key: string]: (v: any) => void;
-        };
-        p2p: {
-            [key: string]: (payload: p2pMessageEvent) => void;
-        };
+        store: IEvents;
+        findvalue: IEvents;
+        findnode: IEvents;
+        responder: IEvents;
     };
     cypher: Cypher;
     constructor(opt?: {
@@ -85,13 +67,6 @@ export default class Kademlia {
     private maintain;
     offer(target: string, proxy?: null): Promise<any>;
     answer(target: string, sdp: string, proxy: string): Promise<any>;
-    send(target: string, data: {
-        text?: string;
-        file?: {
-            name: string;
-            value: ArrayBuffer[];
-        };
-    }): Promise<any>;
     private onCommand;
     private onRequest;
 }
