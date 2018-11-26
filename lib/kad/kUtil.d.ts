@@ -19,7 +19,7 @@ export default class KUtil {
     }): WebRTC | undefined;
     getCloseEstDist(key: string): number;
     getCloseIds(targetId: string): string[];
-    getAllPeerIds(): (string | undefined)[];
+    getAllPeerIds(): string[] | undefined;
     isPeerExist(id: string): boolean;
     getPeerNum(): number;
     cleanDiscon(): void;

@@ -123,12 +123,15 @@ export default class KUtil {
     return list;
   }
 
-  getAllPeerIds() {
-    return this.getAllPeers().map(peer => {
-      if (peer) {
+  getAllPeerIds(): string[] | undefined {
+    const arr = this.getAllPeers();
+    if (arr.length > 0) {
+      return arr.map(peer => {
         return peer.nodeId;
-      }
-    });
+      });
+    } else {
+      return undefined;
+    }
   }
 
   isPeerExist(id: string): boolean {
@@ -163,8 +166,10 @@ export default class KUtil {
     return num;
   }
 
-  isNodeExist(nodeId: string) {
-    return this.getAllPeerIds().includes(nodeId);
+  isNodeExist(nodeId: string): boolean {
+    const arr = this.getAllPeerIds();
+    if (!arr) return false;
+    return arr.includes(nodeId);
   }
 
   getClosePeers(targetId: string, opt?: { excludeId?: string }) {
