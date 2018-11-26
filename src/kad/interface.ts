@@ -1,8 +1,9 @@
-interface Req {
+export interface Req {
   nodeId: string;
   data: any;
 }
-interface StoreFormat {
+
+export interface StoreFormat {
   sender: string;
   key: string;
   value: any;
@@ -12,7 +13,7 @@ interface StoreFormat {
   persist?: boolean;
 }
 
-interface StoreChunks {
+export interface StoreChunks {
   sender: string;
   key: string;
   value: any;
@@ -23,19 +24,19 @@ interface StoreChunks {
   size: number;
 }
 
-interface Findnode {
+export interface Findnode {
   targetKey: string;
 }
 
-interface FindnodeR {
+export interface FindnodeR {
   closeIds: Array<string>;
 }
 
-interface FindValue {
+export interface FindValue {
   targetKey: string;
 }
 
-interface FindValueR {
+export interface FindValueR {
   success?: {
     value: string;
     key: string;
@@ -54,14 +55,14 @@ interface FindValueR {
   };
 }
 
-interface StoreSignaling {
+export interface StoreSignaling {
   type: string;
   target: string;
   sdp: any;
   proxy: any;
 }
 
-interface network {
+export interface network {
   layer: "networkLayer";
   type: string;
   nodeId: string;
@@ -70,14 +71,14 @@ interface network {
   hash: any;
 }
 
-interface p2pMessage {
+export interface p2pMessage {
   sender: string;
   target: string;
   file?: { index: number; length: number; chunk: any; filename: string };
   text?: string;
 }
 
-interface p2pMessageEvent {
+export interface p2pMessageEvent {
   nodeId: string;
   file?: any;
   filename?: string;

@@ -9,6 +9,7 @@ import { BSON } from "bson";
 import Cypher from "../lib/cypher";
 import sha1 from "sha1";
 import { IEvents } from "../util";
+import { StoreFormat, StoreChunks, FindValue, network } from "./interface";
 
 const bson = new BSON();
 export function excuteEvent(ev: any, v?: any) {

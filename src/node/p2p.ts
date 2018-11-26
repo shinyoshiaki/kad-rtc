@@ -3,6 +3,7 @@ import WebRTC from "webrtc4me";
 import { BSON } from "bson";
 import { message } from "webrtc4me/lib/interface";
 import { excuteEvent, IEvents } from "../util";
+import { p2pMessage, p2pMessageEvent } from "../kad/interface";
 
 const bson = new BSON();
 

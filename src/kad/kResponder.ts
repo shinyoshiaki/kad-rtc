@@ -2,6 +2,7 @@ import { networkFormat } from "./KConst";
 import def from "./KConst";
 import Kademlia, { excuteEvent } from "./kademlia";
 import { distance } from "kad-distance";
+import { network, StoreFormat, StoreChunks, FindValueR } from "./interface";
 
 const responder: any = {};
 
@@ -122,7 +123,7 @@ export default class KResponder {
         const peer = k.f.getPeerFromnodeId(network.nodeId);
 
         if (!peer) return;
-        let sendData: FindValueR;
+        let sendData:FindValueR;
 
         if (value.chunks) {
           //ラージファイル

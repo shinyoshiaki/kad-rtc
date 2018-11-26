@@ -1,5 +1,6 @@
 import sha1 from "sha1";
 import { BSON } from "bson";
+import { network } from "./interface";
 
 export default {
   STORE: "STORE",
