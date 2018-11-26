@@ -1,6 +1,6 @@
 {
   "name": "kad-rtc",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "Apache-2.0",
   "scripts": {
     "type-check": "tsc --noEmit",
@@ -37,8 +37,7 @@
   "dependencies": {
     "bson": "^3.0.2",
     "buffer": "^5.2.1",
-    "buffer-to-arraybuffer": "^0.0.5",
-    "events": "^3.0.0",
+    "buffer-to-arraybuffer": "^0.0.5",    
     "inquirer": "^6.2.0",
     "kad-distance": "git+https://git@github.com/shinyoshiaki/kad-distance.git",
     "keypair": "^1.0.1",

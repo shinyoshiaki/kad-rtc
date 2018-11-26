@@ -1,9 +1,6 @@
-/// <reference types="node" />
 import WebRTC from "webrtc4me";
-import events from "events";
 import Kademlia from "../kad/kademlia";
 export default class PortalNode {
-    ev: events.EventEmitter;
     io: any;
     kad: Kademlia;
     peerOffer: WebRTC | undefined;

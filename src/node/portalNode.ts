@@ -2,7 +2,6 @@ import WebRTC from "webrtc4me";
 import http from "http";
 import socketio from "socket.io";
 import client from "socket.io-client";
-import events from "events";
 import Kademlia from "../kad/kademlia";
 
 enum def {
@@ -12,7 +11,6 @@ enum def {
 }
 
 export default class PortalNode {
-  ev: events.EventEmitter;
   io: any;
   kad: Kademlia;
   peerOffer: WebRTC | undefined;
@@ -38,7 +36,6 @@ export default class PortalNode {
         this.answerFirst(data, socket.id);
       });
     });
-    this.ev = new events.EventEmitter();
     this.kad = new Kademlia({ kLength: 20 });
   }
 
