@@ -5,18 +5,17 @@ import client from "socket.io-client";
 import events from "events";
 import Kademlia from "../kad/kademlia";
 
-const def = {
-  OFFER: "OFFER",
-  ANSWER: "ANSWER",
-  ONCOMMAND: "ONCOMMAND"
-};
-
-let peerOffer: WebRTC;
+enum def {
+  OFFER = "OFFER",
+  ANSWER = "ANSWER",
+  ONCOMMAND = "ONCOMMAND"
+}
 
 export default class PortalNode {
   ev: events.EventEmitter;
   io: any;
   kad: Kademlia;
+  peerOffer: WebRTC | undefined;
 
   constructor(myPort: number, target?: { address: string; port: string }) {
     if (target) {
@@ -26,7 +25,7 @@ export default class PortalNode {
         this.offerFirst(socket);
       });
       socket.on(def.ANSWER, (data: any) => {
-        peerOffer.setAnswer(data.sdp, data.nodeId);
+        if (this.peerOffer) this.peerOffer.setAnswer(data.sdp, data.nodeId);
       });
     }
 
@@ -60,7 +59,7 @@ export default class PortalNode {
       console.log("first offer connected", peer.nodeId);
       this.kad.connect(peer);
     };
-    peerOffer = peer;
+    this.peerOffer = peer;
   }
 
   answerFirst(data: any, socketId: string) {

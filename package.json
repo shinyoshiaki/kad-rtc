@@ -1,6 +1,6 @@
 {
   "name": "kad-rtc",
-  "version": "0.0.28",
+  "version": "0.0.29",
   "license": "Apache-2.0",
   "scripts": {
     "type-check": "tsc --noEmit",

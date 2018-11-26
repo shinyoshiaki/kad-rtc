@@ -1,3 +1,3 @@
 import Node from "../node/node";
 
-new Node("localhost", "20000");
+new Node({ address: "localhost", port: "20000" });
