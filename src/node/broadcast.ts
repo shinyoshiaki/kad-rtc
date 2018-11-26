@@ -5,11 +5,14 @@ import { IEvents, excuteEvent } from "../util";
 
 export default class BroadCast {
   kad: Kademlia;
-  hashs: string[] = [];
-  onBroadcast: IEvents = {};
+  private hashs: string[] = [];
+  private onBroadcast: IEvents = {};
   events = { broadcast: this.onBroadcast };
   constructor(kad: Kademlia) {
     this.kad = kad;
+    this.kad.events.responder["broadcast.ts"] = (message: message) => {
+      this.responder(message);
+    };
   }
 
   broadcast(msg: string) {
@@ -19,7 +22,7 @@ export default class BroadCast {
     });
   }
 
-  responder(message: message) {
+  private responder(message: message) {
     if (!(message.label === "broadcast")) return;
 
     const hash = sha1(message.data).toString();

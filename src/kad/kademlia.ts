@@ -45,10 +45,10 @@ export default class Kademlia {
     onApp: (v?: any) => {}
   };
 
-  onStore: IEvents = {};
-  onFindValue: IEvents = {};
-  onFindNode: IEvents = {};
-  onResponder: IEvents = {};
+  private onStore: IEvents = {};
+  private onFindValue: IEvents = {};
+  private onFindNode: IEvents = {};
+  private onResponder: IEvents = {};
   events = {
     store: this.onStore,
     findvalue: this.onFindValue,

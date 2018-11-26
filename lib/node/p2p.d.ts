@@ -1,17 +1,11 @@
 import Kademlia from "../kad/kademlia";
-import { message } from "webrtc4me/lib/interface";
+import { IEvents } from "../util";
 export default class P2P {
     kad: Kademlia;
-    p2pMsgBuffer: {
-        [key: string]: any[];
-    };
-    onP2P: {
-        [key: string]: (payload: p2pMessageEvent) => void;
-    };
+    private p2pMsgBuffer;
+    private onP2P;
     events: {
-        p2p: {
-            [key: string]: (payload: p2pMessageEvent) => void;
-        };
+        p2p: IEvents;
     };
     constructor(kad: Kademlia);
     send(target: string, data: {
@@ -21,5 +15,5 @@ export default class P2P {
             value: ArrayBuffer[];
         };
     }): Promise<any>;
-    responder(message: message): void;
+    private responder;
 }

@@ -34,10 +34,10 @@ export default class Kademlia {
         _onFindNode: (v?: any) => void;
         onApp: (v?: any) => void;
     };
-    onStore: IEvents;
-    onFindValue: IEvents;
-    onFindNode: IEvents;
-    onResponder: IEvents;
+    private onStore;
+    private onFindValue;
+    private onFindNode;
+    private onResponder;
     events: {
         store: IEvents;
         findvalue: IEvents;

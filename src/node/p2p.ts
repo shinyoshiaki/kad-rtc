@@ -2,19 +2,22 @@ import Kademlia from "../kad/kademlia";
 import WebRTC from "webrtc4me";
 import { BSON } from "bson";
 import { message } from "webrtc4me/lib/interface";
-import { excuteEvent } from "../util";
+import { excuteEvent, IEvents } from "../util";
 
 const bson = new BSON();
 
 export default class P2P {
   kad: Kademlia;
-  p2pMsgBuffer: { [key: string]: any[] } = {};
-  onP2P: { [key: string]: (payload: p2pMessageEvent) => void } = {};
+  private p2pMsgBuffer: { [key: string]: any[] } = {};
+  private onP2P: IEvents = {};
   events = {
     p2p: this.onP2P
   };
   constructor(kad: Kademlia) {
     this.kad = kad;
+    this.kad.events.responder["p2p.ts"] = (message: message) => {
+      this.responder(message);
+    };
   }
 
   async send(
@@ -68,7 +71,7 @@ export default class P2P {
     });
   }
 
-  responder(message: message) {
+  private responder(message: message) {
     if (message.label === "p2p") {
       const buffer: Buffer = Buffer.from(message.data);
       const packet: p2pMessage = bson.deserialize(buffer);

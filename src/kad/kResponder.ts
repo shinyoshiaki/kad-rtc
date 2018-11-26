@@ -61,7 +61,7 @@ export default class KResponder {
 
       //レプリケーション
       if (!isSdp) {
-        excuteEvent(kad.onStore, data.value);
+        excuteEvent(kad.events.store, data.value);
         k.keyValueList[data.key] = data.value;
       }
     };
@@ -85,7 +85,7 @@ export default class KResponder {
         //レプリケーション
         k.keyValueList[data.key] = { chunks: this.storeChunks[data.key] };
 
-        excuteEvent(kad.onStore, { chunks: this.storeChunks[data.key] });
+        excuteEvent(kad.events.store, { chunks: this.storeChunks[data.key] });
 
         const mine = distance(k.nodeId, data.key);
         const close = k.f.getCloseEstDist(data.key);
