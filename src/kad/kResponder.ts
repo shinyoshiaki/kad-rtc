@@ -52,7 +52,7 @@ export default class KResponder {
             console.log("kad received answer", data.sender);
             try {
               console.log(k.ref[target]);
-              k.ref[target].setAnswer(data.value.sdp);
+              k.ref[target].setSdp(data.value.sdp);
             } catch (error) {
               console.log(error);
             }
@@ -123,7 +123,7 @@ export default class KResponder {
         const peer = k.f.getPeerFromnodeId(network.nodeId);
 
         if (!peer) return;
-        let sendData:FindValueR;
+        let sendData: FindValueR;
 
         if (value.chunks) {
           //ラージファイル

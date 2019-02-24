@@ -23,7 +23,10 @@ export default class PortalNode {
         this.offerFirst(socket);
       });
       socket.on(def.ANSWER, (data: any) => {
-        if (this.peerOffer) this.peerOffer.setAnswer(data.sdp, data.nodeId);
+        if (this.peerOffer) {
+          this.peerOffer.connecting(data.nodeId);
+          this.peerOffer.setSdp(data.sdp);
+        }
       });
     }
 
@@ -63,7 +66,8 @@ export default class PortalNode {
     return new Promise((resolve, reject) => {
       const peer = new WebRTC();
       console.log("answer first", data);
-      peer.makeAnswer(data.sdp, data.nodeId);
+      peer.connecting(data.nodeId);
+      peer.setSdp(data.sdp);
 
       const timeout = setTimeout(() => {
         reject("timeout");

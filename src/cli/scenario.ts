@@ -16,12 +16,12 @@ function portalNodeAnswer(
   nodeId: string,
   callback: (local: any) => void
 ) {
-  const PortalNode = new WebRTC();
+  const PortalNode = new WebRTC({ disable_stun: true, nodeId: nodeId });
   PortalNode.connect = () => {
     console.log("portalnode connected", portalNodeKad.nodeId, nodeId);
     portalNodeKad.addknode(PortalNode);
   };
-  PortalNode.makeAnswer(sdp, { disable_stun: true, nodeId: nodeId });
+  PortalNode.setSdp(sdp);
   PortalNode.signal = local => {
     callback(local);
   };
@@ -29,11 +29,14 @@ function portalNodeAnswer(
 
 function connectNode(nodeId: string) {
   return new Promise<WebRTC>(resolve => {
-    const Node = new WebRTC();
-    Node.makeOffer({ disable_stun: true, nodeId: portalNodeKad.nodeId });
+    const Node = new WebRTC({
+      disable_stun: true,
+      nodeId: portalNodeKad.nodeId
+    });
+    Node.makeOffer();
     Node.signal = local => {
       portalNodeAnswer(local, nodeId, sdp => {
-        Node.setAnswer(sdp);
+        Node.setSdp(sdp);
       });
     };
     Node.connect = () => {

@@ -183,9 +183,9 @@ export default class Kademlia {
   }
 
   addknode(peer: WebRTC) {
-    peer.events.data["kademlia.ts"] = raw => {
+    peer.onData.subscribe(raw => {
       this.onCommand(raw);
-    };
+    });
 
     peer.disconnect = () => {
       console.log("kad node disconnected");
@@ -275,7 +275,7 @@ export default class Kademlia {
     return new Promise<any>(async (resolve, reject) => {
       const r = this.ref;
       const peer = (r[target] = new WebRTC());
-      peer.makeAnswer(sdp);
+      peer.setSdp(sdp);
       console.log("kad answer", target);
 
       const timeout = setTimeout(() => {

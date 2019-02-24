@@ -24,7 +24,10 @@ export default class Node {
         this.offerFirst(socket);
       });
       socket.on(def.ANSWER, (data: any) => {
-        if (this.peerOffer) this.peerOffer.setAnswer(data.sdp, data.nodeId);
+        if (this.peerOffer) {
+          this.peerOffer.connecting(data.nodeId);
+          this.peerOffer.setSdp(data.sdp);
+        }
       });
     }
 
