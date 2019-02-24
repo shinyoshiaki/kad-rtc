@@ -1,6 +1,6 @@
 {
   "name": "kad-rtc",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "Apache-2.0",
   "scripts": {
     "type-check": "tsc --noEmit",
@@ -26,18 +26,21 @@
     "@types/bson": "^1.0.11",
     "@types/events": "^1.2.0",
     "@types/inquirer": "^0.0.43",
+    "@types/jest": "^24.0.6",
     "@types/sha1": "^1.1.1",
     "@types/socket.io": "^1.4.38",
     "@types/socket.io-client": "^1.4.32",
     "@types/source-map-support": "^0.4.1",
     "ava": "^0.25.0",
+    "jest": "^24.1.0",
+    "ts-jest": "^24.0.0",
     "ts-node": "^7.0.1",
-    "typescript": "^3.0.3"
+    "typescript": "^3.3.3333"
   },
   "dependencies": {
-    "bson": "^3.0.2",
+    "bson": "3.0.2",
     "buffer": "^5.2.1",
-    "buffer-to-arraybuffer": "^0.0.5",    
+    "buffer-to-arraybuffer": "^0.0.5",
     "inquirer": "^6.2.0",
     "kad-distance": "git+https://git@github.com/shinyoshiaki/kad-distance.git",
     "keypair": "^1.0.1",
@@ -45,16 +48,25 @@
     "socket.io": "^2.1.1",
     "socket.io-client": "^2.1.1",
     "source-map-support": "^0.5.9",
-    "webrtc4me": "git+https://git@github.com/shinyoshiaki/webrtc4me.git#stream",
+    "webrtc4me": "git+https://git@github.com/shinyoshiaki/webrtc4me.git",
     "wrtc": "^0.2.1"
   },
-  "ava": {
-    "compileEnhancements": false,
-    "extensions": [
-      "ts"
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
     ],
-    "require": [
-      "ts-node/register"
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsConfigFile": "tsconfig.json"
+      }
+    },
+    "testMatch": [
+      "**/__tests__/*.+(ts|tsx|js)"
     ]
   }
 }

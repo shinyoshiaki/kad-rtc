@@ -194,11 +194,8 @@ export default class Kademlia {
     };
 
     if (!this.f.isNodeExist(peer.nodeId)) {
-      //自分のノードIDと追加するノードIDの距離
       const num = distance(this.nodeId, peer.nodeId);
-      //kbucketsの該当する距離のkbucketを呼び出す
       const kbucket = this.kbuckets[num];
-      //該当するkbucketに新しいピアを加える
       kbucket.push(peer);
 
       console.log("addknode kbuckets", "peer.nodeId:", peer.nodeId);
@@ -214,10 +211,9 @@ export default class Kademlia {
 
   private async findNewPeer(peer: WebRTC) {
     if (this.f.getKbucketNum() < this.k) {
-      //自身のノードIDをkeyとしてFIND_NODE
       await this.findNode(this.nodeId, peer).catch(console.log);
     } else {
-      console.log("kbucket ready", this.f.getKbucketNum());
+      console.log("kbucket fulled", this.f.getKbucketNum());
     }
   }
 
