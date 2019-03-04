@@ -3,7 +3,9 @@ import Kademlia from "../../kad/kademlia";
 
 const sleep = (waitSeconds: number) => {
   return new Promise(resolve => {
-    setTimeout(() => resolve(), waitSeconds * 1000);
+    setTimeout(() => {
+      resolve();
+    }, waitSeconds * 1000);
   });
 };
 
@@ -14,10 +16,14 @@ function portalNodeAnswer(
   nodeId: string,
   callback: (local: any) => void
 ) {
-  const PortalNode = new WebRTC({ disable_stun: true, nodeId: nodeId });
+  const PortalNode = new WebRTC({ disable_stun: true, nodeId });
+  PortalNode.connect = async () => {
+    portalNodeKad.addknode(PortalNode);
+  };
   PortalNode.setSdp(sdp);
-  PortalNode.connect = () => portalNodeKad.addknode(PortalNode);
-  PortalNode.signal = local => callback(local);
+  PortalNode.signal = local => {
+    callback(local);
+  };
 }
 
 function connectNode(nodeId: string) {
@@ -40,14 +46,19 @@ function connectNode(nodeId: string) {
 
 const Kads: Array<Kademlia> = [];
 
-(async () => {
-  for (let i = 0; i < 4; i++) {
-    const kad = new Kademlia();
-    const node = await connectNode(kad.nodeId);
-    Kads.push(kad);
-    kad.addknode(node);
-    await sleep(1);
-  }
-
-
-})();
+test(
+  "findnode",
+  async done => {
+    for (let i = 0; i < 4; i++) {
+      const kad = new Kademlia();
+      const node = await connectNode(kad.nodeId);
+      Kads.push(kad);
+      kad.addknode(node);
+    }
+    const num = Kads[Kads.length - 1].f.getAllPeerIds().length;
+    console.log({ num });
+    expect(num).toBe(3);
+    done();
+  },
+  30 * 1000
+);

@@ -235,18 +235,17 @@ export default class KResponder {
       const ids = data.closeIDs;
       console.log("on findnode-r", ids);
 
-      for (let key in ids) {
-        const target = ids[key];
+      for (let key of ids) {
         this.offerQueue.push(async () => {
-          console.log("offerque run", target);
-          if (target !== k.nodeId && !k.f.isNodeExist(target)) {
+          console.log("offerque run", key);
+          if (key !== k.nodeId && !k.f.isNodeExist(key)) {
             //IDが接続されていないものなら接続する
-            await k.offer(target, network.nodeId).catch(console.log);
+            await k.offer(key, network.nodeId).catch(console.log);
           }
         });
         //ノードIDが見つかったらコールバック
-        if (k.state.findNode === target) {
-          k.callback._onFindNode(target);
+        if (k.state.findNode === key) {
+          k.callback._onFindNode(key);
         }
       }
 

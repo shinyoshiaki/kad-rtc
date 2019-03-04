@@ -123,14 +123,14 @@ export default class KUtil {
     return list;
   }
 
-  getAllPeerIds(): string[] | undefined {
+  getAllPeerIds(): string[] {
     const arr = this.getAllPeers();
     if (arr.length > 0) {
       return arr.map(peer => {
         return peer.nodeId;
       });
     } else {
-      return undefined;
+      return [];
     }
   }
 

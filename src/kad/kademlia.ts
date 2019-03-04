@@ -4,12 +4,12 @@ import Helper from "./kUtil";
 import KResponder from "./kResponder";
 import def, { networkFormat } from "./KConst";
 import { distance } from "kad-distance";
-import { message } from "webrtc4me/lib/interface";
 import { BSON } from "bson";
 import Cypher from "../lib/cypher";
 import sha1 from "sha1";
 import { IEvents } from "../util";
 import { StoreFormat, StoreChunks, FindValue, network } from "./interface";
+import { message } from "webrtc4me/lib/interface";
 
 const bson = new BSON();
 export function excuteEvent(ev: any, v?: any) {
@@ -22,7 +22,7 @@ export function excuteEvent(ev: any, v?: any) {
 export default class Kademlia {
   nodeId: string;
   k: number;
-  kbuckets: Array<Array<WebRTC>>;
+  kbuckets: WebRTC[][];
   f: Helper;
   responder: KResponder;
   dataList: Array<any> = [];
@@ -278,8 +278,9 @@ export default class Kademlia {
         reject("kad answer timeout");
       }, 5 * 1000);
 
-      peer.signal = sdp => {
-        const _ = this.f.getPeerFromnodeId(proxy);
+      peer.signal = async sdp => {
+        const peer = this.f.getPeerFromnodeId(proxy);
+        if (!peer) return;
         const hash = sha1(Math.random().toString()).toString();
         const sendData: StoreFormat = {
           sender: this.nodeId,
@@ -289,7 +290,7 @@ export default class Kademlia {
           hash,
           sign: this.cypher.encrypt(hash)
         };
-        if (_) _.send(networkFormat(this.nodeId, def.STORE, sendData), "kad");
+        peer.send(networkFormat(this.nodeId, def.STORE, sendData), "kad");
       };
 
       peer.connect = () => {
