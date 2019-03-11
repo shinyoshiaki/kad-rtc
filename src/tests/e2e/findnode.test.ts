@@ -56,7 +56,7 @@ test(
       kad.addknode(node);
     }
     const num = Kads[Kads.length - 1].f.getAllPeerIds().length;
-    console.log({ num });
+
     expect(num).toBe(3);
     done();
   },

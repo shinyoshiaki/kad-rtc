@@ -128,7 +128,6 @@ export default class Kademlia {
 
   findNode(targetId: string, peer: WebRTC) {
     return new Promise<WebRTC>(async (resolve, reject) => {
-      console.log("findnode", targetId);
       this.state.findNode = targetId;
       const sendData = { targetKey: targetId };
       //送る
@@ -198,9 +197,6 @@ export default class Kademlia {
       const kbucket = this.kbuckets[num];
       kbucket.push(peer);
 
-      console.log("addknode kbuckets", "peer.nodeId:", peer.nodeId);
-      console.log(this.f.getAllPeerIds());
-
       setTimeout(() => {
         this.findNewPeer(peer);
       }, 1000);
@@ -225,7 +221,6 @@ export default class Kademlia {
     //そのノードをk-bucketの末尾に移す
     kbucket.forEach((peer, i) => {
       if (peer.nodeId === network.nodeId) {
-        console.log("maintain", "Moves it to the tail of the list");
         kbucket.splice(i, 1);
         kbucket.push(peer);
         return 0;
@@ -250,16 +245,14 @@ export default class Kademlia {
       }, 5 * 1000);
 
       peer.signal = sdp => {
-        console.log("kad offer store", target);
-        const _ = this.f.getCloseEstPeer(target);
-        if (!_) return;
-        if (_.nodeId !== target)
+        const close = this.f.getCloseEstPeer(target);
+        if (!close) return;
+        if (close.nodeId !== target)
           this.store(this.nodeId, target, { sdp, proxy });
       };
 
       peer.connect = () => {
         peer.nodeId = target;
-        console.log("kad offer connected", target);
         this.addknode(peer);
         clearTimeout(timeout);
         resolve(true);
@@ -272,15 +265,14 @@ export default class Kademlia {
       const r = this.ref;
       const peer = (r[target] = new WebRTC());
       peer.setSdp(sdp);
-      console.log("kad answer", target);
 
       const timeout = setTimeout(() => {
         reject("kad answer timeout");
       }, 5 * 1000);
 
       peer.signal = async sdp => {
-        const peer = this.f.getPeerFromnodeId(proxy);
-        if (!peer) return;
+        const p = this.f.getPeerFromnodeId(proxy);
+        if (!p) return;
         const hash = sha1(Math.random().toString()).toString();
         const sendData: StoreFormat = {
           sender: this.nodeId,
@@ -290,12 +282,11 @@ export default class Kademlia {
           hash,
           sign: this.cypher.encrypt(hash)
         };
-        peer.send(networkFormat(this.nodeId, def.STORE, sendData), "kad");
+        p.send(networkFormat(this.nodeId, def.STORE, sendData), "kad");
       };
 
       peer.connect = () => {
         peer.nodeId = target;
-        console.log("kad answer connected", target);
         this.addknode(peer);
         clearTimeout(timeout);
         resolve(true);
@@ -308,7 +299,6 @@ export default class Kademlia {
       const buffer: Buffer = Buffer.from(message.data);
       try {
         const networkLayer: network = bson.deserialize(buffer);
-        console.log("oncommand kad", { message }, { networkLayer });
         if (!JSON.stringify(this.dataList).includes(networkLayer.hash)) {
           this.dataList.push(networkLayer.hash);
           this.onRequest(networkLayer);

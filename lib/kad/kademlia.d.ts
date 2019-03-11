@@ -7,7 +7,7 @@ export declare function excuteEvent(ev: any, v?: any): void;
 export default class Kademlia {
     nodeId: string;
     k: number;
-    kbuckets: Array<Array<WebRTC>>;
+    kbuckets: WebRTC[][];
     f: Helper;
     responder: KResponder;
     dataList: Array<any>;

@@ -211,15 +211,9 @@ export default class KResponder {
     };
 
     responder[def.FINDNODE] = (network: any) => {
-      console.log("on findnode", network.nodeId);
       const data = network.data;
       //要求されたキーに近い複数のキーを送る
       const sendData = { closeIDs: k.f.getCloseIDs(data.targetKey) };
-
-      console.log(network.nodeId, {
-        allpeer: k.f.getAllPeerIds(),
-        ids: sendData.closeIDs
-      });
 
       const peer = k.f.getPeerFromnodeId(network.nodeId);
       if (peer) {
@@ -281,7 +275,6 @@ export default class KResponder {
   }
 
   response(rpc: string, req: any) {
-    console.log("kad rpc", rpc, req);
     if (Object.keys(responder).includes(rpc)) {
       responder[rpc](req);
     }
