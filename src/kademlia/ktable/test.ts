@@ -7,7 +7,10 @@ import { distance } from "kad-distance";
 
 class PeerTest implements Peer {
   onDisconnect = new Event<undefined>();
+  onData = new Event<string>();
   constructor(public kid: string) {}
+
+  send(data: string) {}
 }
 
 describe("ktable", () => {

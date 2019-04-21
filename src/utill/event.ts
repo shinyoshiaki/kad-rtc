@@ -40,4 +40,15 @@ export default class Event<T> {
       func(data);
     });
   }
+
+  asPromise = (timelimit?: number) =>
+    new Promise<T>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject();
+      }, timelimit);
+      this.once(data => {
+        clearTimeout(timeout);
+        resolve(data);
+      });
+    });
 }

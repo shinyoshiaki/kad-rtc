@@ -12,7 +12,7 @@ export default class Kademlia {
     this.kTable = new Ktable(kid, opt);
   }
 
-  findNode(){
-
+  findNode(kid: string) {
+    const peers = this.kTable.findNode(kid);
   }
 }

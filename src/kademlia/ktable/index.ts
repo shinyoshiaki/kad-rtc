@@ -23,28 +23,16 @@ export default class Ktable {
     kbucket.add(peer);
   }
 
-  getAllPeers = (): Peer[] => {
-    const { kbuckets } = this;
-    console.log(
-      kbuckets
-        .filter(kbucket => kbucket.length > 0)
-        .map(kbucket =>
-          Object.keys(kbucket.peers).map(key => kbucket.peers[key])
-        )
-    );
-    return kbuckets
-      .filter(kbucket => kbucket.length > 0)
+  getAllPeers = (): Peer[] =>
+    this.kbuckets
       .map(kbucket => Object.keys(kbucket.peers).map(key => kbucket.peers[key]))
       .flatMap(item => item);
-  };
 
   getPeer = (kid: string): Peer | undefined =>
     this.getAllPeers().find(peer => peer.kid === kid);
 
-  findNode(kid: string): Peer[] {
-    const { k } = this;
-    return this.getAllPeers()
+  findNode = (kid: string): Peer[] =>
+    this.getAllPeers()
       .sort((a, b) => distance(a.kid, kid) - distance(b.kid, kid))
-      .slice(0, k);
-  }
+      .slice(0, this.k);
 }
