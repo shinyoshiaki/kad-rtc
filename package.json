@@ -40,6 +40,7 @@
     "bson": "3.0.2",
     "buffer": "^5.2.1",
     "buffer-to-arraybuffer": "^0.0.5",
+    "immer": "^3.1.1",
     "inquirer": "^6.2.0",
     "kad-distance": "git+https://git@github.com/shinyoshiaki/kad-distance.git",
     "keypair": "^1.0.1",
@@ -66,7 +67,8 @@
     },
     "testMatch": [
       "**/__tests__/**/*.ts?(x)",
-      "**/?(*.)(spec|test).ts?(x)"
+      "**/?(*.)(spec|test).ts?(x)",
+      "**/?(*)(spec|test).ts?(x)"
     ]
   }
 }
