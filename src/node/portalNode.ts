@@ -11,7 +11,7 @@ enum def {
 }
 
 export default class PortalNode {
-  io: any;
+  io: socketio.Server;
   kad: Kademlia;
   peerOffer: WebRTC | undefined;
 
@@ -34,7 +34,7 @@ export default class PortalNode {
     this.io = socketio(srv);
     srv.listen(myPort);
 
-    this.io.on("connection", (socket: any) => {
+    this.io.on("connection", socket => {
       socket.on(def.OFFER, (data: any) => {
         this.answerFirst(data, socket.id);
       });
@@ -74,6 +74,7 @@ export default class PortalNode {
       }, 3 * 1000);
 
       peer.signal = sdp => {
+        const soc = this.io.sockets.sockets[socketId];
         this.io.sockets.sockets[socketId].emit(def.ANSWER, {
           sdp: sdp,
           nodeId: this.kad.nodeId
