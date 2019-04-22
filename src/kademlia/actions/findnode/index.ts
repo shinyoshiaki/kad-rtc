@@ -1,7 +1,7 @@
-import Peer from "../../implements/peer";
+import Peer from "../../modules/peer";
 
-const FindNode = (payload: string) => {
-  return { rpc: "findnode" as const, payload };
+const FindNode = (kid: string) => {
+  return { rpc: "findnode" as const, kid };
 };
 
 export type FindNode = ReturnType<typeof FindNode>;
@@ -13,15 +13,16 @@ const Connect = (payload: string) => {
 export type Connect = ReturnType<typeof Connect>;
 
 export default async function findNode(kid: string, peers: Peer[]) {
+  const finds: Peer[] = [];
   for (let peer of peers) {
     peer.send(JSON.stringify(FindNode(kid)));
 
     const ask = await peer.onData.asPromise().catch();
     if (!ask) continue;
     const offer = JSON.parse(ask);
-    peer.setOffer(offer);
 
-    const sdp = await peer.signal.asPromise();
-    peer.send(JSON.stringify(Connect(sdp)));
+    const open = await peer.open(offer);
+    finds.push(open);
   }
+  return finds;
 }
