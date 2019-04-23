@@ -1,5 +1,5 @@
 import Peer from "../../modules/peer";
-import { OnFindNode } from "./rpc";
+import { FindNodeProxyOffer } from "./listen/proxy";
 
 const FindNode = (kid: string) => {
   return { rpc: "findnode" as const, kid };
@@ -13,14 +13,14 @@ const FindNodeAnswer = (sdp: string, kid: string) => {
 
 export type FindNodeAnswer = ReturnType<typeof FindNodeAnswer>;
 
-type rpcs = OnFindNode;
+type rpcs = FindNodeProxyOffer;
 
 export default async function findNode(kid: string, peers: Peer[]) {
   const finds: Peer[] = [];
   for (let peer of peers) {
     const rpc = peer.rpc(FindNode(kid));
     const res: rpcs = await rpc.asPromise();
-    if (res.rpc === "onfindnode") {
+    if (res.rpc === "FindNodeProxyOffer") {
       const offers = res.peers;
 
       for (let offer of offers) {

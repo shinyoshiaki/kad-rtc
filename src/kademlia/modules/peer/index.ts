@@ -12,5 +12,5 @@ export default class Peer {
 
   setSdp = (sdp: any) => {};
 
-  createOffer = (): any => {};
+  createOffer = async (): Promise<any> => {};
 }
