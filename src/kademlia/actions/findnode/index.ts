@@ -1,4 +1,5 @@
 import Peer from "../../modules/peer";
+import { OnFindNode } from "./rpc";
 
 const FindNode = (kid: string) => {
   return { rpc: "findnode" as const, kid };
@@ -6,23 +7,32 @@ const FindNode = (kid: string) => {
 
 export type FindNode = ReturnType<typeof FindNode>;
 
-const Connect = (payload: string) => {
-  return { rpc: "connect" as const, payload };
+const FindNodeAnswer = (sdp: string, kid: string) => {
+  return { rpc: "findnodeanswer" as const, sdp, kid };
 };
 
-export type Connect = ReturnType<typeof Connect>;
+export type FindNodeAnswer = ReturnType<typeof FindNodeAnswer>;
+
+type rpcs = OnFindNode;
 
 export default async function findNode(kid: string, peers: Peer[]) {
   const finds: Peer[] = [];
   for (let peer of peers) {
-    peer.send(JSON.stringify(FindNode(kid)));
+    const rpc = peer.rpc(FindNode(kid));
+    const res: rpcs = await rpc.asPromise();
+    if (res.rpc === "onfindnode") {
+      const offers = res.peers;
 
-    const ask = await peer.onData.asPromise().catch();
-    if (!ask) continue;
-    const offer = JSON.parse(ask);
-
-    const open = await peer.open(offer);
-    finds.push(open);
+      for (let offer of offers) {
+        const { kid, sdp } = offer;
+        const peer = new Peer(kid);
+        peer.setSdp(sdp);
+        const answer = await peer.onSignal.asPromise();
+        peer.rpc(FindNodeAnswer(answer, kid));
+        await peer.onConnect.asPromise();
+        finds.push(peer);
+      }
+    }
   }
   return finds;
 }

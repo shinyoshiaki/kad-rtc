@@ -1,13 +1,16 @@
 import Event from "../../../utill/event";
 
 export default class Peer {
-  kid: string = "";
-  onData = new Event<string>();
+  onRpc = new Event<any>();
   onDisconnect = new Event<undefined>();
+  onSignal = new Event<any>();
+  onConnect = new Event<undefined>();
 
-  rpc(data: object, label: string) {}
+  constructor(public kid: string) {}
 
-  async open(data: string) {
-    return new Peer();
-  }
+  rpc = (data: { rpc: string }) => new Event<any>();
+
+  setSdp = (sdp: any) => {};
+
+  createOffer = (): any => {};
 }
