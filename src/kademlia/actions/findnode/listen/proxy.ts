@@ -40,11 +40,13 @@ export default class FindNodeProxy {
   }
 
   async findnode(data: FindNode) {
-    const { finderkid } = data;
+    const { finderkid, except } = data;
     const peers = this.ktable.findNode(finderkid);
     const offers: { peerkid: string; sdp: any }[] = [];
+
     for (let peer of peers) {
       if (peer.kid === finderkid) continue;
+      if (except.includes(peer.kid)) continue;
 
       const rpc = peer.rpc(FindNodeProxyOpen(this.listen.kid));
 

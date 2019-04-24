@@ -1,6 +1,7 @@
 import Peer from "../../../modules/peer";
 import { FindNodeProxyOpen, FindNodeProxyAnswer } from "./proxy";
 import Ktable from "../../../ktable";
+import listenFindnode from ".";
 
 const FindNodePeerOffer = (sdp: any, peerkid: string) => {
   return { rpc: "FindNodePeerOffer" as const, sdp, peerkid };
@@ -49,5 +50,6 @@ export default class FindNodePeer {
     await peer.setAnswer(sdp);
 
     this.ktable.add(peer);
+    listenFindnode(this.module, peer, this.ktable);
   }
 }

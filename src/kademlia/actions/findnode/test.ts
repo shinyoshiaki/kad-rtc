@@ -58,12 +58,20 @@ describe("findnode", () => {
 
       {
         const node = nodes[0];
-        const peers = await findNode(
-          PeerModule,
-          node.kid,
-          node.findNode(node.kid)
-        );
-        expect(peers.length).not.toBe(0);
+        for (let _ in [...Array(num)]) {
+          const peers = await findNode(
+            PeerModule,
+            node.kid,
+            node.findNode(node.kid)
+          );
+          expect(peers.length).not.toBe(0);
+          peers.forEach(peer => {
+            node.add(peer);
+            listenFindnode(PeerModule, peer, node);
+          });
+        }
+
+        expect(node.getAllPeers().length).toBe(num + 1);
       }
     },
     1000 * 6000
