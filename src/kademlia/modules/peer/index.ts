@@ -1,5 +1,7 @@
 import Event from "../../../utill/event";
 
+export const PeerModule = (kid: string) => new Peer(kid);
+
 export default class Peer {
   onRpc = new Event<any>();
   onDisconnect = new Event();
@@ -10,11 +12,9 @@ export default class Peer {
 
   rpc = (data: { rpc: string }) => new Event<any>();
 
-  setSdp = (sdp: any) => {};
-
   createOffer = async (): Promise<any> => {};
 
   setOffer = async (sdp: any): Promise<any> => {};
 
-  setAnswer = async (sdp: any) => {};
+  setAnswer = async (sdp: any): Promise<any> => {};
 }
