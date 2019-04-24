@@ -4,7 +4,7 @@ export type Option = { kBucketSize: number };
 
 export default class Kbucket {
   private k = 20;
-  peers: { [key: string]: Peer } = {};
+  peers: { kid: string; peer: Peer }[] = [];
 
   constructor(opt: Partial<Option>) {
     const { kBucketSize } = opt;
@@ -14,11 +14,22 @@ export default class Kbucket {
   }
 
   add(peer: Peer) {
-    this.peers[peer.kid] = peer;
+    if (this.peers.map(item => item.kid).includes(peer.kid)) return false;
+
+    if (this.peers.length > this.k) {
+      const discon = this.peers.pop();
+      if (discon) {
+        discon.peer.disconnect();
+      }
+    }
+
+    this.peers.push({ kid: peer.kid, peer });
 
     peer.onDisconnect.subscribe(() => {
-      delete this.peers[peer.kid];
+      this.peers = this.peers.filter(find => find.kid !== peer.kid);
     });
+
+    return true;
   }
 
   get length() {

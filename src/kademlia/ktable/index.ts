@@ -6,7 +6,6 @@ export type Option = OptBucket;
 
 export default class Ktable {
   private kbuckets: Kbucket[] = [];
-  private peers: Peer[] = [];
   private k = 20;
 
   constructor(public kid: string, opt: Partial<Option> = {}) {
@@ -21,13 +20,18 @@ export default class Ktable {
   add(peer: Peer) {
     const length = distance(this.kid, peer.kid);
     const kbucket = this.kbuckets[length];
-    kbucket.add(peer);
-    this.peers.push(peer);
+    return kbucket.add(peer);
+  }
+
+  get allPeers() {
+    return this.kbuckets
+      .map(kbucket => kbucket.peers.map(bucket => bucket.peer))
+      .flatMap(item => item);
   }
 
   getAllPeers = (): Peer[] =>
     this.kbuckets
-      .map(kbucket => Object.keys(kbucket.peers).map(key => kbucket.peers[key]))
+      .map(kbucket => kbucket.peers.map(bucket => bucket.peer))
       .flatMap(item => item);
 
   getPeer = (kid: string): Peer | undefined =>

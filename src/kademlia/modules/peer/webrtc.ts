@@ -54,4 +54,8 @@ export default class Peer implements Base {
     await this.peer.onConnect.asPromise();
     return true;
   };
+
+  disconnect = () => {
+    this.peer.disconnect();
+  };
 }

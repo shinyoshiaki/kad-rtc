@@ -17,4 +17,6 @@ export default class Peer {
   setOffer = async (sdp: any): Promise<any> => {};
 
   setAnswer = async (sdp: any): Promise<any> => {};
+
+  disconnect = () => {};
 }

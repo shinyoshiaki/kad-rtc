@@ -287,4 +287,8 @@ export default class WebRTC {
   addTrack(track: MediaStreamTrack, stream: MediaStream) {
     this.rtc.addTrack(track, stream);
   }
+
+  disconnect() {
+    this.rtc.close();
+  }
 }

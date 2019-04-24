@@ -4,7 +4,8 @@ import sha1 from "sha1";
 import listenFindnode from "./listen";
 import findNode from ".";
 
-const num = 4;
+const kBucketSize = 4;
+const num = 24;
 
 describe("findnode", () => {
   test(
@@ -12,8 +13,8 @@ describe("findnode", () => {
     async () => {
       const nodes: Ktable[] = [];
       {
-        const kOffer = new Ktable(sha1("0").toString());
-        const kAnswer = new Ktable(sha1("1").toString());
+        const kOffer = new Ktable(sha1("0").toString(), { kBucketSize });
+        const kAnswer = new Ktable(sha1("1").toString(), { kBucketSize });
 
         const offer = new Peer(kAnswer.kid);
         const offerSdp = await offer.createOffer();
@@ -21,19 +22,15 @@ describe("findnode", () => {
         const answerSdp = await answer.setOffer(offerSdp);
         await offer.setAnswer(answerSdp);
 
-        kOffer.add(offer);
-        kAnswer.add(answer);
-
-        listenFindnode(PeerModule, offer, kOffer);
-        listenFindnode(PeerModule, answer, kAnswer);
+        if (kOffer.add(offer)) listenFindnode(PeerModule, offer, kOffer);
+        if (kAnswer.add(answer)) listenFindnode(PeerModule, answer, kAnswer);
 
         nodes.push(kOffer);
         nodes.push(kAnswer);
       }
-
       for (let i = 2; i < 2 + num; i++) {
         const pop = nodes.slice(-1)[0];
-        const push = new Ktable(sha1(i.toString()).toString());
+        const push = new Ktable(sha1(i.toString()).toString(), { kBucketSize });
 
         const offer = new Peer(push.kid);
         const offerSdp = await offer.createOffer();
@@ -41,37 +38,31 @@ describe("findnode", () => {
         const answerSdp = await answer.setOffer(offerSdp);
         await offer.setAnswer(answerSdp);
 
-        pop.add(offer);
-        push.add(answer);
-
-        listenFindnode(PeerModule, offer, pop);
-        listenFindnode(PeerModule, answer, push);
+        if (pop.add(offer)) listenFindnode(PeerModule, offer, pop);
+        if (push.add(answer)) listenFindnode(PeerModule, answer, push);
 
         nodes.push(push);
       }
 
       {
-        const length = nodes.filter(node => node.getAllPeers().length > 0)
-          .length;
-        expect(length).toBe(6);
+        for (let node of nodes) {
+          await findNode(PeerModule, node.kid, node);
+        }
       }
-
       {
         const node = nodes[0];
-        for (let _ in [...Array(num)]) {
-          const peers = await findNode(
-            PeerModule,
-            node.kid,
-            node.findNode(node.kid)
-          );
-          expect(peers.length).not.toBe(0);
-          peers.forEach(peer => {
-            node.add(peer);
-            listenFindnode(PeerModule, peer, node);
-          });
+        const word = "f6e1126cedebf23e1463aee73f9df08783640400";
+
+        let target: any;
+
+        for (let _ in [...Array(5)]) {
+          await findNode(PeerModule, word, node);
+
+          target = node.allPeers.find(peer => peer.kid === word);
+          if (target) break;
         }
 
-        expect(node.getAllPeers().length).toBe(num + 1);
+        expect(target).not.toBe(undefined);
       }
     },
     1000 * 6000

@@ -1,8 +1,10 @@
 import Peer from "../../modules/peer";
 import { FindNodeProxyOffer } from "./listen/proxy";
+import Ktable from "../../ktable";
+import listenFindnode from "./listen";
 
-const FindNode = (finderkid: string, except: string[]) => {
-  return { rpc: "findnode" as const, finderkid, except };
+const FindNode = (searchkid: string, except: string[]) => {
+  return { rpc: "findnode" as const, searchkid, except };
 };
 
 export type FindNode = ReturnType<typeof FindNode>;
@@ -17,13 +19,12 @@ type actions = FindNodeProxyOffer;
 
 export default async function findNode(
   module: (kid: string) => Peer,
-  mykid: string,
-  peers: Peer[]
+  searchkid: string,
+  ktable: Ktable
 ) {
-  const finds: Peer[] = [];
-  for (let peer of peers) {
-    const except = peers.map(item => item.kid);
-    const rpc = peer.rpc(FindNode(mykid, except));
+  for (let peer of ktable.findNode(searchkid)) {
+    const except = ktable.allPeers.map(item => item.kid);
+    const rpc = peer.rpc(FindNode(searchkid, except));
 
     const res: actions = await rpc.asPromise();
     if (res.rpc === "FindNodeProxyOffer") {
@@ -38,9 +39,8 @@ export default async function findNode(
         peer.rpc(FindNodeAnswer(answer, peerkid));
         await connect.onConnect.asPromise();
 
-        finds.push(connect);
+        if (ktable.add(connect)) listenFindnode(module, connect, ktable);
       }
     }
   }
-  return finds;
 }
