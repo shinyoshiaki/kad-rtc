@@ -39,7 +39,8 @@ export default async function findNode(
         peer.rpc(FindNodeAnswer(answer, peerkid));
         await connect.onConnect.asPromise();
 
-        if (ktable.add(connect)) listenFindnode(module, connect, ktable);
+        ktable.add(connect);
+        listenFindnode(module, connect, ktable);
       }
     }
   }

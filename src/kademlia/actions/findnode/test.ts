@@ -4,7 +4,7 @@ import sha1 from "sha1";
 import listenFindnode from "./listen";
 import findNode from ".";
 
-const kBucketSize = 4;
+const kBucketSize = 8;
 const num = 24;
 
 describe("findnode", () => {
@@ -22,8 +22,10 @@ describe("findnode", () => {
         const answerSdp = await answer.setOffer(offerSdp);
         await offer.setAnswer(answerSdp);
 
-        if (kOffer.add(offer)) listenFindnode(PeerModule, offer, kOffer);
-        if (kAnswer.add(answer)) listenFindnode(PeerModule, answer, kAnswer);
+        kOffer.add(offer);
+        listenFindnode(PeerModule, offer, kOffer);
+        kAnswer.add(answer);
+        listenFindnode(PeerModule, answer, kAnswer);
 
         nodes.push(kOffer);
         nodes.push(kAnswer);
@@ -38,8 +40,10 @@ describe("findnode", () => {
         const answerSdp = await answer.setOffer(offerSdp);
         await offer.setAnswer(answerSdp);
 
-        if (pop.add(offer)) listenFindnode(PeerModule, offer, pop);
-        if (push.add(answer)) listenFindnode(PeerModule, answer, push);
+        pop.add(offer);
+        listenFindnode(PeerModule, offer, pop);
+        push.add(answer);
+        listenFindnode(PeerModule, answer, push);
 
         nodes.push(push);
       }

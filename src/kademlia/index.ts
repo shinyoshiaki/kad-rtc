@@ -19,7 +19,6 @@ export default class Kademlia {
   }
 
   async findNode(searchkid: string) {
-    const connects = await findNode(this.module, searchkid, this.kTable);
-    connects.forEach(peer => this.kTable.add(peer));
+    await findNode(this.module, searchkid, this.kTable);
   }
 }

@@ -9,10 +9,7 @@ export default class Event<T> {
   private event: IEvent<T>;
 
   constructor() {
-    this.event = {
-      stack: [],
-      index: 0
-    };
+    this.event = { stack: [], index: 0 };
   }
 
   excute(data?: T) {
@@ -32,6 +29,10 @@ export default class Event<T> {
       );
     };
     return { unSubscribe };
+  }
+
+  allUnsubscribe() {
+    this.event = { stack: [], index: 0 };
   }
 
   once(func: EventFunc<T>) {

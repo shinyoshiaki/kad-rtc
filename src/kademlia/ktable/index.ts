@@ -20,7 +20,7 @@ export default class Ktable {
   add(peer: Peer) {
     const length = distance(this.kid, peer.kid);
     const kbucket = this.kbuckets[length];
-    return kbucket.add(peer);
+    kbucket.add(peer);
   }
 
   get allPeers() {
