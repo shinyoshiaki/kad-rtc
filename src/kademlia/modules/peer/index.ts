@@ -2,9 +2,9 @@ import Event from "../../../utill/event";
 
 export default class Peer {
   onRpc = new Event<any>();
-  onDisconnect = new Event<undefined>();
+  onDisconnect = new Event();
   onSignal = new Event<any>();
-  onConnect = new Event<undefined>();
+  onConnect = new Event();
 
   constructor(public kid: string) {}
 
@@ -13,4 +13,8 @@ export default class Peer {
   setSdp = (sdp: any) => {};
 
   createOffer = async (): Promise<any> => {};
+
+  setOffer = async (sdp: any): Promise<any> => {};
+
+  setAnswer = async (sdp: any) => {};
 }

@@ -10,7 +10,7 @@
       "request": "launch",
       "program": "${workspaceRoot}/node_modules/.bin/jest",
       "protocol": "inspector",
-      "args": ["--runInBand"],
+      "args": ["--runInBand", "--forceExit"],
       "windows": {
         "program": "${workspaceRoot}/node_modules/jest/bin/jest.js"
       },

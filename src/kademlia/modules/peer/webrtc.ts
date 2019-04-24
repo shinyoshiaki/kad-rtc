@@ -1,22 +1,34 @@
 import Base from ".";
 import Event from "../../../utill/event";
-import WebRTC from "webrtc4me";
+import WebRTC from "../../../webrtc/core";
 
 export default class Peer implements Base {
-  onRpc = new Event<any>();
-  onDisconnect = new Event<undefined>();
-  onSignal = new Event<any>();
-  onConnect = new Event<undefined>();
+  type = "webrtc";
   private peer = new WebRTC();
+  onRpc = new Event<any>();
+  onSignal = this.peer.onSignal as any;
+  onDisconnect = this.peer.onDisconnect as any;
+  onConnect = this.peer.onConnect as any;
 
-  constructor(public kid: string) {}
-
-  rpc = (data: { rpc: string }) => {
-    const observer = new Event<any>();
-    this.peer.send(JSON.stringify(data), data.rpc);
+  constructor(public kid: string) {
     const discon = this.peer.onData.subscribe(raw => {
+      try {
+        const data = JSON.parse(raw.data);
+        if (data.rpc) {
+          this.onRpc.excute(data);
+        }
+      } catch (error) {}
+    });
+    this.peer.onDisconnect.once(() => discon.unSubscribe());
+  }
+
+  rpc = (send: { rpc: string }) => {
+    const observer = new Event<any>();
+    this.peer.send(JSON.stringify(send), send.rpc);
+    const discon = this.peer.onData.subscribe(raw => {
+      const data = JSON.parse(raw.data);
       if (raw.label === data.rpc) {
-        observer.excute(raw.data);
+        observer.excute(data);
       }
     });
     this.peer.onDisconnect.once(() => discon.unSubscribe());
@@ -31,5 +43,16 @@ export default class Peer implements Base {
     this.peer.makeOffer();
     const offer = await this.peer.onSignal.asPromise();
     return offer;
+  };
+
+  setOffer = async (sdp: any) => {
+    this.peer.setSdp(sdp);
+    const answer = await this.peer.onSignal.asPromise();
+    return answer;
+  };
+
+  setAnswer = async (sdp: any) => {
+    this.peer.setSdp(sdp);
+    await this.peer.onConnect.asPromise();
   };
 }

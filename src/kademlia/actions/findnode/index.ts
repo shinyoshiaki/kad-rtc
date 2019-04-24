@@ -13,13 +13,13 @@ const FindNodeAnswer = (sdp: string, kid: string) => {
 
 export type FindNodeAnswer = ReturnType<typeof FindNodeAnswer>;
 
-type rpcs = FindNodeProxyOffer;
+type actions = FindNodeProxyOffer;
 
 export default async function findNode(kid: string, peers: Peer[]) {
   const finds: Peer[] = [];
   for (let peer of peers) {
     const rpc = peer.rpc(FindNode(kid));
-    const res: rpcs = await rpc.asPromise();
+    const res: actions = await rpc.asPromise();
     if (res.rpc === "FindNodeProxyOffer") {
       const offers = res.peers;
 

@@ -45,6 +45,8 @@ export default class FindNodeProxy {
     const peers = this.ktable.findNode(kid);
     const offers: { kid: string; sdp: any }[] = [];
     for (let peer of peers) {
+      if (peer.kid === kid) continue;
+
       const rpc = peer.rpc(FindNodeProxyOpen(this.listen.kid));
 
       const res: actions = await rpc.asPromise();

@@ -1,17 +1,11 @@
 import Ktable from ".";
 import sha1 from "sha1";
 import Kbucket from "./kbucket";
-import Peer from "../implements/peer";
-import Event from "../../utill/event";
+
 import { distance } from "kad-distance";
+import Peer from "../modules/peer";
 
-class PeerTest implements Peer {
-  onDisconnect = new Event<undefined>();
-  onData = new Event<string>();
-  constructor(public kid: string) {}
-
-  send(data: string) {}
-}
+class PeerTest extends Peer {}
 
 describe("ktable", () => {
   const kBucketSize = 4;
