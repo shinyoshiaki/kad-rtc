@@ -5,7 +5,7 @@ import listenFindnode from "./listen";
 import findNode from ".";
 
 const kBucketSize = 8;
-const num = 24;
+const num = 4;
 
 describe("findnode", () => {
   test(

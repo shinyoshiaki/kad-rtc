@@ -7,7 +7,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --forceExit",
     "publish": "npm publish --access=public"
   },
   "main": "lib/index.js",
