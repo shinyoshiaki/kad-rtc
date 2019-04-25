@@ -6,15 +6,11 @@
     "node": ">=11"
   },
   "scripts": {
-    "type-check": "tsc --noEmit",
-    "type-check:watch": "npm run type-check -- --watch",
-    "build": "npm run build:types && npm run build:js",
-    "build:types": "tsc --emitDeclarationOnly",
-    "build:js": "babel src --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
-    "start": "yarn build && node ./lib/cli/setup.js",
-    "test": "jest --detectOpenHandles"
+    "build": "tsc",
+    "test": "jest",
+    "publish": "npm publish --access=public"
   },
-  "main": "lib/kad/kademlia.js",
+  "main": "lib/index.js",
   "files": [
     "lib",
     "src"

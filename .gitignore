@@ -4,3 +4,4 @@ sample-win32-x64/
 save
 build/
 *.log
+**/tsconfig.tsbuildinfo

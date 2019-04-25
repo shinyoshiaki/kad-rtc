@@ -44,4 +44,5 @@ export default async function findNode(
       }
     }
   }
+  return ktable.getPeer(searchkid);
 }

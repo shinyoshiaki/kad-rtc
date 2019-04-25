@@ -5,10 +5,9 @@ import WebRTC from "../../../webrtc/core";
 export const PeerModule = (kid: string) => new Peer(kid);
 
 export default class Peer implements Base {
-  type = "webrtc";
+  private type = "webrtc";
   private peer = new WebRTC();
   onRpc = new Event<any>();
-  onSignal = this.peer.onSignal as any;
   onDisconnect = this.peer.onDisconnect as any;
   onConnect = this.peer.onConnect as any;
 

@@ -12,24 +12,24 @@ describe("findnode", () => {
     "findnode",
     async () => {
       const nodes: Ktable[] = [];
-      {
-        const kOffer = new Ktable(sha1("0").toString(), { kBucketSize });
-        const kAnswer = new Ktable(sha1("1").toString(), { kBucketSize });
 
-        const offer = new Peer(kAnswer.kid);
-        const offerSdp = await offer.createOffer();
-        const answer = new Peer(kOffer.kid);
-        const answerSdp = await answer.setOffer(offerSdp);
-        await offer.setAnswer(answerSdp);
+      const kOffer = new Ktable(sha1("0").toString(), { kBucketSize });
+      const kAnswer = new Ktable(sha1("1").toString(), { kBucketSize });
 
-        kOffer.add(offer);
-        listenFindnode(PeerModule, offer, kOffer);
-        kAnswer.add(answer);
-        listenFindnode(PeerModule, answer, kAnswer);
+      const offer = new Peer(kAnswer.kid);
+      const offerSdp = await offer.createOffer();
+      const answer = new Peer(kOffer.kid);
+      const answerSdp = await answer.setOffer(offerSdp);
+      await offer.setAnswer(answerSdp);
 
-        nodes.push(kOffer);
-        nodes.push(kAnswer);
-      }
+      kOffer.add(offer);
+      listenFindnode(PeerModule, offer, kOffer);
+      kAnswer.add(answer);
+      listenFindnode(PeerModule, answer, kAnswer);
+
+      nodes.push(kOffer);
+      nodes.push(kAnswer);
+
       for (let i = 2; i < 2 + num; i++) {
         const pop = nodes.slice(-1)[0];
         const push = new Ktable(sha1(i.toString()).toString(), { kBucketSize });
@@ -47,26 +47,25 @@ describe("findnode", () => {
 
         nodes.push(push);
       }
-
-      {
-        for (let node of nodes) {
-          await findNode(PeerModule, node.kid, node);
-        }
+      for (let node of nodes) {
+        await findNode(PeerModule, node.kid, node);
       }
-      {
+      const search = async (word: string) => {
         const node = nodes[0];
-        const word = "f6e1126cedebf23e1463aee73f9df08783640400";
 
         let target: any;
 
         for (let _ in [...Array(5)]) {
-          await findNode(PeerModule, word, node);
-
-          target = node.allPeers.find(peer => peer.kid === word);
+          target = await findNode(PeerModule, word, node);
           if (target) break;
         }
 
         expect(target).not.toBe(undefined);
+      };
+
+      for (let word of nodes) {
+        if (word.kid === nodes[0].kid) continue;
+        await search(word.kid);
       }
     },
     1000 * 6000
