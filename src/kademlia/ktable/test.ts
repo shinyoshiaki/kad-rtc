@@ -31,7 +31,7 @@ describe("ktable", () => {
 
     expect(
       distance(kid, peers[0].kid) <
-        distance(ktable.getAllPeers()[kBucketSize].kid, kid)
+        distance(ktable.allPeers[kBucketSize].kid, kid)
     ).toBe(true);
   });
 });

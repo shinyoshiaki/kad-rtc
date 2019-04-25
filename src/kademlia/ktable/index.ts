@@ -29,16 +29,11 @@ export default class Ktable {
       .flatMap(item => item);
   }
 
-  getAllPeers = (): Peer[] =>
-    this.kbuckets
-      .map(kbucket => kbucket.peers.map(bucket => bucket.peer))
-      .flatMap(item => item);
-
   getPeer = (kid: string): Peer | undefined =>
-    this.getAllPeers().find(peer => peer.kid === kid);
+    this.allPeers.find(peer => peer.kid === kid);
 
   findNode = (kid: string): Peer[] =>
-    this.getAllPeers()
+    this.allPeers
       .sort((a, b) => distance(a.kid, kid) - distance(b.kid, kid))
       .slice(0, this.k);
 }
