@@ -5,12 +5,12 @@ export const PeerModule = (kid: string) => new Peer(kid);
 
 export default class Peer implements Base {
   private type = "webrtc";
+  private onData = new Event<any>();
+  private send: Event<any> | undefined;
+
   onRpc = new Event<any>();
   onDisconnect = new Event();
   onConnect = new Event();
-
-  onData = new Event<any>();
-  send: Event<any> | undefined;
 
   constructor(public kid: string) {
     this.onData.subscribe(raw => {
@@ -24,17 +24,19 @@ export default class Peer implements Base {
   }
 
   rpc = (send: { rpc: string }) => {
+    if (this.send) this.send.excute({ data: send, label: send.rpc });
+  };
+
+  promiseRpc = (rpc: string) => {
     const observer = new Event<any>();
-    if (this.send) {
-      this.send.excute({ data: send, label: send.rpc });
-      this.onData.subscribe(raw => {
-        const data = raw.data;
-        if (raw.label === data.rpc) {
-          observer.excute(data);
-        }
-      });
-    }
-    return observer;
+    const once = this.onData.subscribe(raw => {
+      if (raw.label === rpc) {
+        const data = JSON.parse(raw.data);
+        observer.excute(data);
+        once.unSubscribe();
+      }
+    });
+    return observer.asPromise();
   };
 
   createOffer = async () => {

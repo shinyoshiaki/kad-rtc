@@ -48,13 +48,11 @@ export default class FindNodeProxy {
       if (peer.kid === this.listen.kid) continue;
       if (except.includes(peer.kid)) continue;
 
-      const rpc = peer.rpc(FindNodeProxyOpen(this.listen.kid));
+      peer.rpc(FindNodeProxyOpen(this.listen.kid));
 
-      const res: actions = await rpc.asPromise();
-      if (res.rpc === "FindNodePeerOffer") {
-        const { peerkid, sdp } = res;
-        offers.push({ peerkid, sdp });
-      }
+      const res: FindNodePeerOffer = await peer.promiseRpc("FindNodePeerOffer");
+      const { peerkid, sdp } = res;
+      offers.push({ peerkid, sdp });
     }
     this.listen.rpc(FindNodeProxyOffer(offers));
   }

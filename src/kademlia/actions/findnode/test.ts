@@ -5,7 +5,7 @@ import listenFindnode from "./listen";
 import findNode from ".";
 
 const kBucketSize = 8;
-const num = 4;
+const num = 10;
 
 describe("findnode", () => {
   test(
@@ -67,6 +67,8 @@ describe("findnode", () => {
         if (word.kid === nodes[0].kid) continue;
         await search(word.kid);
       }
+
+      await new Promise(r => setTimeout(r, 0));
     },
     1000 * 6000
   );

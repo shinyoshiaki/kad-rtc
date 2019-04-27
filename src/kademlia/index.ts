@@ -1,24 +1,31 @@
 import Ktable, { Option as OptTable } from "./ktable";
-import sha1 from "sha1";
 import findNode from "./actions/findnode";
 import Peer from "./modules/peer";
 
 type Option = OptTable;
 
 export default class Kademlia {
-  kid = sha1(Math.random().toString()).toString();
   kTable: Ktable;
 
   constructor(
+    public kid: string,
     private module: (kid: string) => Peer,
     opt: Partial<Option> = {}
   ) {
-    const { kid } = this;
-
     this.kTable = new Ktable(kid, opt);
   }
 
-  async findNode(searchkid: string) {
-    await findNode(this.module, searchkid, this.kTable);
+  async findNode(searchkid: string, retry = 5) {
+    let target;
+    for (let _ in [...Array(retry)]) {
+      target = await findNode(this.module, searchkid, this.kTable);
+      if (target) break;
+    }
+    return target;
+  }
+
+  async add(peer: Peer) {
+    this.kTable.add(peer);
+    await findNode(this.module, this.kid, this.kTable);
   }
 }

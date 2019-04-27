@@ -9,7 +9,9 @@ export default class Peer {
 
   constructor(public kid: string) {}
 
-  rpc = (data: { rpc: string }) => new Event<any>();
+  rpc = (data: { rpc: string }) => {};
+
+  promiseRpc = (rpc: string) => new Event<any>().asPromise();
 
   createOffer = async (): Promise<any> => {};
 
