@@ -14,18 +14,19 @@ export default class Kbucket {
   }
 
   add(peer: Peer) {
+    if (this.peers.find(v => v.kid === peer.kid)) {
+      this.peers = this.peers.filter(find => find.kid !== peer.kid);
+    }
+
     this.peers.push({ kid: peer.kid, peer });
+
+    if (this.peers.length > this.k) {
+      this.peers.shift();
+    }
 
     peer.onDisconnect.subscribe(() => {
       this.peers = this.peers.filter(find => find.kid !== peer.kid);
     });
-
-    if (this.peers.length > this.k) {
-      const discon = this.peers.shift();
-      // if (discon) {
-      //   discon.peer.disconnect();
-      // }
-    }
   }
 
   get length() {

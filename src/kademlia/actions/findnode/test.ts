@@ -1,11 +1,11 @@
 import Ktable from "../../ktable";
-import Peer, { PeerModule } from "../../modules/peer/webrtc";
+import Peer, { PeerModule } from "../../modules/peer/mock";
 import sha1 from "sha1";
 import listenFindnode from "./listen";
 import findNode from ".";
 
 const kBucketSize = 8;
-const num = 1;
+const num = 50;
 
 describe("findnode", () => {
   test(
@@ -55,16 +55,26 @@ describe("findnode", () => {
 
         let target: any;
 
-        for (let _ in [...Array(5)]) {
-          target = await findNode(PeerModule, word, node);
-          if (target) break;
+        let trytime = 0;
+        for (let pre = ""; ; trytime++) {
+          const res = await findNode(PeerModule, word, node);
+          if (pre === res.hash) {
+            break;
+          }
+          if (res.target) {
+            target = res.target;
+            break;
+          }
+          pre = res.hash;
         }
 
+        if (!target) {
+          expect(true).toBe(true);
+        }
         expect(target).not.toBe(undefined);
       };
 
-      for (let word of nodes) {
-        if (word.kid === nodes[0].kid) continue;
+      for (let word of nodes.slice(1)) {
         await search(word.kid);
       }
 

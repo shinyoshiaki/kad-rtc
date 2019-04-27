@@ -8,7 +8,7 @@ import Peer from "../modules/peer";
 class PeerTest extends Peer {}
 
 describe("ktable", () => {
-  const kBucketSize = 4;
+  const kBucketSize = 20;
 
   test("constructor", () => {
     const ktable = new Ktable(sha1("a").toString(), { kBucketSize });
@@ -23,7 +23,7 @@ describe("ktable", () => {
     const ktable = new Ktable(sha1("a").toString(), { kBucketSize });
     const { kid } = ktable;
 
-    [...Array(10)].forEach((_, i) => {
+    [...Array(100)].forEach((_, i) => {
       ktable.add(new PeerTest(sha1(i.toString()).toString()));
     });
 
@@ -31,7 +31,7 @@ describe("ktable", () => {
 
     expect(
       distance(kid, peers[0].kid) <
-        distance(ktable.allPeers[kBucketSize].kid, kid)
+        distance(ktable.allPeers.slice(-1)[0].kid, kid)
     ).toBe(true);
   });
 });

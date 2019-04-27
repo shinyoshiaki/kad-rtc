@@ -4,7 +4,7 @@ import Event from "../../../utill/event";
 export const PeerModule = (kid: string) => new Peer(kid);
 
 export default class Peer implements Base {
-  private type = "webrtc";
+  private type = "mock";
   private onData = new Event<any>();
   private send: Event<any> | undefined;
 

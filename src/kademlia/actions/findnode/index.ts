@@ -2,6 +2,7 @@ import Peer from "../../modules/peer";
 import { FindNodeProxyOffer } from "./listen/proxy";
 import Ktable from "../../ktable";
 import listenFindnode from "./listen";
+import sha1 from "sha1";
 
 const FindNode = (searchkid: string, except: string[]) => {
   return { rpc: "findnode" as const, searchkid, except };
@@ -20,7 +21,7 @@ export default async function findNode(
   searchkid: string,
   ktable: Ktable
 ) {
-  for (let peer of ktable.findNode(searchkid)) {
+  for (let peer of ktable.allPeers) {
     const except = ktable.allPeers.map(item => item.kid);
     peer.rpc(FindNode(searchkid, except));
 
@@ -43,5 +44,15 @@ export default async function findNode(
       listenFindnode(module, connect, ktable);
     }
   }
-  return ktable.getPeer(searchkid);
+  return {
+    target: ktable.getPeer(searchkid),
+    hash: sha1(
+      JSON.stringify(
+        ktable
+          .findNode(searchkid)
+          .map(v => v.kid)
+          .sort()
+      )
+    ).toString()
+  };
 }
