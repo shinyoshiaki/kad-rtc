@@ -15,8 +15,6 @@ const FindNodeAnswer = (sdp: string, peerkid: string) => {
 
 export type FindNodeAnswer = ReturnType<typeof FindNodeAnswer>;
 
-type actions = FindNodeProxyOffer;
-
 export default async function findNode(
   module: (kid: string) => Peer,
   searchkid: string,
@@ -26,7 +24,9 @@ export default async function findNode(
     const except = ktable.allPeers.map(item => item.kid);
     peer.rpc(FindNode(searchkid, except));
 
-    const res: FindNodeProxyOffer = await peer.promiseRpc("FindNodeProxyOffer");
+    const res: FindNodeProxyOffer = await peer
+      .eventRpc("FindNodeProxyOffer")
+      .asPromise();
 
     const { peers } = res;
     if (peers.length === 0) continue;

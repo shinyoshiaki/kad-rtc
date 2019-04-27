@@ -11,7 +11,7 @@ export default class Peer {
 
   rpc = (data: { rpc: string }) => {};
 
-  promiseRpc = (rpc: string) => new Event<any>().asPromise();
+  eventRpc = (rpc: string) => new Event<any>();
 
   createOffer = async (): Promise<any> => {};
 

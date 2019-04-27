@@ -24,37 +24,40 @@ export default class Peer implements Base {
   }
 
   rpc = (send: { rpc: string }) => {
-    if (this.send) this.send.excute({ data: send, label: send.rpc });
+    setTimeout(() => {
+      if (this.send) this.send.excute({ data: send, label: send.rpc });
+    }, 0);
   };
 
-  promiseRpc = (rpc: string) => {
+  eventRpc = (rpc: string) => {
     const observer = new Event<any>();
     const once = this.onData.subscribe(raw => {
       if (raw.label === rpc) {
-        const data = JSON.parse(raw.data);
+        const data = raw.data;
         observer.excute(data);
         once.unSubscribe();
       }
     });
-    return observer.asPromise();
+    return observer;
   };
 
   createOffer = async () => {
     return this.onData;
   };
 
-  setOffer = async (sdp: any) => {
+  setOffer = async (sdp: Event<any>) => {
     this.send = sdp;
     return { send: this.onData, connect: this.onConnect };
   };
 
-  setAnswer = async (sdp: any) => {
+  setAnswer = async (sdp: { send: Event<any>; connect: Event<{}> }) => {
     this.send = sdp.send;
     const connect: Event<{}> = sdp.connect;
+
     setTimeout(() => {
       connect.excute();
+      this.onConnect.excute();
     }, 0);
-    this.onConnect.excute();
 
     return true;
   };

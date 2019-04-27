@@ -27,7 +27,7 @@ export default class Peer implements Base {
     this.peer.send(JSON.stringify(send), send.rpc);
   };
 
-  promiseRpc = (rpc: string) => {
+  eventRpc = (rpc: string) => {
     const observer = new Event<any>();
     const once = this.peer.onData.subscribe(raw => {
       if (raw.label === rpc) {
@@ -36,7 +36,7 @@ export default class Peer implements Base {
         once.unSubscribe();
       }
     });
-    return observer.asPromise();
+    return observer;
   };
 
   createOffer = async () => {
