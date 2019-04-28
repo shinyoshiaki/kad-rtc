@@ -5052,9 +5052,10 @@ webidl-conversions@^4.0.2:
   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-4.0.2.tgz#a855980b1f0b6b359ba1d5d9fb39ae941faa63ad"
   integrity sha512-YQ+BmxuTgd6UXZW3+ICGfyqRyHXVlD5GtQr5+qjiNW7bF0cqrzX500HVXPBOvgXb5YnzDd+h0zqyv61KUD7+Sg==
 
-"webrtc4me@git+https://git@github.com/shinyoshiaki/webrtc4me.git":
-  version "0.5.4"
-  resolved "git+https://git@github.com/shinyoshiaki/webrtc4me.git#d4ccacaec270d44ce2a91e6da1d4861033671064"
+webrtc4me@^0.5.5:
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/webrtc4me/-/webrtc4me-0.5.5.tgz#e1a7b4232e5aaa3ecf652e98ecefa1f7dfb2b791"
+  integrity sha512-k5aKASHqv4wc7yj5Epfet/fqFzRpC+WgFsDmv3IShsVb4fy+zX9ycNGLxL3rJpSYTCyO2nOGDs8sOt0ntrxDlQ==
   dependencies:
     rxjs "^6.4.0"
     wrtc "^0.3.5"

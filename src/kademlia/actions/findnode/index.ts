@@ -1,7 +1,7 @@
 import { FindNodeProxyOffer } from "./listen/proxy";
-import listenFindnode from "./listen";
 import sha1 from "sha1";
 import { DependencyInjection } from "../../di";
+import { listeners } from '../../listeners';
 
 const FindNode = (searchkid: string, except: string[]) => {
   return { rpc: "findnode" as const, searchkid, except };
@@ -40,7 +40,7 @@ export default async function findNode(
       await connect.onConnect.asPromise();
 
       kTable.add(connect);
-      listenFindnode(connect, di);
+      listeners(connect, di);
     }
   }
   return {

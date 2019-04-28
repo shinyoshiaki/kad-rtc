@@ -1,6 +1,6 @@
-import { PeerModule } from "./mock";
+import { PeerModule } from "./webrtc";
 
-describe("mock", () => {
+describe("webrtc", () => {
   test(
     "test",
     async () => {

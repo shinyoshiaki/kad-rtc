@@ -51,7 +51,7 @@
     "socket.io": "^2.1.1",
     "socket.io-client": "^2.1.1",
     "source-map-support": "^0.5.9",
-    "webrtc4me": "git+https://git@github.com/shinyoshiaki/webrtc4me.git",
+    "webrtc4me": "^0.5.5",
     "wrtc": "^0.3.7"
   },
   "jest": {

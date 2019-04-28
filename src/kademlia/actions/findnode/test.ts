@@ -1,8 +1,8 @@
 import Peer, { PeerModule } from "../../modules/peer/mock";
 import sha1 from "sha1";
-import listenFindnode from "./listen";
 import findNode from ".";
 import { dependencyInjection, DependencyInjection } from "../../di";
+import { listeners } from '../../listeners';
 
 const kBucketSize = 8;
 const num = 5;
@@ -24,10 +24,10 @@ export async function setupNodes(kBucketSize: number, num: number) {
   await offer.setAnswer(answerSdp);
 
   kOffer.kTable.add(offer);
-  listenFindnode(offer, kOffer);
+  listeners(offer, kOffer);
 
   kAnswer.kTable.add(answer);
-  listenFindnode(answer, kAnswer);
+  listeners(answer, kAnswer);
 
   nodes.push(kOffer);
   nodes.push(kAnswer);
@@ -47,10 +47,9 @@ export async function setupNodes(kBucketSize: number, num: number) {
     await offer.setAnswer(answerSdp);
 
     pop.kTable.add(offer);
-    listenFindnode(offer, pop);
+    listeners(offer, pop);
     push.kTable.add(answer);
-
-    listenFindnode(answer, push);
+    listeners(answer, push);
 
     nodes.push(push);
   }

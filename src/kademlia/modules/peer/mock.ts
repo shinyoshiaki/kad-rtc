@@ -50,17 +50,18 @@ export default class Peer implements Base {
     return { send: this.onData, connect: this.onConnect };
   };
 
-  setAnswer = async (sdp: { send: Event<any>; connect: Event<{}> }) => {
-    this.send = sdp.send;
-    const connect: Event<{}> = sdp.connect;
+  setAnswer = async (sdp: { send: Event<any>; connect: Event<{}> }) =>
+    new Promise<boolean>(resolve => {
+      this.send = sdp.send;
+      const connect: Event<{}> = sdp.connect;
 
-    setTimeout(() => {
-      connect.excute();
-      this.onConnect.excute();
-    }, 0);
+      setTimeout(() => {
+        connect.excute();
+        this.onConnect.excute();
 
-    return true;
-  };
+        resolve(true);
+      }, 0);
+    });
 
   disconnect = () => {};
 }

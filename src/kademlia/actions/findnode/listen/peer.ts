@@ -1,7 +1,7 @@
 import Peer from "../../../modules/peer";
 import { FindNodeProxyOpen, FindNodeProxyAnswer } from "./proxy";
-import listenFindnode from ".";
 import { DependencyInjection } from "../../../di";
+import { listeners } from "../../../listeners";
 
 const FindNodePeerOffer = (sdp: any, peerkid: string) => {
   return { rpc: "FindNodePeerOffer" as const, sdp, peerkid };
@@ -50,6 +50,6 @@ export default class FindNodePeer {
     await peer.setAnswer(sdp);
 
     kTable.add(peer);
-    listenFindnode(peer, this.di);
+    listeners(peer, this.di);
   }
 }

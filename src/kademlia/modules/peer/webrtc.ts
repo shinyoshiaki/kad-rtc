@@ -1,6 +1,6 @@
 import Base from ".";
 import Event from "../../../utill/event";
-import WebRTC from "../../../webrtc/core";
+import WebRTC from "webrtc4me";
 
 export const PeerModule = (kid: string) => new Peer(kid);
 
@@ -45,14 +45,14 @@ export default class Peer implements Base {
     return offer;
   };
 
-  setOffer = async (sdp: any) => {
-    this.peer.setSdp(sdp);
+  setOffer = async (offer: any) => {
+    this.peer.setSdp(offer);
     const answer = await this.peer.onSignal.asPromise();
     return answer;
   };
 
-  setAnswer = async (sdp: any) => {
-    this.peer.setSdp(sdp);
+  setAnswer = async (answer: any) => {
+    this.peer.setSdp(answer);
     await this.peer.onConnect.asPromise();
     return true;
   };
