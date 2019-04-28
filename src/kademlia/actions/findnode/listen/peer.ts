@@ -1,7 +1,7 @@
 import Peer from "../../../modules/peer";
 import { FindNodeProxyOpen, FindNodeProxyAnswer } from "./proxy";
-import Ktable from "../../../ktable";
 import listenFindnode from ".";
+import { DependencyInjection } from "../../../di";
 
 const FindNodePeerOffer = (sdp: any, peerkid: string) => {
   return { rpc: "FindNodePeerOffer" as const, sdp, peerkid };
@@ -14,11 +14,7 @@ type actions = FindNodeProxyOpen | FindNodeProxyAnswer;
 export default class FindNodePeer {
   signaling: { [key: string]: Peer } = {};
 
-  constructor(
-    private module: (kid: string) => Peer,
-    private listen: Peer,
-    private ktable: Ktable
-  ) {
+  constructor(private listen: Peer, private di: DependencyInjection) {
     const discon = listen.onRpc.subscribe(async (data: actions) => {
       switch (data.rpc) {
         case "FindNodeProxyOpen":
@@ -35,21 +31,25 @@ export default class FindNodePeer {
 
   async findNodeProxyOpen(data: FindNodeProxyOpen) {
     const { finderkid } = data;
-    const peer = this.module(finderkid);
+    const { peerModule, kTable } = this.di;
+
+    const peer = peerModule(finderkid);
     this.signaling[finderkid] = peer;
 
     const offer = await peer.createOffer();
 
-    this.listen.rpc(FindNodePeerOffer(offer, this.ktable.kid));
+    this.listen.rpc(FindNodePeerOffer(offer, kTable.kid));
   }
 
   async findNodeProxyAnswer(data: FindNodeProxyAnswer) {
     const { finderkid, sdp } = data;
+    const { kTable } = this.di;
+
     const peer = this.signaling[finderkid];
     if (!peer) return;
     await peer.setAnswer(sdp);
 
-    this.ktable.add(peer);
-    listenFindnode(this.module, peer, this.ktable);
+    kTable.add(peer);
+    listenFindnode(peer, this.di);
   }
 }

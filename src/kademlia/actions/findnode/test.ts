@@ -1,55 +1,71 @@
-import Ktable from "../../ktable";
 import Peer, { PeerModule } from "../../modules/peer/mock";
 import sha1 from "sha1";
 import listenFindnode from "./listen";
 import findNode from ".";
+import { dependencyInjection, DependencyInjection } from "../../di";
 
 const kBucketSize = 8;
-const num = 50;
+const num = 5;
+
+export async function setupNodes(kBucketSize: number, num: number) {
+  const nodes: DependencyInjection[] = [];
+
+  const kOffer = dependencyInjection(sha1("0").toString(), PeerModule, {
+    kBucketSize
+  });
+  const kAnswer = dependencyInjection(sha1("1").toString(), PeerModule, {
+    kBucketSize
+  });
+
+  const offer = new Peer(kAnswer.kTable.kid);
+  const offerSdp = await offer.createOffer();
+  const answer = new Peer(kOffer.kTable.kid);
+  const answerSdp = await answer.setOffer(offerSdp);
+  await offer.setAnswer(answerSdp);
+
+  kOffer.kTable.add(offer);
+  listenFindnode(offer, kOffer);
+
+  kAnswer.kTable.add(answer);
+  listenFindnode(answer, kAnswer);
+
+  nodes.push(kOffer);
+  nodes.push(kAnswer);
+
+  for (let i = 2; i < 2 + num; i++) {
+    const pop = nodes.slice(-1)[0];
+    const push = dependencyInjection(
+      sha1(i.toString()).toString(),
+      PeerModule,
+      { kBucketSize }
+    );
+
+    const offer = new Peer(push.kTable.kid);
+    const offerSdp = await offer.createOffer();
+    const answer = new Peer(pop.kTable.kid);
+    const answerSdp = await answer.setOffer(offerSdp);
+    await offer.setAnswer(answerSdp);
+
+    pop.kTable.add(offer);
+    listenFindnode(offer, pop);
+    push.kTable.add(answer);
+
+    listenFindnode(answer, push);
+
+    nodes.push(push);
+  }
+  for (let node of nodes) {
+    await findNode(node.kTable.kid, node);
+  }
+  return nodes;
+}
 
 describe("findnode", () => {
   test(
     "findnode",
     async () => {
-      const nodes: Ktable[] = [];
+      const nodes = await setupNodes(kBucketSize, num);
 
-      const kOffer = new Ktable(sha1("0").toString(), { kBucketSize });
-      const kAnswer = new Ktable(sha1("1").toString(), { kBucketSize });
-
-      const offer = new Peer(kAnswer.kid);
-      const offerSdp = await offer.createOffer();
-      const answer = new Peer(kOffer.kid);
-      const answerSdp = await answer.setOffer(offerSdp);
-      await offer.setAnswer(answerSdp);
-
-      kOffer.add(offer);
-      listenFindnode(PeerModule, offer, kOffer);
-      kAnswer.add(answer);
-      listenFindnode(PeerModule, answer, kAnswer);
-
-      nodes.push(kOffer);
-      nodes.push(kAnswer);
-
-      for (let i = 2; i < 2 + num; i++) {
-        const pop = nodes.slice(-1)[0];
-        const push = new Ktable(sha1(i.toString()).toString(), { kBucketSize });
-
-        const offer = new Peer(push.kid);
-        const offerSdp = await offer.createOffer();
-        const answer = new Peer(pop.kid);
-        const answerSdp = await answer.setOffer(offerSdp);
-        await offer.setAnswer(answerSdp);
-
-        pop.add(offer);
-        listenFindnode(PeerModule, offer, pop);
-        push.add(answer);
-        listenFindnode(PeerModule, answer, push);
-
-        nodes.push(push);
-      }
-      for (let node of nodes) {
-        await findNode(PeerModule, node.kid, node);
-      }
       const search = async (word: string) => {
         const node = nodes[0];
 
@@ -57,7 +73,7 @@ describe("findnode", () => {
 
         let trytime = 0;
         for (let pre = ""; ; trytime++) {
-          const res = await findNode(PeerModule, word, node);
+          const res = await findNode(word, node);
           if (pre === res.hash) {
             break;
           }
@@ -75,7 +91,7 @@ describe("findnode", () => {
       };
 
       for (let word of nodes.slice(1)) {
-        await search(word.kid);
+        await search(word.kTable.kid);
       }
 
       await new Promise(r => setTimeout(r, 0));

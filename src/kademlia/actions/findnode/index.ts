@@ -1,8 +1,7 @@
-import Peer from "../../modules/peer";
 import { FindNodeProxyOffer } from "./listen/proxy";
-import Ktable from "../../ktable";
 import listenFindnode from "./listen";
 import sha1 from "sha1";
+import { DependencyInjection } from "../../di";
 
 const FindNode = (searchkid: string, except: string[]) => {
   return { rpc: "findnode" as const, searchkid, except };
@@ -17,12 +16,12 @@ const FindNodeAnswer = (sdp: string, peerkid: string) => {
 export type FindNodeAnswer = ReturnType<typeof FindNodeAnswer>;
 
 export default async function findNode(
-  module: (kid: string) => Peer,
   searchkid: string,
-  ktable: Ktable
+  di: DependencyInjection
 ) {
-  for (let peer of ktable.allPeers) {
-    const except = ktable.allPeers.map(item => item.kid);
+  const { kTable, peerModule } = di;
+  for (let peer of kTable.allPeers) {
+    const except = kTable.allPeers.map(item => item.kid);
     peer.rpc(FindNode(searchkid, except));
 
     const res: FindNodeProxyOffer = await peer
@@ -34,21 +33,21 @@ export default async function findNode(
 
     for (let offer of peers) {
       const { peerkid, sdp } = offer;
-      const connect = module(peerkid);
+      const connect = peerModule(peerkid);
       const answer = await connect.setOffer(sdp);
 
       peer.rpc(FindNodeAnswer(answer, peerkid));
       await connect.onConnect.asPromise();
 
-      ktable.add(connect);
-      listenFindnode(module, connect, ktable);
+      kTable.add(connect);
+      listenFindnode(connect, di);
     }
   }
   return {
-    target: ktable.getPeer(searchkid),
+    target: kTable.getPeer(searchkid),
     hash: sha1(
       JSON.stringify(
-        ktable
+        kTable
           .findNode(searchkid)
           .map(v => v.kid)
           .sort()
