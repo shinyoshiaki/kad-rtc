@@ -10,13 +10,14 @@ const Store = (key: string, value: string) => {
 export type Store = ReturnType<typeof Store>;
 
 export default async function store(value: string, di: DependencyInjection) {
+  const { kTable } = di;
   const key = sha1(value).toString();
-  for (let pre = "", i = 0; i < di.kTable.kBucketSize; i++) {
-    const res = await findNode(key, di);
-    if (pre === res.hash) {
-      break;
-    }
-    pre = res.hash;
+  for (
+    let preHash = "";
+    preHash !== kTable.getHash(key);
+    preHash = kTable.getHash(key)
+  ) {
+    await findNode(key, di);
   }
   const peers = di.kTable.findNode(key);
   for (let peer of peers) {

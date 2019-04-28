@@ -24,10 +24,19 @@ export default class Ktable {
     kbucket.add(peer);
   }
 
+  findNode = (kid: string): Peer[] =>
+    this.allPeers
+      .sort((a, b) => distance(a.kid, kid) - distance(b.kid, kid))
+      .slice(0, this.k);
+
   get allPeers() {
     return this.kbuckets
       .map(kbucket => kbucket.peers.map(bucket => bucket.peer))
       .flatMap(item => item);
+  }
+
+  get allKids() {
+    return this.allPeers.map(v => v.kid);
   }
 
   get kBucketSize() {
@@ -36,11 +45,6 @@ export default class Ktable {
 
   getPeer = (kid: string): Peer | undefined =>
     this.allPeers.find(peer => peer.kid === kid);
-
-  findNode = (kid: string): Peer[] =>
-    this.allPeers
-      .sort((a, b) => distance(a.kid, kid) - distance(b.kid, kid))
-      .slice(0, this.k);
 
   getHash = (kid: string) =>
     sha1(

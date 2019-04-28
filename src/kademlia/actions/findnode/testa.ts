@@ -1,11 +1,12 @@
-import Peer, { PeerModule } from "../../modules/peer/mock";
+import { PeerModule } from "../../modules/peer/mock";
+import Peer from "../../modules/peer";
 import sha1 from "sha1";
 import findNode from ".";
 import { dependencyInjection, DependencyInjection } from "../../di";
-import { listeners } from '../../listeners';
+import { listeners } from "../../listeners";
 
 const kBucketSize = 8;
-const num = 5;
+const num = kBucketSize * 2;
 
 export async function testSetupNodes(kBucketSize: number, num: number) {
   const nodes: DependencyInjection[] = [];
@@ -17,9 +18,9 @@ export async function testSetupNodes(kBucketSize: number, num: number) {
     kBucketSize
   });
 
-  const offer = new Peer(kAnswer.kTable.kid);
+  const offer = PeerModule(kAnswer.kTable.kid);
   const offerSdp = await offer.createOffer();
-  const answer = new Peer(kOffer.kTable.kid);
+  const answer = PeerModule(kOffer.kTable.kid);
   const answerSdp = await answer.setOffer(offerSdp);
   await offer.setAnswer(answerSdp);
 
@@ -40,9 +41,9 @@ export async function testSetupNodes(kBucketSize: number, num: number) {
       { kBucketSize }
     );
 
-    const offer = new Peer(push.kTable.kid);
+    const offer = PeerModule(push.kTable.kid);
     const offerSdp = await offer.createOffer();
-    const answer = new Peer(pop.kTable.kid);
+    const answer = PeerModule(pop.kTable.kid);
     const answerSdp = await answer.setOffer(offerSdp);
     await offer.setAnswer(answerSdp);
 
@@ -68,19 +69,18 @@ describe("findnode", () => {
       const search = async (word: string) => {
         const node = nodes[0];
 
-        let target: any;
+        let target: undefined | Peer;
 
-        let trytime = 0;
-        for (let pre = ""; ; trytime++) {
-          const res = await findNode(word, node);
-          if (pre === res.hash) {
+        for (
+          let pre = "";
+          pre !== node.kTable.getHash(word);
+          pre = node.kTable.getHash(word)
+        ) {
+          target = await findNode(word, node);
+
+          if (target) {
             break;
           }
-          if (res.target) {
-            target = res.target;
-            break;
-          }
-          pre = res.hash;
         }
 
         if (!target) {

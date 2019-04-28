@@ -42,8 +42,5 @@ export default async function findNode(
       listeners(connect, di);
     }
   }
-  return {
-    target: kTable.getPeer(searchkid),
-    hash: kTable.getHash(searchkid)
-  };
+  return kTable.getPeer(searchkid);
 }
