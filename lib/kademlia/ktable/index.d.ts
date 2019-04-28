@@ -8,6 +8,8 @@ export default class Ktable {
     constructor(kid: string, opt?: Partial<Option>);
     add(peer: Peer): void;
     readonly allPeers: Peer[];
+    readonly kBucketSize: number;
     getPeer: (kid: string) => Peer | undefined;
     findNode: (kid: string) => Peer[];
+    getHash: (kid: string) => string;
 }

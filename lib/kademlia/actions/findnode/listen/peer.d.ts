@@ -1,6 +1,6 @@
 import Peer from "../../../modules/peer";
 import { FindNodeProxyOpen, FindNodeProxyAnswer } from "./proxy";
-import Ktable from "../../../ktable";
+import { DependencyInjection } from "../../../di";
 declare const FindNodePeerOffer: (sdp: any, peerkid: string) => {
     rpc: "FindNodePeerOffer";
     sdp: any;
@@ -8,13 +8,12 @@ declare const FindNodePeerOffer: (sdp: any, peerkid: string) => {
 };
 export declare type FindNodePeerOffer = ReturnType<typeof FindNodePeerOffer>;
 export default class FindNodePeer {
-    private module;
     private listen;
-    private ktable;
+    private di;
     signaling: {
         [key: string]: Peer;
     };
-    constructor(module: (kid: string) => Peer, listen: Peer, ktable: Ktable);
+    constructor(listen: Peer, di: DependencyInjection);
     findNodeProxyOpen(data: FindNodeProxyOpen): Promise<void>;
     findNodeProxyAnswer(data: FindNodeProxyAnswer): Promise<void>;
 }

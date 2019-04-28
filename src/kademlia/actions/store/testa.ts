@@ -11,12 +11,12 @@ describe("store", () => {
     async () => {
       const nodes = await testSetupNodes(kBucketSize, num);
 
-      const test = async (value: string) => {
+      const testStore = async (value: string) => {
         const node = nodes[0];
         await store(value, node);
       };
 
-      await test("test");
+      await testStore("test");
 
       expect(
         Object.keys(nodes.slice(-1)[0].kvs.db).includes(sha1("test").toString())

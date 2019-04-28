@@ -1,5 +1,4 @@
 import { FindNodeProxyOffer } from "./listen/proxy";
-import sha1 from "sha1";
 import { DependencyInjection } from "../../di";
 import { listeners } from "../../listeners";
 
@@ -45,13 +44,6 @@ export default async function findNode(
   }
   return {
     target: kTable.getPeer(searchkid),
-    hash: sha1(
-      JSON.stringify(
-        kTable
-          .findNode(searchkid)
-          .map(v => v.kid)
-          .sort()
-      )
-    ).toString()
+    hash: kTable.getHash(searchkid)
   };
 }

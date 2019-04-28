@@ -8,7 +8,10 @@ export default class Peer {
     constructor(kid: string);
     rpc: (data: {
         rpc: string;
-    }) => Event<any>;
+    }) => void;
+    eventRpc: <T extends {
+        rpc: string;
+    }>(rpc: T["rpc"]) => Event<T>;
     createOffer: () => Promise<any>;
     setOffer: (sdp: any) => Promise<any>;
     setAnswer: (sdp: any) => Promise<any>;

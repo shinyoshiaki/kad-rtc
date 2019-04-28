@@ -18,7 +18,11 @@ export default async function findValue(key: string, di: DependencyInjection) {
   const { kTable, peerModule } = di;
   let result: string | undefined;
 
-  job: for (let _ in [...Array(kTable.kBucketSize)]) {
+  job: for (
+    let preHash = "";
+    preHash !== kTable.getHash(key);
+    preHash = kTable.getHash(key)
+  ) {
     for (let peer of kTable.allPeers) {
       const except = kTable.allPeers.map(item => item.kid);
       peer.rpc(FindValue(key, except));

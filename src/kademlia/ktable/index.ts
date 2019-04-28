@@ -1,6 +1,7 @@
 import Kbucket, { Option as OptBucket } from "./kbucket";
 import { distance } from "kad-distance";
 import Peer from "../modules/peer";
+import sha1 from "sha1";
 
 export type Option = OptBucket;
 
@@ -40,4 +41,13 @@ export default class Ktable {
     this.allPeers
       .sort((a, b) => distance(a.kid, kid) - distance(b.kid, kid))
       .slice(0, this.k);
+
+  getHash = (kid: string) =>
+    sha1(
+      JSON.stringify(
+        this.findNode(kid)
+          .map(v => v.kid)
+          .sort()
+      )
+    ).toString();
 }

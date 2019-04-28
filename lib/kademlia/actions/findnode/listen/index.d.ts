@@ -1,3 +1,3 @@
 import Peer from "../../../modules/peer";
-import Ktable from "../../../ktable";
-export default function listenFindnode(module: (kid: string) => Peer, peer: Peer, ktable: Ktable): void;
+import { DependencyInjection } from "../../../di";
+export default function listenFindnode(peer: Peer, di: DependencyInjection): void;

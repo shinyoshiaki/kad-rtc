@@ -11,7 +11,7 @@ describe("portal", () => {
       });
 
       await b.onConnect.asPromise();
-      expect(a.kademlia.kTable.getPeer(b.kid)).not.toBe(undefined);
+      expect(a.kademlia.di.kTable.getPeer(b.kid)).not.toBe(undefined);
     },
     1000 * 6000
   );

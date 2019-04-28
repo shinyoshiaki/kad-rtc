@@ -1,12 +1,13 @@
 {
   "name": "kad-rtc",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=11"
   },
   "scripts": {
     "build": "tsc",
+    "update": "rm -rf ./lib && npm run build",
     "test": "jest --forceExit",
     "publish": "npm publish --access=public"
   },

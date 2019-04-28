@@ -1,11 +1,17 @@
-import Ktable, { Option as OptTable } from "./ktable";
+import { Option as OptTable } from "./ktable";
 import Peer from "./modules/peer";
-declare type Option = OptTable;
+import { DependencyInjection } from "./di";
+declare type Options = OptTable;
 export default class Kademlia {
-    private module;
     kid: string;
-    kTable: Ktable;
-    constructor(module: (kid: string) => Peer, opt?: Partial<Option>);
-    findNode(searchkid: string): Promise<void>;
+    di: DependencyInjection;
+    constructor(kid: string, module: (kid: string) => Peer, opt?: Partial<Options>);
+    findNode(searchkid: string, retry?: number): Promise<{
+        target: Peer | undefined;
+        hash: string;
+    } | undefined>;
+    store(value: string): Promise<void>;
+    findValue(key: string): Promise<string | undefined>;
+    add(peer: Peer): Promise<void>;
 }
 export {};

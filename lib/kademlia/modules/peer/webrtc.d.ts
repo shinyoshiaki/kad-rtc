@@ -11,9 +11,10 @@ export default class Peer implements Base {
     constructor(kid: string);
     rpc: (send: {
         rpc: string;
-    }) => Event<any>;
+    }) => void;
+    eventRpc: (rpc: string) => Event<any>;
     createOffer: () => Promise<any>;
-    setOffer: (sdp: any) => Promise<any>;
-    setAnswer: (sdp: any) => Promise<boolean>;
+    setOffer: (offer: any) => Promise<any>;
+    setAnswer: (answer: any) => Promise<boolean>;
     disconnect: () => void;
 }
