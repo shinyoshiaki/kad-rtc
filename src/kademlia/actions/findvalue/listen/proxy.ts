@@ -33,7 +33,7 @@ export default class FindValueProxy {
           this.findvalue(data);
           break;
         case "FindValueAnswer":
-          this;
+          this.findValueAnswer(data);
           break;
       }
     });
@@ -69,7 +69,7 @@ export default class FindValueProxy {
     }
   }
 
-  async findnodeanswer(data: FindValueAnswer) {
+  async findValueAnswer(data: FindValueAnswer) {
     const { sdp, peerkid } = data;
     const { kTable } = this.di;
     const peer = kTable.getPeer(peerkid);

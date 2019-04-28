@@ -1,4 +1,4 @@
-import { testSetupNodes } from "../findnode/test";
+import { testSetupNodes } from "../findnode/testa";
 import store from ".";
 import sha1 from "sha1";
 
