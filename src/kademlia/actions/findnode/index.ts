@@ -9,7 +9,7 @@ const FindNode = (searchkid: string, except: string[]) => {
 
 export type FindNode = ReturnType<typeof FindNode>;
 
-const FindNodeAnswer = (sdp: string, peerkid: string) => {
+const FindNodeAnswer = (sdp: any, peerkid: string) => {
   return { rpc: "FindNodeAnswer" as const, sdp, peerkid };
 };
 

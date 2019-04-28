@@ -1,7 +1,7 @@
 import Peer from "../../../modules/peer";
-import { FindNodeProxyOpen, FindNodeProxyAnswer } from "./proxy";
 import { DependencyInjection } from "../../../di";
 import { listeners } from "../../../listeners";
+import { FindValueProxyOpen, FindValueProxyAnswer } from "./proxy";
 
 const FindValuePeerOffer = (sdp: any, peerkid: string) => {
   return { rpc: "FindValuePeerOffer" as const, sdp, peerkid };
@@ -9,7 +9,7 @@ const FindValuePeerOffer = (sdp: any, peerkid: string) => {
 
 export type FindValuePeerOffer = ReturnType<typeof FindValuePeerOffer>;
 
-type actions = {};
+type actions = FindValueProxyOpen | FindValueProxyAnswer;
 
 export default class FindValuePeer {
   signaling: { [key: string]: Peer } = {};
@@ -17,11 +17,11 @@ export default class FindValuePeer {
   constructor(private listen: Peer, private di: DependencyInjection) {
     const discon = listen.onRpc.subscribe(async (data: actions) => {
       switch (data.rpc) {
-        case "FindNodeProxyOpen":
-          this.findNodeProxyOpen(data);
+        case "FindValueProxyOpen":
+          this.findValueProxyOpen(data);
           break;
-        case "FindNodeProxyAnswer":
-          this.findNodeProxyAnswer(data);
+        case "FindValueProxyAnswer":
+          this.findValueProxyAnswer(data);
           break;
       }
     });
@@ -29,7 +29,7 @@ export default class FindValuePeer {
     listen.onDisconnect.once(() => discon.unSubscribe());
   }
 
-  async findNodeProxyOpen(data: FindNodeProxyOpen) {
+  async findValueProxyOpen(data: FindValueProxyOpen) {
     const { finderkid } = data;
     const { peerModule, kTable } = this.di;
 
@@ -38,10 +38,10 @@ export default class FindValuePeer {
 
     const offer = await peer.createOffer();
 
-    this.listen.rpc(FindNodePeerOffer(offer, kTable.kid));
+    this.listen.rpc(FindValuePeerOffer(offer, kTable.kid));
   }
 
-  async findNodeProxyAnswer(data: FindNodeProxyAnswer) {
+  async findValueProxyAnswer(data: FindValueProxyAnswer) {
     const { finderkid, sdp } = data;
     const { kTable } = this.di;
 

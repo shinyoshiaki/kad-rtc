@@ -7,7 +7,7 @@ import { listeners } from '../../listeners';
 const kBucketSize = 8;
 const num = 5;
 
-export async function setupNodes(kBucketSize: number, num: number) {
+export async function testSetupNodes(kBucketSize: number, num: number) {
   const nodes: DependencyInjection[] = [];
 
   const kOffer = dependencyInjection(sha1("0").toString(), PeerModule, {
@@ -63,7 +63,7 @@ describe("findnode", () => {
   test(
     "findnode",
     async () => {
-      const nodes = await setupNodes(kBucketSize, num);
+      const nodes = await testSetupNodes(kBucketSize, num);
 
       const search = async (word: string) => {
         const node = nodes[0];

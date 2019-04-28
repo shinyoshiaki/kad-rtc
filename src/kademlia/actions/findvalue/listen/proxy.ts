@@ -1,7 +1,7 @@
 import Peer from "../../../modules/peer";
 import { FindValuePeerOffer } from "./peer";
 import { DependencyInjection } from "../../../di";
-import { FindValue } from "..";
+import { FindValue, FindValueAnswer } from "..";
 
 const FindValueResult = (
   data: Partial<{ value: string; offers: { peerkid: string; sdp: any }[] }>
@@ -23,7 +23,7 @@ const FindValueProxyAnswer = (sdp: any, finderkid: string) => {
 
 export type FindValueProxyAnswer = ReturnType<typeof FindValueProxyAnswer>;
 
-type actions = FindValue;
+type actions = FindValue | FindValueAnswer;
 
 export default class FindValueProxy {
   constructor(private listen: Peer, private di: DependencyInjection) {
@@ -32,8 +32,8 @@ export default class FindValueProxy {
         case "FindValue":
           this.findvalue(data);
           break;
-        case "findnodeanswer":
-          this.findnodeanswer(data);
+        case "FindValueAnswer":
+          this;
           break;
       }
     });
@@ -59,8 +59,8 @@ export default class FindValueProxy {
 
         peer.rpc(FindValueProxyOpen(this.listen.kid));
 
-        const res: FindValuePeerOffer = await peer
-          .eventRpc("FindValuePeerOffer")
+        const res = await peer
+          .eventRpc<FindValuePeerOffer>("FindValuePeerOffer")
           .asPromise();
         const { peerkid, sdp } = res;
         offers.push({ peerkid, sdp });
@@ -69,11 +69,11 @@ export default class FindValueProxy {
     }
   }
 
-  async findnodeanswer(data: FindNodeAnswer) {
+  async findnodeanswer(data: FindValueAnswer) {
     const { sdp, peerkid } = data;
     const { kTable } = this.di;
     const peer = kTable.getPeer(peerkid);
     if (!peer) return;
-    peer.rpc(FindNodeProxyAnswer(sdp, this.listen.kid));
+    peer.rpc(FindValueProxyAnswer(sdp, this.listen.kid));
   }
 }

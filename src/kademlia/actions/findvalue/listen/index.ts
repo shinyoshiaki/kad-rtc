@@ -1,9 +1,9 @@
 import Peer from "../../../modules/peer";
-import FindNodePeer from "./peer";
-import FindNodeProxy from "./proxy";
 import { DependencyInjection } from "../../../di";
+import FindValuePeer from "./peer";
+import FindValueProxy from "./proxy";
 
-export default function listenFindnode(peer: Peer, di: DependencyInjection) {
-  new FindNodeProxy(peer,di);
-  new FindNodePeer(peer, di);
+export default function listenFindValue(peer: Peer, di: DependencyInjection) {
+  new FindValuePeer(peer, di);
+  new FindValueProxy(peer, di);
 }
