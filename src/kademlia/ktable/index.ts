@@ -29,6 +29,10 @@ export default class Ktable {
       .flatMap(item => item);
   }
 
+  get kBucketSize() {
+    return this.k;
+  }
+
   getPeer = (kid: string): Peer | undefined =>
     this.allPeers.find(peer => peer.kid === kid);
 
