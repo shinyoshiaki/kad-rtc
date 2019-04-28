@@ -11,7 +11,7 @@ export default class Peer {
 
   rpc = (data: { rpc: string }) => {};
 
-  eventRpc = (rpc: string) => new Event<any>();
+  eventRpc = <T extends { rpc: string }>(rpc: T["rpc"]) => new Event<T>();
 
   createOffer = async (): Promise<any> => {};
 

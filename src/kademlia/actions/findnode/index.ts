@@ -1,16 +1,16 @@
 import { FindNodeProxyOffer } from "./listen/proxy";
 import sha1 from "sha1";
 import { DependencyInjection } from "../../di";
-import { listeners } from '../../listeners';
+import { listeners } from "../../listeners";
 
 const FindNode = (searchkid: string, except: string[]) => {
-  return { rpc: "findnode" as const, searchkid, except };
+  return { rpc: "FindNode" as const, searchkid, except };
 };
 
 export type FindNode = ReturnType<typeof FindNode>;
 
 const FindNodeAnswer = (sdp: string, peerkid: string) => {
-  return { rpc: "findnodeanswer" as const, sdp, peerkid };
+  return { rpc: "FindNodeAnswer" as const, sdp, peerkid };
 };
 
 export type FindNodeAnswer = ReturnType<typeof FindNodeAnswer>;
@@ -24,8 +24,8 @@ export default async function findNode(
     const except = kTable.allPeers.map(item => item.kid);
     peer.rpc(FindNode(searchkid, except));
 
-    const res: FindNodeProxyOffer = await peer
-      .eventRpc("FindNodeProxyOffer")
+    const res = await peer
+      .eventRpc<FindNodeProxyOffer>("FindNodeProxyOffer")
       .asPromise();
 
     const { peers } = res;
