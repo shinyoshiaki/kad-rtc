@@ -2,6 +2,8 @@ import Base from "./base";
 import Event from "../../../utill/event";
 import WebRTC from "webrtc4me";
 
+let num = 0;
+
 export const PeerModule = (kid: string) => new Peer(kid);
 
 export default class Peer implements Base {
@@ -12,6 +14,7 @@ export default class Peer implements Base {
   onConnect = this.peer.onConnect as any;
 
   constructor(public kid: string) {
+    num++;
     const discon = this.peer.onData.subscribe(raw => {
       try {
         const data = JSON.parse(raw.data);

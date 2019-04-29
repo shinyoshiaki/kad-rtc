@@ -27,7 +27,7 @@ type actions = FindValue | FindValueAnswer;
 
 export default class FindValueProxy {
   constructor(private listen: Peer, private di: DependencyInjection) {
-    const discon = listen.onRpc.subscribe(async (data: actions) => {
+    const discon = listen.onRpc.subscribe((data: actions) => {
       switch (data.rpc) {
         case "FindValue":
           this.findvalue(data);
@@ -62,7 +62,12 @@ export default class FindValueProxy {
 
         const res = await peer
           .eventRpc<FindValuePeerOffer>("FindValuePeerOffer")
-          .asPromise();
+          .asPromise(5000);
+
+        if (!res) {
+          continue;
+        }
+
         const { peerkid, sdp } = res;
         offers.push({ peerkid, sdp });
       }

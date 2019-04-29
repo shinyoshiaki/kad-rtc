@@ -2,8 +2,8 @@ import Portal from ".";
 import { Count } from "../../utill/testtools";
 import aport from "aport";
 
-const kBucketSize = 5;
-const num = 10;
+const kBucketSize = 4;
+const num = 8;
 
 async function testSetupNodes(kBucketSize: number, num: number) {
   const nodes: Portal[] = [];

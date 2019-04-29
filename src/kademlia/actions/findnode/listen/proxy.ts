@@ -25,7 +25,7 @@ type actions = FindNode | FindNodeAnswer;
 
 export default class FindNodeProxy {
   constructor(private listen: Peer, private di: DependencyInjection) {
-    const discon = listen.onRpc.subscribe(async (data: actions) => {
+    const discon = listen.onRpc.subscribe((data: actions) => {
       switch (data.rpc) {
         case "FindNode":
           this.findnode(data);
@@ -53,7 +53,12 @@ export default class FindNodeProxy {
 
       const res = await peer
         .eventRpc<FindNodePeerOffer>("FindNodePeerOffer")
-        .asPromise();
+        .asPromise(5000);
+
+      if (!res) {
+        continue;
+      }
+
       const { peerkid, sdp } = res;
       offers.push({ peerkid, sdp });
     }

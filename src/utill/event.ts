@@ -43,11 +43,11 @@ export default class Event<T> {
   }
 
   asPromise = (timelimit?: number) =>
-    new Promise<T>((resolve, reject) => {
+    new Promise<T | undefined>((resolve, reject) => {
       const timeout =
         timelimit &&
         setTimeout(() => {
-          reject();
+          reject(undefined);
         }, timelimit);
       this.once(data => {
         if (timeout) clearTimeout(timeout);

@@ -15,7 +15,7 @@ export default class FindNodePeer {
   signaling: { [key: string]: Peer } = {};
 
   constructor(private listen: Peer, private di: DependencyInjection) {
-    const discon = listen.onRpc.subscribe(async (data: actions) => {
+    const discon = listen.onRpc.subscribe((data: actions) => {
       switch (data.rpc) {
         case "FindNodeProxyOpen":
           this.findNodeProxyOpen(data);

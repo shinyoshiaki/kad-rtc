@@ -15,7 +15,7 @@ export default class FindValuePeer {
   signaling: { [key: string]: Peer } = {};
 
   constructor(private listen: Peer, private di: DependencyInjection) {
-    const discon = listen.onRpc.subscribe(async (data: actions) => {
+    const discon = listen.onRpc.subscribe((data: actions) => {
       switch (data.rpc) {
         case "FindValueProxyOpen":
           this.findValueProxyOpen(data);

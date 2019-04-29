@@ -16,7 +16,7 @@ export default function listenStore(peer: Peer, di: DependencyInjection) {
 
 class ListenStore {
   constructor(private listen: Peer, private di: DependencyInjection) {
-    const discon = listen.onRpc.subscribe(async (data: actions) => {
+    const discon = listen.onRpc.subscribe((data: actions) => {
       switch (data.rpc) {
         case "store":
           this.store(data);

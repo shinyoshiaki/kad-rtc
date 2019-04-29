@@ -33,6 +33,10 @@ export default async function findValue(key: string, di: DependencyInjection) {
         .eventRpc<FindValueResult>("FindValueResult")
         .asPromise();
 
+      if (!res) {
+        continue;
+      }
+
       const { value, offers } = res.data;
       if (value) {
         result = value;
