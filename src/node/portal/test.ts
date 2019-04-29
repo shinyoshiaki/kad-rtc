@@ -1,6 +1,26 @@
 import Portal from ".";
 import { Count } from "../../utill/testtools";
 
+const kBucketSize = 5;
+const num = kBucketSize * 2;
+
+async function testSetupNodes(kBucketSize: number, num: number) {
+  const nodes: Portal[] = [];
+  const first = new Portal({ port: 20000 });
+  nodes.push(first);
+
+  for (let i = 1; i < num; i++) {
+    const node = new Portal({
+      target: { url: "localhost", port: 20000 + i - 1 },
+      port: 20000 + i,
+      kadOption: { kBucketSize }
+    });
+    await node.onConnect.asPromise();
+    nodes.push(node);
+  }
+  return nodes;
+}
+
 describe("portal", () => {
   test(
     "p2p",
@@ -24,6 +44,8 @@ describe("portal", () => {
         });
       const { a, b } = await test();
       expect(a.kademlia.di.kTable.getPeer(b.kid)).not.toBe(undefined);
+      a.close();
+      b.close();
     },
     1000 * 6000
   );
@@ -31,23 +53,15 @@ describe("portal", () => {
   // test(
   //   "findnode",
   //   async () => {
-  //     const nodes: Portal[] = [];
-  //     const first = new Portal({ port: 20000 });
-  //     nodes.push(first);
-
-  //     for (let i = 1; i < 6; i++) {
-  //       const node = new Portal({
-  //         target: { url: "localhost", port: 20000 + i - 1 },
-  //         port: 20000 + i
-  //       });
-  //       await node.onConnect.asPromise();
-  //       nodes.push(node);
-  //     }
+  //     const nodes = await testSetupNodes(kBucketSize, num);
 
   //     const last = nodes.slice(-1)[0];
 
-  //     await new Promise(r => setTimeout(r, 5000));
   //     expect(true).toBe(true);
+
+  //     nodes.forEach(node => {
+  //       node.close();
+  //     });
   //   },
   //   1000 * 6000
   // );

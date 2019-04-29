@@ -10,7 +10,8 @@
     "type": "tsc --noEmit",
     "update": "rm -rf ./lib && npm run build",
     "test": "npm run type && jest --forceExit",
-    "publish": "npm publish --access=public"
+    "publish": "npm publish --access=public",
+    "test_target":"jest --forceExit ./src/kademlia/actions/findnode/test.ts"
   },
   "main": "lib/index.js",
   "files": [

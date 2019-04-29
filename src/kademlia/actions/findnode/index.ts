@@ -18,7 +18,11 @@ export default async function findNode(
   searchkid: string,
   di: DependencyInjection
 ) {
-  const { kTable, peerModule } = di;
+  const { kTable } = di;
+  const { peerCreate } = di.modules;
+
+  if (kTable.getPeer(searchkid)) return kTable.getPeer(searchkid);
+
   for (let peer of kTable.allPeers) {
     const except = kTable.allPeers.map(item => item.kid);
     peer.rpc(FindNode(searchkid, except));
@@ -32,7 +36,7 @@ export default async function findNode(
 
     for (let offer of peers) {
       const { peerkid, sdp } = offer;
-      const connect = peerModule(peerkid);
+      const connect = peerCreate(peerkid);
       const answer = await connect.setOffer(sdp);
 
       peer.rpc(FindNodeAnswer(answer, peerkid));

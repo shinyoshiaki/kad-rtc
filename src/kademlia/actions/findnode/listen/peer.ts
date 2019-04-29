@@ -31,9 +31,10 @@ export default class FindNodePeer {
 
   async findNodeProxyOpen(data: FindNodeProxyOpen) {
     const { finderkid } = data;
-    const { peerModule, kTable } = this.di;
+    const { kTable } = this.di;
+    const { peerCreate } = this.di.modules;
 
-    const peer = peerModule(finderkid);
+    const peer = peerCreate(finderkid);
     this.signaling[finderkid] = peer;
 
     const offer = await peer.createOffer();

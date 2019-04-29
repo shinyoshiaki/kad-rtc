@@ -11,6 +11,8 @@ export type Store = ReturnType<typeof Store>;
 
 export default async function store(value: string, di: DependencyInjection) {
   const { kTable } = di;
+  const { kvs } = di.modules;
+
   const key = sha1(value).toString();
   for (
     let preHash = "";
@@ -24,5 +26,5 @@ export default async function store(value: string, di: DependencyInjection) {
     peer.rpc(Store(key, value));
     await peer.eventRpc<OnStore>("OnStore").asPromise();
   }
-  di.kvs.set(key, value);
+  kvs.set(key, value);
 }

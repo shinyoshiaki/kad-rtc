@@ -4,19 +4,28 @@ import sha1 from "sha1";
 import findNode from ".";
 import { dependencyInjection, DependencyInjection } from "../../di";
 import { listeners } from "../../listeners";
+import { KvsModule } from "../../modules/kvs/base";
 
-const kBucketSize = 8;
+const kBucketSize = 5;
 const num = kBucketSize * 2;
 
 export async function testSetupNodes(kBucketSize: number, num: number) {
   const nodes: DependencyInjection[] = [];
 
-  const kOffer = dependencyInjection(sha1("0").toString(), PeerModule, {
-    kBucketSize
-  });
-  const kAnswer = dependencyInjection(sha1("1").toString(), PeerModule, {
-    kBucketSize
-  });
+  const kOffer = dependencyInjection(
+    sha1("0").toString(),
+    { peerCreate: PeerModule, kvs: KvsModule() },
+    {
+      kBucketSize
+    }
+  );
+  const kAnswer = dependencyInjection(
+    sha1("1").toString(),
+    { peerCreate: PeerModule, kvs: KvsModule() },
+    {
+      kBucketSize
+    }
+  );
 
   const offer = PeerModule(kAnswer.kTable.kid);
   const offerSdp = await offer.createOffer();
@@ -37,7 +46,7 @@ export async function testSetupNodes(kBucketSize: number, num: number) {
     const pop = nodes.slice(-1)[0];
     const push = dependencyInjection(
       sha1(i.toString()).toString(),
-      PeerModule,
+      { peerCreate: PeerModule, kvs: KvsModule() },
       { kBucketSize }
     );
 
@@ -71,10 +80,12 @@ describe("findnode", () => {
 
         let target: undefined | Peer;
 
+        let pre = "",
+          trytime = 0;
         for (
-          let pre = "";
+          ;
           pre !== node.kTable.getHash(word);
-          pre = node.kTable.getHash(word)
+          pre = node.kTable.getHash(word), trytime++
         ) {
           target = await findNode(word, node);
 
@@ -84,9 +95,11 @@ describe("findnode", () => {
         }
 
         if (!target) {
-          expect(true).toBe(true);
+          const now = node.kTable.getHash(word);
+          expect(pre).toBe(now);
+        } else {
+          expect(target).not.toBe(undefined);
         }
-        expect(target).not.toBe(undefined);
       };
 
       for (let word of nodes.slice(1)) {

@@ -43,7 +43,8 @@ export default class FindValueProxy {
 
   async findvalue(data: FindValue) {
     const { key, except } = data;
-    const { kTable, kvs } = this.di;
+    const { kTable } = this.di;
+    const { kvs } = this.di.modules;
 
     const value = kvs.get(key);
 

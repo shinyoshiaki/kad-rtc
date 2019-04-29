@@ -6,10 +6,13 @@ import Kademlia from "../../kademlia";
 import { PeerModule } from "../../kademlia/modules/peer/webrtc";
 import Peer from "../../kademlia/modules/peer/base";
 import Event from "../../utill/event";
+import { Option } from "../../kademlia/ktable";
+import { KvsModule } from "../../kademlia/modules/kvs/base";
 
-type Option = {
+type Options = {
   port: number;
   target?: { url: string; port: number };
+  kadOption?: Partial<Option>;
 };
 
 const Request = (clientKid: string) => {
@@ -36,11 +39,16 @@ type actions = Offer | Request | Answer;
 
 export default class Portal {
   kid = sha1(Math.random().toString()).toString();
-  kademlia = new Kademlia(this.kid, PeerModule);
+  kademlia = new Kademlia(
+    this.kid,
+    { peerCreate: PeerModule, kvs: KvsModule() },
+    this.opt.kadOption
+  );
   peers: { [key: string]: Peer } = {};
   onConnect = new Event();
+  io: SocketIO.Server;
 
-  constructor(private opt: Option) {
+  constructor(private opt: Options) {
     const { target, port } = opt;
     if (target) {
       const socket = client.connect("http://" + target.url + ":" + target.port);
@@ -56,7 +64,7 @@ export default class Portal {
     }
 
     const srv = new http.Server();
-    const io = socketio(srv);
+    const io = (this.io = socketio(srv));
     srv.listen(port);
     io.on("connection", socket => {
       socket.on("rpc", (data: actions) => {
@@ -72,7 +80,7 @@ export default class Portal {
     });
   }
 
-  async offer(socket: SocketIO.Socket, data: Request) {
+  private async offer(socket: SocketIO.Socket, data: Request) {
     const peer = this.peers[data.clientKid];
 
     const sdp = await peer.createOffer();
@@ -83,7 +91,7 @@ export default class Portal {
     this.onConnect.excute();
   }
 
-  async answer(socket: SocketIOClient.Socket, data: Offer) {
+  private async answer(socket: SocketIOClient.Socket, data: Offer) {
     const peer = this.peers[data.serverKid];
 
     const sdp = await peer.setOffer(data.sdp);
@@ -92,5 +100,9 @@ export default class Portal {
 
     await this.kademlia.add(peer);
     this.onConnect.excute();
+  }
+
+  close() {
+    this.io.close();
   }
 }

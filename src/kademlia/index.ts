@@ -5,6 +5,7 @@ import { DependencyInjection, dependencyInjection } from "./di";
 import store from "./actions/store";
 import findValue from "./actions/findvalue";
 import { listeners } from "./listeners";
+import Modules from "./modules";
 
 type Options = OptTable;
 
@@ -13,10 +14,10 @@ export default class Kademlia {
 
   constructor(
     public kid: string,
-    peerModule: (kid: string) => Peer,
+    modules: Modules,
     opt: Partial<Options> = {}
   ) {
-    this.di = dependencyInjection(kid, peerModule, opt);
+    this.di = dependencyInjection(kid, modules, opt);
   }
 
   async findNode(searchkid: string) {

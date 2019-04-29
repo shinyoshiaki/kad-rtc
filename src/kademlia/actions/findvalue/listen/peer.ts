@@ -31,9 +31,10 @@ export default class FindValuePeer {
 
   async findValueProxyOpen(data: FindValueProxyOpen) {
     const { finderkid } = data;
-    const { peerModule, kTable } = this.di;
+    const { kTable } = this.di;
+    const { peerCreate } = this.di.modules;
 
-    const peer = peerModule(finderkid);
+    const peer = peerCreate(finderkid);
     this.signaling[finderkid] = peer;
 
     const offer = await peer.createOffer();

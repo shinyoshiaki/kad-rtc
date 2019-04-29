@@ -15,7 +15,9 @@ const FindValueAnswer = (sdp: any, peerkid: string) => {
 export type FindValueAnswer = ReturnType<typeof FindValueAnswer>;
 
 export default async function findValue(key: string, di: DependencyInjection) {
-  const { kTable, peerModule } = di;
+  const { kTable } = di;
+  const { peerCreate } = di.modules;
+
   let result: string | undefined;
 
   job: for (
@@ -40,7 +42,7 @@ export default async function findValue(key: string, di: DependencyInjection) {
 
         for (let offer of offers) {
           const { peerkid, sdp } = offer;
-          const connect = peerModule(peerkid);
+          const connect = peerCreate(peerkid);
           const answer = await connect.setOffer(sdp);
 
           peer.rpc(FindValueAnswer(answer, peerkid));

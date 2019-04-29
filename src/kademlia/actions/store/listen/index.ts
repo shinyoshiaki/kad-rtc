@@ -28,7 +28,7 @@ class ListenStore {
 
   store(data: Store) {
     const { key, value } = data;
-    const { kvs } = this.di;
+    const { kvs } = this.di.modules;
     kvs.set(key, value);
 
     this.listen.rpc(OnStore());
