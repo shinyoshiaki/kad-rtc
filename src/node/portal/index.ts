@@ -3,7 +3,8 @@ import socketio from "socket.io";
 import sha1 from "sha1";
 import client from "socket.io-client";
 import Kademlia from "../../kademlia";
-import Peer, { PeerModule } from "../../kademlia/modules/peer/webrtc";
+import { PeerModule } from "../../kademlia/modules/peer/webrtc";
+import Peer from "../../kademlia/modules/peer/base";
 import Event from "../../utill/event";
 
 type Option = {

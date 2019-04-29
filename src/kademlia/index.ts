@@ -4,6 +4,7 @@ import Peer from "./modules/peer/base";
 import { DependencyInjection, dependencyInjection } from "./di";
 import store from "./actions/store";
 import findValue from "./actions/findvalue";
+import { listeners } from "./listeners";
 
 type Options = OptTable;
 
@@ -45,6 +46,8 @@ export default class Kademlia {
   async add(peer: Peer) {
     const { kTable } = this.di;
     kTable.add(peer);
+    listeners(peer, this.di);
+
     await findNode(this.kid, this.di);
   }
 }

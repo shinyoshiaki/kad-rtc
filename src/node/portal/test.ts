@@ -1,16 +1,28 @@
 import Portal from ".";
+import { Count } from "../../utill/testtools";
 
 describe("portal", () => {
   test(
     "p2p",
     async () => {
-      const a = new Portal({ port: 10000 });
-      const b = new Portal({
-        port: 10001,
-        target: { port: 10000, url: "localhost" }
-      });
-
-      await b.onConnect.asPromise();
+      const test = () =>
+        new Promise<{ a: Portal; b: Portal }>(resolve => {
+          const a = new Portal({ port: 10000 });
+          const b = new Portal({
+            port: 10001,
+            target: { port: 10000, url: "localhost" }
+          });
+          const count = new Count(2, () => {
+            resolve({ a, b });
+          });
+          a.onConnect.once(() => {
+            count.check();
+          });
+          b.onConnect.once(() => {
+            count.check();
+          });
+        });
+      const { a, b } = await test();
       expect(a.kademlia.di.kTable.getPeer(b.kid)).not.toBe(undefined);
     },
     1000 * 6000

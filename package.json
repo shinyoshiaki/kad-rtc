@@ -9,7 +9,7 @@
     "build": "tsc",
     "type": "tsc --noEmit",
     "update": "rm -rf ./lib && npm run build",
-    "test": "jest --forceExit",
+    "test": "npm run type && jest --forceExit",
     "publish": "npm publish --access=public"
   },
   "main": "lib/index.js",

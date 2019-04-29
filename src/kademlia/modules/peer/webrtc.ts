@@ -6,7 +6,7 @@ export const PeerModule = (kid: string) => new Peer(kid);
 
 export default class Peer implements Base {
   private type = "webrtc";
-  private peer = new WebRTC();
+  private peer = new WebRTC({ disable_stun: true });
   onRpc = new Event<any>();
   onDisconnect = this.peer.onDisconnect as any;
   onConnect = this.peer.onConnect as any;
