@@ -1,22 +1,26 @@
 import Portal from ".";
 import { Count } from "../../utill/testtools";
+import aport from "aport";
 
 const kBucketSize = 5;
-const num = kBucketSize * 2;
+const num = 10;
 
 async function testSetupNodes(kBucketSize: number, num: number) {
   const nodes: Portal[] = [];
-  const first = new Portal({ port: 20000 });
+  const firstport = await aport();
+  const first = new Portal({ port: firstport });
   nodes.push(first);
 
-  for (let i = 1; i < num; i++) {
+  for (let i = 1, port = firstport; i < num; i++) {
+    const newport = await aport();
     const node = new Portal({
-      target: { url: "localhost", port: 20000 + i - 1 },
-      port: 20000 + i,
+      target: { url: "localhost", port },
+      port: newport,
       kadOption: { kBucketSize }
     });
     await node.onConnect.asPromise();
     nodes.push(node);
+    port = newport;
   }
   return nodes;
 }
@@ -27,10 +31,10 @@ describe("portal", () => {
     async () => {
       const test = () =>
         new Promise<{ a: Portal; b: Portal }>(resolve => {
-          const a = new Portal({ port: 10000 });
+          const a = new Portal({ port: 50000 });
           const b = new Portal({
-            port: 10001,
-            target: { port: 10000, url: "localhost" }
+            port: 50001,
+            target: { port: 50000, url: "localhost" }
           });
           const count = new Count(2, () => {
             resolve({ a, b });
@@ -50,19 +54,29 @@ describe("portal", () => {
     1000 * 6000
   );
 
-  // test(
-  //   "findnode",
-  //   async () => {
-  //     const nodes = await testSetupNodes(kBucketSize, num);
+  test(
+    "findnode",
+    async () => {
+      const nodes = await testSetupNodes(kBucketSize, num);
 
-  //     const last = nodes.slice(-1)[0];
+      const search = async (word: string) => {
+        const node = nodes[0];
 
-  //     expect(true).toBe(true);
+        const res = await node.kademlia.findNode(word);
+        if (!res) {
+          res;
+        }
+        expect(res).not.toBe(undefined);
+      };
 
-  //     nodes.forEach(node => {
-  //       node.close();
-  //     });
-  //   },
-  //   1000 * 6000
-  // );
+      for (let node of nodes.slice(1)) {
+        await search(node.kademlia.di.kTable.kid);
+      }
+
+      nodes.forEach(node => {
+        node.close();
+      });
+    },
+    1000 * 6000
+  );
 });

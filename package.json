@@ -9,9 +9,9 @@
     "build": "tsc",
     "type": "tsc --noEmit",
     "update": "rm -rf ./lib && npm run build",
-    "test": "npm run type && jest --forceExit",
     "publish": "npm publish --access=public",
-    "test_target":"jest --forceExit ./src/kademlia/actions/findnode/test.ts"
+    "test": "npm run type && jest --forceExit",
+    "test_target": "jest --forceExit ./src/kademlia/actions/findnode/test.ts"
   },
   "main": "lib/index.js",
   "files": [
@@ -28,6 +28,7 @@
     "@types/socket.io": "^1.4.38",
     "@types/socket.io-client": "^1.4.32",
     "@types/source-map-support": "^0.4.1",
+    "aport": "^2.0.0",
     "jest": "^24.1.0",
     "ts-jest": "^24.0.0",
     "tslib": "^1.9.3",
