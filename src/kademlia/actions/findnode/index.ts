@@ -29,7 +29,7 @@ export default async function findNode(
 
     const res = await peer
       .eventRpc<FindNodeProxyOffer>("FindNodeProxyOffer")
-      .asPromise(5000)
+      .asPromise(1111)
       .catch();
 
     if (!res) {

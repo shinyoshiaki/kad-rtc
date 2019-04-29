@@ -53,7 +53,7 @@ export default class FindNodeProxy {
 
       const res = await peer
         .eventRpc<FindNodePeerOffer>("FindNodePeerOffer")
-        .asPromise(5000);
+        .asPromise(1111);
 
       if (!res) {
         continue;

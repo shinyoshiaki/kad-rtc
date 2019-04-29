@@ -10,7 +10,7 @@
       "request": "launch",
       "program": "${workspaceRoot}/node_modules/.bin/jest",
       "protocol": "inspector",
-      "args": ["--runInBand", "--forceExit"],
+      "args": ["--runInBand", "--forceExit", "--detectOpenHandles"],
       "windows": {
         "program": "${workspaceRoot}/node_modules/jest/bin/jest.js"
       },
@@ -26,7 +26,8 @@
       "args": [
         "--runInBand",
         "--forceExit",
-        "${workspaceRoot}/src/node/guest/test.ts"
+        "--detectOpenHandles",
+        "${workspaceRoot}/src/kademlia/actions/findnode/test.ts"
       ],
       "windows": {
         "program": "${workspaceRoot}/node_modules/jest/bin/jest.js"

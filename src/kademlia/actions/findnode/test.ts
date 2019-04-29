@@ -1,4 +1,4 @@
-import { PeerModule } from "../../modules/peer/mock";
+import { PeerModule } from "../../modules/peer/webrtc";
 import Peer from "../../modules/peer/base";
 import sha1 from "sha1";
 import findNode from ".";
@@ -6,8 +6,8 @@ import { dependencyInjection, DependencyInjection } from "../../di";
 import { listeners } from "../../listeners";
 import { KvsModule } from "../../modules/kvs/base";
 
-const kBucketSize = 5;
-const num = kBucketSize * 2;
+const kBucketSize = 8;
+const num = 15;
 
 export async function testSetupNodes(kBucketSize: number, num: number) {
   const nodes: DependencyInjection[] = [];
