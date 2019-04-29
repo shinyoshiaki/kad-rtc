@@ -1,1 +1,1 @@
-{"version":3,"file":"index.js","sourceRoot":"","sources":["../src/index.ts"],"names":[],"mappings":"","sourcesContent":[""]}
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../src/index.ts"],"names":[],"mappings":";;;AAAA,kEAAkC;AAClC,2EAAiD;AAIxC,qBAJF,cAAU,CAIE;AAFnB,kBAAe,kBAAQ,CAAC","sourcesContent":["import Kademlia from \"./kademlia\";\nimport peerModlue from \"./kademlia/modules/peer\";\n\nexport default Kademlia;\n\nexport { peerModlue };\n"]}

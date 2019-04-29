@@ -1,6 +1,6 @@
 import Kbucket, { Option as OptBucket } from "./kbucket";
 import { distance } from "kad-distance";
-import Peer from "../modules/peer";
+import Peer from "../modules/peer/base";
 import sha1 from "sha1";
 
 export type Option = OptBucket;

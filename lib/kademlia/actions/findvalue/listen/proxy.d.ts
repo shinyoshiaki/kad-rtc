@@ -1,4 +1,4 @@
-import Peer from "../../../modules/peer";
+import Peer from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
 import { FindValue, FindValueAnswer } from "..";
 declare const FindValueResult: (data: Partial<{

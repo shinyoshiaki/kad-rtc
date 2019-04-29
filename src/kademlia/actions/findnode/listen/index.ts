@@ -1,4 +1,4 @@
-import Peer from "../../../modules/peer";
+import Peer from "../../../modules/peer/base";
 import FindNodePeer from "./peer";
 import FindNodeProxy from "./proxy";
 import { DependencyInjection } from "../../../di";

@@ -1,4 +1,4 @@
-import Peer from "../../../modules/peer";
+import Peer from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
 import { FindValueProxyOpen, FindValueProxyAnswer } from "./proxy";
 declare const FindValuePeerOffer: (sdp: any, peerkid: string) => {

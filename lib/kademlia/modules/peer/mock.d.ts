@@ -1,4 +1,4 @@
-import Base from ".";
+import Base from "./base";
 import Event from "../../../utill/event";
 export declare const PeerModule: (kid: string) => Peer;
 export default class Peer implements Base {

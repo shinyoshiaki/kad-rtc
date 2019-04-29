@@ -1,4 +1,4 @@
-import Peer from "../../modules/peer";
+import Peer from "../../modules/peer/base"
 
 export type Option = { kBucketSize: number };
 

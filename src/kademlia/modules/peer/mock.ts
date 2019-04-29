@@ -1,4 +1,4 @@
-import Base from ".";
+import Base from "./base";
 import Event from "../../../utill/event";
 
 export const PeerModule = (kid: string) => new Peer(kid);

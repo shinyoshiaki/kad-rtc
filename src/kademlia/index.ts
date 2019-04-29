@@ -1,6 +1,6 @@
 import { Option as OptTable } from "./ktable";
 import findNode from "./actions/findnode";
-import Peer from "./modules/peer";
+import Peer from "./modules/peer/base";
 import { DependencyInjection, dependencyInjection } from "./di";
 import store from "./actions/store";
 import findValue from "./actions/findvalue";
@@ -12,18 +12,24 @@ export default class Kademlia {
 
   constructor(
     public kid: string,
-    module: (kid: string) => Peer,
+    peerModule: (kid: string) => Peer,
     opt: Partial<Options> = {}
   ) {
-    this.di = dependencyInjection(kid, module, opt);
+    this.di = dependencyInjection(kid, peerModule, opt);
   }
 
-  async findNode(searchkid: string, retry = 5) {
-    let target;
-    for (let _ in [...Array(retry)]) {
+  async findNode(searchkid: string) {
+    let target: undefined | Peer;
+
+    for (
+      let pre = "";
+      pre !== this.di.kTable.getHash(searchkid);
+      pre = this.di.kTable.getHash(searchkid)
+    ) {
       target = await findNode(searchkid, this.di);
       if (target) break;
     }
+
     return target;
   }
 

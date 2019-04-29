@@ -1,6 +1,6 @@
 import Ktable, { Option } from "./ktable";
-import KeyValueStore from "./modules/kvs";
-import Peer from "./modules/peer";
+import KeyValueStore from "./modules/kvs/base";
+import Peer from "./modules/peer/base";
 
 type Options = Option;
 

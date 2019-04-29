@@ -1,5 +1,5 @@
 import { Option as OptBucket } from "./kbucket";
-import Peer from "../modules/peer";
+import Peer from "../modules/peer/base";
 export declare type Option = OptBucket;
 export default class Ktable {
     kid: string;
@@ -7,9 +7,10 @@ export default class Ktable {
     private k;
     constructor(kid: string, opt?: Partial<Option>);
     add(peer: Peer): void;
+    findNode: (kid: string) => Peer[];
     readonly allPeers: Peer[];
+    readonly allKids: string[];
     readonly kBucketSize: number;
     getPeer: (kid: string) => Peer | undefined;
-    findNode: (kid: string) => Peer[];
     getHash: (kid: string) => string;
 }

@@ -1,5 +1,5 @@
 import { PeerModule } from "../../modules/peer/mock";
-import Peer from "../../modules/peer";
+import Peer from "../../modules/peer/base";
 import sha1 from "sha1";
 import findNode from ".";
 import { dependencyInjection, DependencyInjection } from "../../di";

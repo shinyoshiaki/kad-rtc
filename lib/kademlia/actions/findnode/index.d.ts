@@ -11,8 +11,5 @@ declare const FindNodeAnswer: (sdp: any, peerkid: string) => {
     peerkid: string;
 };
 export declare type FindNodeAnswer = ReturnType<typeof FindNodeAnswer>;
-export default function findNode(searchkid: string, di: DependencyInjection): Promise<{
-    target: import("../../modules/peer").default | undefined;
-    hash: string;
-}>;
+export default function findNode(searchkid: string, di: DependencyInjection): Promise<import("../../modules/peer/base").default | undefined>;
 export {};

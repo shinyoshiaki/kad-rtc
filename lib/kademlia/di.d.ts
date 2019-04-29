@@ -1,6 +1,6 @@
 import Ktable from "./ktable";
-import KeyValueStore from "./modules/kvs";
-import Peer from "./modules/peer";
+import KeyValueStore from "./modules/kvs/base";
+import Peer from "./modules/peer/base";
 export declare type DependencyInjection = {
     peerModule: (kid: string) => Peer;
     kTable: Ktable;

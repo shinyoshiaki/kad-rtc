@@ -1,4 +1,4 @@
-import Peer from "./modules/peer";
+import Peer from "./modules/peer/base";
 import listenFindnode from "./actions/findnode/listen";
 import listenStore from "./actions/store/listen";
 import { DependencyInjection } from "./di";
