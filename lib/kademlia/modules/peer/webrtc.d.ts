@@ -13,6 +13,7 @@ export default class Peer implements Base {
         rpc: string;
     }) => void;
     eventRpc: (rpc: string) => Event<any>;
+    manageLimit: () => Promise<void>;
     createOffer: () => Promise<any>;
     setOffer: (offer: any) => Promise<any>;
     setAnswer: (answer: any) => Promise<boolean>;

@@ -1,6 +1,6 @@
 import Base from "./base";
 import Event from "../../../utill/event";
-import WebRTC from "webrtc4me";
+import WebRTC from "../../../webrtc";
 
 let peerNum = 0;
 const peerStack: WebRTC[] = [];
@@ -15,15 +15,7 @@ export default class Peer implements Base {
   onConnect = this.peer.onConnect as any;
 
   constructor(public kid: string) {
-    if (peerNum > 250) {
-      const discon = peerStack.shift();
-      discon!.disconnect();
-      peerNum--;
-    } else {
-      peerStack.push(this.peer);
-      peerNum++;
-    }
-
+    this.peer.nodeId = kid;
     const discon = this.peer.onData.subscribe(raw => {
       try {
         const data = JSON.parse(raw.data);
@@ -32,7 +24,9 @@ export default class Peer implements Base {
         }
       } catch (error) {}
     });
-    this.peer.onDisconnect.once(() => discon.unSubscribe());
+    this.peer.onDisconnect.once(() => {
+      discon.unSubscribe();
+    });
   }
 
   rpc = (send: { rpc: string }) => {
@@ -51,7 +45,20 @@ export default class Peer implements Base {
     return observer;
   };
 
+  manageLimit = async () => {
+    if (peerNum > 250) {
+      const discon = peerStack.shift();
+      await discon!.disconnect();
+      peerNum--;
+    } else {
+      peerStack.push(this.peer);
+      peerNum++;
+    }
+  };
+
   createOffer = async () => {
+    await this.manageLimit();
+
     this.peer.makeOffer();
     const offer = await this.peer.onSignal.asPromise();
     await new Promise(r => setTimeout(r, 0));
@@ -59,6 +66,8 @@ export default class Peer implements Base {
   };
 
   setOffer = async (offer: any) => {
+    await this.manageLimit();
+
     this.peer.setSdp(offer);
     const answer = await this.peer.onSignal.asPromise();
     await new Promise(r => setTimeout(r, 0));

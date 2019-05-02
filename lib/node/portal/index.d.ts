@@ -1,27 +1,17 @@
 /// <reference types="socket.io" />
-/// <reference types="socket.io-client" />
 import Kademlia from "../../kademlia";
-import Peer from "../../kademlia/modules/peer/webrtc";
+import Peer from "../../kademlia/modules/peer/base";
 import Event from "../../utill/event";
-declare type Option = {
+import { Option } from "../../kademlia/ktable";
+declare type Options = {
     port: number;
     target?: {
         url: string;
         port: number;
     };
+    kadOption?: Partial<Option>;
 };
-declare const Request: (clientKid: string) => {
-    rpc: "Request";
-    clientKid: string;
-};
-declare type Request = ReturnType<typeof Request>;
-declare const Offer: (sdp: string, serverKid: string) => {
-    rpc: "Offer";
-    sdp: string;
-    serverKid: string;
-};
-declare type Offer = ReturnType<typeof Offer>;
-export default class Portal {
+export default class PortalNode {
     private opt;
     kid: string;
     kademlia: Kademlia;
@@ -29,8 +19,10 @@ export default class Portal {
         [key: string]: Peer;
     };
     onConnect: Event<{}>;
-    constructor(opt: Option);
-    offer(socket: SocketIO.Socket, data: Request): Promise<void>;
-    answer(socket: SocketIOClient.Socket, data: Offer): Promise<void>;
+    io: SocketIO.Server | undefined;
+    constructor(opt: Options);
+    private offer;
+    private answer;
+    close(): void;
 }
 export {};

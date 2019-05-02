@@ -1,4 +1,5 @@
 import Event from "../../../utill/event";
+export declare const KvsModule: () => KevValueStore;
 export default class KevValueStore {
     db: {
         [key: string]: string;

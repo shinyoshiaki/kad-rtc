@@ -1,9 +1,7 @@
 import Ktable from "./ktable";
-import KeyValueStore from "./modules/kvs/base";
-import Peer from "./modules/peer/base";
+import Modules from "./modules";
 export declare type DependencyInjection = {
-    peerModule: (kid: string) => Peer;
     kTable: Ktable;
-    kvs: KeyValueStore;
+    modules: Modules;
 };
-export declare const dependencyInjection: (kid: string, peerModule: (kid: string) => Peer, opt?: Partial<import("./ktable/kbucket").Option>) => DependencyInjection;
+export declare const dependencyInjection: (kid: string, modules: Modules, opt?: Partial<import("./ktable/kbucket").Option>) => DependencyInjection;
