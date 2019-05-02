@@ -1,6 +1,6 @@
 import Kademlia from "./kademlia";
-import peerModlue from "./kademlia/modules/peer";
+import { PeerModule } from "./kademlia/modules/peer/webrtc";
+import GuestNode from "./node/guest";
+import PortalNode from "./node/portal";
 
-export default Kademlia;
-
-export { peerModlue };
+export { PeerModule, Kademlia, GuestNode, PortalNode };

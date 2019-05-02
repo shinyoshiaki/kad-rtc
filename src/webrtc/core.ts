@@ -293,23 +293,23 @@ export default class WebRTC {
 
     for (let key in dataChannels) {
       const channel = dataChannels[key];
-      channel.close();
       channel.onmessage = null;
       channel.onopen = null;
       channel.onclose = null;
       channel.onerror = null;
+      channel.close();
     }
     this.dataChannels = null as any;
 
-    rtc.close();
     rtc.oniceconnectionstatechange = null;
     rtc.onicegatheringstatechange = null;
     rtc.onsignalingstatechange = null;
     rtc.onicecandidate = null;
     rtc.ontrack = null;
     rtc.ondatachannel = null;
+    rtc.close();
     this.rtc = null as any;
 
-    await new Promise(r => setTimeout(r, 1000 * 1));
+    await new Promise(r => setTimeout(r, 1000 * 30));
   }
 }
