@@ -38,7 +38,7 @@ export default class WebRTC {
     setSdp(sdp: any): Promise<void>;
     private createDatachannel;
     private dataChannelEvents;
-    send(data: any, label?: string): void;
+    send(data: any, label?: string): Promise<void>;
     addTrack(track: MediaStreamTrack, stream: MediaStream): void;
     disconnect(): Promise<void>;
 }
