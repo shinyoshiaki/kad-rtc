@@ -27,35 +27,32 @@ export default async function findNode(
     const except = kTable.allPeers.map(item => item.kid);
     peer.rpc(FindNode(searchkid, except));
 
-    try {
-      const res = await peer
-        .eventRpc<FindNodeProxyOffer>("FindNodeProxyOffer")
-        .asPromise(3333)
-        .catch(console.warn);
 
-      if (!res) {
-        continue;
-      }
+    const res = await peer
+    .eventRpc<FindNodeProxyOffer>("FindNodeProxyOffer")
+    .asPromise(3333)
+    .catch(console.warn);
 
-      const { peers } = res;
-      if (peers.length === 0) {
-        continue;
-      }
+  if (!res) {
+    continue;
+  }
 
-      for (let offer of peers) {
-        const { peerkid, sdp } = offer;
-        const connect = peerCreate(peerkid);
-        const answer = await connect.setOffer(sdp);
+  const { peers } = res;
+  if (peers.length === 0) {
+    continue;
+  }
 
-        peer.rpc(FindNodeAnswer(answer, peerkid));
-        await connect.onConnect.asPromise(3333).catch(console.error);
+  for (let offer of peers) {
+    const { peerkid, sdp } = offer;
+    const connect = peerCreate(peerkid);
+    const answer = await connect.setOffer(sdp);
 
-        kTable.add(connect);
-        listeners(connect, di);
-      }
-    } catch (error) {
-      console.warn(error);
-    }
+    peer.rpc(FindNodeAnswer(answer, peerkid));
+    await connect.onConnect.asPromise(3333).catch(console.error);
+
+    kTable.add(connect);
+    listeners(connect, di);
+  }
   }
   return kTable.getPeer(searchkid);
 }
