@@ -12,7 +12,7 @@
     "publish": "npm publish --access=public",
     "test": "npm run type && jest --forceExit",
     "test_target": "jest --forceExit ./src/kademlia/actions/findnode/test.ts",
-    "server":"ts-node --project ./tsconfig.json ./src/cli.ts"
+    "server": "ts-node --project ./tsconfig.json ./src/cli.ts"
   },
   "main": "lib/index.js",
   "files": [
@@ -40,16 +40,10 @@
     "bson": "3.0.2",
     "buffer": "^5.2.1",
     "buffer-to-arraybuffer": "^0.0.5",
-    "immer": "^3.1.1",
-    "inquirer": "^6.2.0",
     "kad-distance": "git+https://git@github.com/shinyoshiaki/kad-distance.git",
-    "keypair": "^1.0.1",
     "sha1": "^1.1.1",
-    "socket.io": "^2.1.1",
     "socket.io-client": "^2.1.1",
-    "source-map-support": "^0.5.9",
-    "webrtc4me": "^0.5.6",
-    "wrtc": "^0.3.7"
+    "webrtc4me": "^0.5.6"
   },
   "jest": {
     "moduleFileExtensions": [
