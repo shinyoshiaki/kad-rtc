@@ -1,1 +1,0 @@
-{"version":3,"file":"cli.js","sourceRoot":"","sources":["../src/cli.ts"],"names":[],"mappings":";;AAAA,wBAA+B;AAE/B,IAAI,aAAU,CAAC,EAAE,IAAI,EAAE,KAAK,EAAE,CAAC,CAAC","sourcesContent":["import { PortalNode } from \".\";\n\nnew PortalNode({ port: 60000 });\n"]}
