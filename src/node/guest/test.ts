@@ -2,8 +2,8 @@ import GuestNode from ".";
 import aport from "aport";
 import PortalNode from "../portal";
 
-const kBucketSize = 4;
-const num = 8;
+const kBucketSize = 8;
+const num = 10; // 11以上で不安定
 
 async function testSetupNodes(kBucketSize: number, num: number) {
   const portalPort = await aport();
@@ -16,13 +16,18 @@ async function testSetupNodes(kBucketSize: number, num: number) {
       target: { url: "localhost", port: portalPort },
       kadOption: { kBucketSize }
     });
+    console.log(i);
+    if (i > 12) {
+      i;
+    }
+
     await node.onConnect.asPromise();
     nodes.push(node);
   }
   return nodes;
 }
 
-describe("portal", () => {
+describe("guest", () => {
   test(
     "findnode",
     async () => {

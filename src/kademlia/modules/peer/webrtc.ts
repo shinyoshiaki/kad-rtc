@@ -44,7 +44,7 @@ export default class Peer implements Base {
   };
 
   manageLimit = async () => {
-    if (peerNum > 250) {
+    if (peerNum > 255) {
       peerStack.push(this.peer);
       peerNum++;
       // const discon = peerStack.shift();
@@ -54,6 +54,7 @@ export default class Peer implements Base {
       peerStack.push(this.peer);
       peerNum++;
     }
+    // console.log(peerNum);
   };
 
   createOffer = async () => {

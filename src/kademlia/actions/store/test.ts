@@ -3,7 +3,7 @@ import store from ".";
 import sha1 from "sha1";
 
 const kBucketSize = 5;
-const num = kBucketSize * 2;
+const num = 5 as const; // このテストは変数を大きくする意味がない
 
 describe("store", () => {
   test(

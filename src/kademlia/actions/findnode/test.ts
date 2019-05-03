@@ -7,7 +7,7 @@ import { listeners } from "../../listeners";
 import { KvsModule } from "../../modules/kvs/base";
 
 const kBucketSize = 8;
-const num = 30;
+const num = 10;
 
 export async function testSetupNodes(kBucketSize: number, num: number) {
   const nodes: DependencyInjection[] = [];
