@@ -31,7 +31,7 @@ export default async function findNode(
       const res = await peer
         .eventRpc<FindNodeProxyOffer>("FindNodeProxyOffer")
         .asPromise(3333)
-        .catch(console.error);
+        .catch(console.warn);
 
       if (!res) {
         continue;

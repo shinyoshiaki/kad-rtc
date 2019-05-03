@@ -14,12 +14,10 @@ export default class Peer implements Base {
 
   constructor(public kid: string) {
     this.onData.subscribe(raw => {
-      try {
-        const data = raw.data;
-        if (data.rpc) {
-          this.onRpc.excute(data);
-        }
-      } catch (error) {}
+      const data = raw.data;
+      if (data.rpc) {
+        this.onRpc.excute(data);
+      }
     });
   }
 

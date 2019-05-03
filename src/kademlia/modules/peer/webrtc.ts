@@ -17,12 +17,10 @@ export default class Peer implements Base {
   constructor(public kid: string) {
     this.peer.nodeId = kid;
     const discon = this.peer.onData.subscribe(raw => {
-      try {
-        const data = JSON.parse(raw.data);
-        if (data.rpc) {
-          this.onRpc.excute(data);
-        }
-      } catch (error) {}
+      const data = JSON.parse(raw.data);
+      if (data.rpc) {
+        this.onRpc.excute(data);
+      }
     });
     this.peer.onDisconnect.once(() => {
       discon.unSubscribe();
@@ -30,26 +28,18 @@ export default class Peer implements Base {
   }
 
   rpc = (send: { rpc: string }) => {
-    try {
-      this.peer.send(JSON.stringify(send), send.rpc);
-    } catch (error) {
-      console.warn(error);
-    }
+    this.peer.send(JSON.stringify(send), send.rpc);
   };
 
   eventRpc = (rpc: string) => {
     const observer = new Event<any>();
-    try {
-      const once = this.peer.onData.subscribe(raw => {
-        if (raw.label === rpc) {
-          const data = JSON.parse(raw.data);
-          observer.excute(data);
-          once.unSubscribe();
-        }
-      });
-    } catch (error) {
-      console.warn(error);
-    }
+    const once = this.peer.onData.subscribe(raw => {
+      if (raw.label === rpc) {
+        const data = JSON.parse(raw.data);
+        observer.excute(data);
+        once.unSubscribe();
+      }
+    });
     return observer;
   };
 
