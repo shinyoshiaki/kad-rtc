@@ -70,19 +70,23 @@ export default class PortalNode {
       const io = (this.io = socketio(srv));
       srv.listen(port);
       io.on("connection", socket => {
-        socket.on("rpc", (data: actions) => {
-          if (data.rpc === "Request") {
-            this.peers[data.clientKid] = PeerModule(data.clientKid);
-            this.offer(io.sockets.sockets[socket.id], data);
-          }
-          if (data.rpc === "Answer") {
-            const peer = this.peers[data.clientKid];
-            peer.setAnswer(data.sdp);
-          }
-        });
+        try {
+          socket.on("rpc", (data: actions) => {
+            if (data.rpc === "Request") {
+              this.peers[data.clientKid] = PeerModule(data.clientKid);
+              this.offer(io.sockets.sockets[socket.id], data);
+            }
+            if (data.rpc === "Answer") {
+              const peer = this.peers[data.clientKid];
+              peer.setAnswer(data.sdp);
+            }
+          });
+        } catch (error) {
+          console.error(error);
+        }
       });
     } catch (error) {
-      console.warn(error);
+      console.error(error);
     }
   }
 

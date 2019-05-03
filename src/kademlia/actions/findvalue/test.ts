@@ -3,8 +3,8 @@ import store from "../store";
 import sha1 from "sha1";
 import findValue from ".";
 
-const kBucketSize = 5;
-const num = kBucketSize * 2;
+const kBucketSize = 8;
+const num = 30;
 
 const getRandomInt = (min: number, max: number) =>
   Math.floor(

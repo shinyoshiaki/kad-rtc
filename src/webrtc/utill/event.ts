@@ -46,7 +46,7 @@ export default class Event<T> {
       const timeout =
         timelimit &&
         setTimeout(() => {
-          reject();
+          reject("Event asPromise timeout");
         }, timelimit);
       this.once(data => {
         if (timeout) clearTimeout(timeout);

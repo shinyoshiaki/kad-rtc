@@ -14,6 +14,7 @@
     "sourceMap": true,
     "inlineSources": true,
     "noUnusedLocals": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noImplicitAny": false
   }
 }

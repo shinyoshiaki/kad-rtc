@@ -24,7 +24,10 @@ export default async function store(value: string, di: DependencyInjection) {
   const peers = di.kTable.findNode(key);
   for (let peer of peers) {
     peer.rpc(Store(key, value));
-    await peer.eventRpc<OnStore>("OnStore").asPromise();
+    await peer
+      .eventRpc<OnStore>("OnStore")
+      .asPromise(3333)
+      .catch(console.error);
   }
   kvs.set(key, value);
 }

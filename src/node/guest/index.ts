@@ -58,7 +58,7 @@ export default class GuestNode {
         }
       });
     } catch (error) {
-      console.warn(error);
+      console.error(error);
     }
   }
 

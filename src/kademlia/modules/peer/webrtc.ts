@@ -30,26 +30,36 @@ export default class Peer implements Base {
   }
 
   rpc = (send: { rpc: string }) => {
-    this.peer.send(JSON.stringify(send), send.rpc);
+    try {
+      this.peer.send(JSON.stringify(send), send.rpc);
+    } catch (error) {
+      console.warn(error);
+    }
   };
 
   eventRpc = (rpc: string) => {
     const observer = new Event<any>();
-    const once = this.peer.onData.subscribe(raw => {
-      if (raw.label === rpc) {
-        const data = JSON.parse(raw.data);
-        observer.excute(data);
-        once.unSubscribe();
-      }
-    });
+    try {
+      const once = this.peer.onData.subscribe(raw => {
+        if (raw.label === rpc) {
+          const data = JSON.parse(raw.data);
+          observer.excute(data);
+          once.unSubscribe();
+        }
+      });
+    } catch (error) {
+      console.warn(error);
+    }
     return observer;
   };
 
   manageLimit = async () => {
     if (peerNum > 250) {
-      const discon = peerStack.shift();
-      await discon!.disconnect();
-      peerNum--;
+      peerStack.push(this.peer);
+      peerNum++;
+      // const discon = peerStack.shift();
+      // await discon!.disconnect();
+      // peerNum--;
     } else {
       peerStack.push(this.peer);
       peerNum++;

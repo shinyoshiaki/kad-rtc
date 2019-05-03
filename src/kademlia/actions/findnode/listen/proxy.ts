@@ -26,13 +26,17 @@ type actions = FindNode | FindNodeAnswer;
 export default class FindNodeProxy {
   constructor(private listen: Peer, private di: DependencyInjection) {
     const discon = listen.onRpc.subscribe((data: actions) => {
-      switch (data.rpc) {
-        case "FindNode":
-          this.findnode(data);
-          break;
-        case "FindNodeAnswer":
-          this.findnodeanswer(data);
-          break;
+      try {
+        switch (data.rpc) {
+          case "FindNode":
+            this.findnode(data);
+            break;
+          case "FindNodeAnswer":
+            this.findnodeanswer(data);
+            break;
+        }
+      } catch (error) {
+        console.warn(error);
       }
     });
 
@@ -51,16 +55,21 @@ export default class FindNodeProxy {
 
       peer.rpc(FindNodeProxyOpen(this.listen.kid));
 
-      const res = await peer
-        .eventRpc<FindNodePeerOffer>("FindNodePeerOffer")
-        .asPromise(1111);
+      try {
+        const res = await peer
+          .eventRpc<FindNodePeerOffer>("FindNodePeerOffer")
+          .asPromise(3333)
+          .catch(console.error);
 
-      if (!res) {
-        continue;
+        if (!res) {
+          continue;
+        }
+
+        const { peerkid, sdp } = res;
+        offers.push({ peerkid, sdp });
+      } catch (error) {
+        console.warn(error);
       }
-
-      const { peerkid, sdp } = res;
-      offers.push({ peerkid, sdp });
     }
     this.listen.rpc(FindNodeProxyOffer(offers));
   }

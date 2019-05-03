@@ -62,7 +62,8 @@ export default class FindValueProxy {
 
         const res = await peer
           .eventRpc<FindValuePeerOffer>("FindValuePeerOffer")
-          .asPromise(1111);
+          .asPromise(3333)
+          .catch(console.error);
 
         if (!res) {
           continue;
