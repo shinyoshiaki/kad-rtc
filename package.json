@@ -39,9 +39,11 @@
     "buffer": "^5.2.1",
     "buffer-to-arraybuffer": "^0.0.5",
     "kad-distance": "git+https://git@github.com/shinyoshiaki/kad-distance.git",
+    "keypair": "^1.0.1",
+    "rx.mini": "git+https://git@github.com/shinyoshiaki/rx.mini.git",
     "sha1": "^1.1.1",
     "socket.io-client": "^2.1.1",
-    "webrtc4me": "^0.5.6"
+    "webrtc4me": "^0.5.8"
   },
   "jest": {
     "moduleFileExtensions": [

@@ -1,4 +1,4 @@
-import Event from "../../../utill/event";
+import Event from "rx.mini";
 export declare const PeerModule: (kid: string) => Peer;
 export default class Peer {
     kid: string;

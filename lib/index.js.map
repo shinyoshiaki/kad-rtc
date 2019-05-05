@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 {"version":3,"file":"index.js","sourceRoot":"","sources":["../src/index.ts"],"names":[],"mappings":";;;AAAA,kEAAkC;AAIb,mBAJd,kBAAQ,CAIc;AAH7B,2DAA4D;AAGnD,qBAHA,mBAAU,CAGA;AAFnB,iEAAqC;AAEN,oBAFxB,eAAS,CAEwB","sourcesContent":["import Kademlia from \"./kademlia\";\nimport { PeerModule } from \"./kademlia/modules/peer/webrtc\";\nimport GuestNode from \"./node/guest\";\n\nexport { PeerModule, Kademlia, GuestNode };\n"]}
+=======
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../src/index.ts"],"names":[],"mappings":";;;AAAA,kEAAkC;AAMb,mBANd,kBAAQ,CAMc;AAL7B,2DAA4D;AAKnD,qBALA,mBAAU,CAKA;AAJnB,iEAAqC;AAIN,oBAJxB,eAAS,CAIwB;AAHxC,mEAAuC;AAGG,qBAHnC,gBAAU,CAGmC;AAFpD,sDAAwD;AAEF,oBAF7C,gBAAS,CAE6C","sourcesContent":["import Kademlia from \"./kademlia\";\nimport { PeerModule } from \"./kademlia/modules/peer/webrtc\";\nimport GuestNode from \"./node/guest\";\nimport PortalNode from \"./node/portal\";\nimport { KvsModule } from \"./kademlia/modules/kvs/base\";\n\nexport { PeerModule, Kademlia, GuestNode, PortalNode, KvsModule };\n"]}
+>>>>>>> master

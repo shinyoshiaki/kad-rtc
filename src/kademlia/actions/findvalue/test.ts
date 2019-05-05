@@ -4,7 +4,7 @@ import sha1 from "sha1";
 import findValue from ".";
 
 const kBucketSize = 8;
-const num = 40;
+const num = 10;
 
 const getRandomInt = (min: number, max: number) =>
   Math.floor(

@@ -1,5 +1,5 @@
 import Base from "./base";
-import Event from "../../../utill/event";
+import Event from "rx.mini";
 import WebRTC from "../../../webrtc";
 
 let peerNum = 0;
@@ -54,7 +54,7 @@ export default class Peer implements Base {
       peerStack.push(this.peer);
       peerNum++;
     }
-    console.log(peerNum);
+    // console.log(peerNum);
   };
 
   createOffer = async () => {

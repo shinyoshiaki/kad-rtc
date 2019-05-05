@@ -1,5 +1,5 @@
 import Base from "./base";
-import Event from "../../../utill/event";
+import Event from "rx.mini";
 export declare const PeerModule: (kid: string) => Peer;
 export default class Peer implements Base {
     kid: string;

@@ -3,7 +3,7 @@ import client from "socket.io-client";
 import Kademlia from "../../kademlia";
 import { PeerModule } from "../../kademlia/modules/peer/webrtc";
 import Peer from "../../kademlia/modules/peer/base";
-import Event from "../../utill/event";
+import Event from "rx.mini";
 import { Option } from "../../kademlia/ktable";
 import { KvsModule } from "../../kademlia/modules/kvs/base";
 
