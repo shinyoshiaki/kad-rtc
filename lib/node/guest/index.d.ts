@@ -1,6 +1,6 @@
 import Kademlia from "../../kademlia";
 import Peer from "../../kademlia/modules/peer/base";
-import Event from "../../utill/event";
+import Event from "rx.mini";
 import { Option } from "../../kademlia/ktable";
 declare type Options = {
     target: {

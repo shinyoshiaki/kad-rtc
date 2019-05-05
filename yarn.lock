@@ -3387,6 +3387,10 @@ rsvp@^4.8.4:
   resolved "https://registry.yarnpkg.com/rsvp/-/rsvp-4.8.4.tgz#b50e6b34583f3dd89329a2f23a8a2be072845911"
   integrity sha512-6FomvYPfs+Jy9TfXmBpBuMWNH94SgCsZmJKcanySzgNNP6LjWxBvyLTa9KaMfDDM5oxRfrKDB0r/qeRsLwnBfA==
 
+"rx.mini@git+https://git@github.com/shinyoshiaki/rx.mini.git":
+  version "0.0.2"
+  resolved "git+https://git@github.com/shinyoshiaki/rx.mini.git#a5cc651b0db957a87d075025815564a7fd552dae"
+
 rxjs@^6.4.0:
   version "6.5.1"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.5.1.tgz#f7a005a9386361921b8524f38f54cbf80e5d08f4"
@@ -4029,11 +4033,12 @@ webidl-conversions@^4.0.2:
   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-4.0.2.tgz#a855980b1f0b6b359ba1d5d9fb39ae941faa63ad"
   integrity sha512-YQ+BmxuTgd6UXZW3+ICGfyqRyHXVlD5GtQr5+qjiNW7bF0cqrzX500HVXPBOvgXb5YnzDd+h0zqyv61KUD7+Sg==
 
-webrtc4me@^0.5.6:
-  version "0.5.6"
-  resolved "https://registry.yarnpkg.com/webrtc4me/-/webrtc4me-0.5.6.tgz#7ccb25a42dee5696fd9df8307bf239d8e58eb576"
-  integrity sha512-GK9MObwAmzuX+x6tFSUyaGPSEehERXh2WVqLCADCghzPg3lkg8XSH3HI8ro2hh9wEzObuI7gjuuk3LzK/dRusg==
+webrtc4me@^0.5.8:
+  version "0.5.8"
+  resolved "https://registry.yarnpkg.com/webrtc4me/-/webrtc4me-0.5.8.tgz#48cd1c2368f6b01d7b2e4f497d8e785e178c7570"
+  integrity sha512-LEXwHxiAn4TD+5ai+dUf+dGIpOOHn+1EJmYnEe6UlaRTKveRsbSwvgW2dEMKUGl2VMk6fmGBsE3YxBlyUlWNRw==
   dependencies:
+    rx.mini "git+https://git@github.com/shinyoshiaki/rx.mini.git"
     rxjs "^6.4.0"
     wrtc "^0.3.5"
 
