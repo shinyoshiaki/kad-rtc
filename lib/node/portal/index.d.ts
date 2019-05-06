@@ -21,6 +21,8 @@ export default class PortalNode {
     onConnect: Event<{}>;
     io: SocketIO.Server | undefined;
     constructor(opt: Options);
+    private asGuest;
+    private asHost;
     private offer;
     private answer;
     close(): void;
