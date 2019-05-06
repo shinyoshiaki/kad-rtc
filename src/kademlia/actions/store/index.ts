@@ -30,4 +30,5 @@ export default async function store(value: string, di: DependencyInjection) {
       .catch(console.error);
   }
   kvs.set(key, value);
+  return key;
 }
