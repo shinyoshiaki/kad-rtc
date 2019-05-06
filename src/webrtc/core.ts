@@ -4,7 +4,7 @@ import {
   RTCIceCandidate
 } from "wrtc";
 
-import Event from "./utill/event";
+import Event from "rx.mini";
 
 export interface message {
   label: string;
@@ -57,23 +57,17 @@ export default class WebRTC {
   private prepareNewConnection() {
     const { disable_stun, trickle } = this.opt;
 
-    let peer: RTCPeerConnection = {} as any;
-
-    try {
-      peer = disable_stun
-        ? new RTCPeerConnection({
-            iceServers: []
-          })
-        : new RTCPeerConnection({
-            iceServers: [
-              {
-                urls: "stun:stun.l.google.com:19302"
-              }
-            ]
-          });
-    } catch (error) {
-      console.error(error);
-    }
+    const peer: RTCPeerConnection = disable_stun
+      ? new RTCPeerConnection({
+          iceServers: []
+        })
+      : new RTCPeerConnection({
+          iceServers: [
+            {
+              urls: "stun:stun.l.google.com:19302"
+            }
+          ]
+        });
 
     peer.ontrack = evt => {
       const stream = evt.streams[0];
@@ -93,7 +87,7 @@ export default class WebRTC {
 
             this.send("ping", "live");
           } catch (error) {
-            console.error({ error });
+            console.warn({ error });
           }
           break;
         case "connected":
@@ -148,7 +142,7 @@ export default class WebRTC {
       if (this.negotiating || this.rtc.signalingState != "stable") return;
       this.negotiating = true;
 
-      const sdp = await this.rtc.createOffer().catch(console.error);
+      const sdp = await this.rtc.createOffer().catch(console.warn);
 
       if (!sdp) return;
 
@@ -194,7 +188,7 @@ export default class WebRTC {
     if (this.isOffer) {
       await this.rtc
         .setRemoteDescription(new RTCSessionDescription(sdp))
-        .catch(console.error);
+        .catch(console.warn);
     }
   }
 
@@ -203,15 +197,15 @@ export default class WebRTC {
 
     await this.rtc
       .setRemoteDescription(new RTCSessionDescription(offer))
-      .catch(console.error);
+      .catch(console.warn);
 
-    const answer = await this.rtc.createAnswer().catch(console.error);
+    const answer = await this.rtc.createAnswer().catch(console.warn);
     if (!answer) {
-      console.error("no answer");
+      console.warn("no answer");
       return;
     }
 
-    await this.rtc.setLocalDescription(answer).catch(console.error);
+    await this.rtc.setLocalDescription(answer).catch(console.warn);
 
     const local = this.rtc.localDescription;
 
@@ -235,63 +229,66 @@ export default class WebRTC {
       case "candidate":
         await this.rtc
           .addIceCandidate(new RTCIceCandidate(sdp.ice))
-          .catch(console.error);
+          .catch(console.warn);
         break;
     }
   }
 
-  private createDatachannel(label: string) {
+  private async createDatachannel(label: string) {
     if (!Object.keys(this.dataChannels).includes(label)) {
       try {
         const dc = this.rtc.createDataChannel(label);
-        this.dataChannelEvents(dc);
         this.dataChannels[label] = dc;
+        await this.dataChannelEvents(dc);
       } catch (dce) {}
     }
   }
 
   private dataChannelEvents(channel: RTCDataChannel) {
-    channel.onopen = () => {
-      if (!this.isConnected) {
-        this.isConnected = true;
-        this.onConnect.excute();
-      }
-    };
-    try {
+    return new Promise(resolve => {
+      channel.onopen = () => {
+        if (!this.isConnected) {
+          this.isConnected = true;
+          this.onConnect.excute();
+        }
+        resolve();
+      };
+
       channel.onmessage = async event => {
         if (!event) return;
-
-        if (channel.label === "update") {
-          const sdp = JSON.parse(event.data);
-          this.setSdp(sdp);
-        } else if (channel.label === "live") {
-          if (event.data === "ping") this.send("pong", "live");
-          else if (this.timeoutPing) clearTimeout(this.timeoutPing);
-        } else {
-          this.onData.excute({
-            label: channel.label,
-            data: event.data,
-            nodeId: this.nodeId
-          });
+        try {
+          if (channel.label === "update") {
+            const sdp = JSON.parse(event.data);
+            this.setSdp(sdp);
+          } else if (channel.label === "live") {
+            if (event.data === "ping") this.send("pong", "live");
+            else if (this.timeoutPing) clearTimeout(this.timeoutPing);
+          } else {
+            this.onData.excute({
+              label: channel.label,
+              data: event.data,
+              nodeId: this.nodeId
+            });
+          }
+        } catch (error) {
+          console.warn(error);
         }
       };
-    } catch (error) {
-      console.error(error);
-    }
-    channel.onerror = err => console.error(err);
-    channel.onclose = () => console.error("close", this.nodeId);
+
+      channel.onerror = err => console.warn(err);
+      channel.onclose = () => console.warn("close", this.nodeId);
+    });
   }
 
   async send(data: any, label?: string) {
     label = label || "datachannel";
     if (!Object.keys(this.dataChannels).includes(label)) {
-      this.createDatachannel(label);
+      await this.createDatachannel(label);
     }
     try {
-      await new Promise(r => setTimeout(r, 0));
       this.dataChannels[label].send(data);
     } catch (error) {
-      console.error(error);
+      console.warn(error);
     }
   }
 
