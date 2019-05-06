@@ -50,44 +50,51 @@ export default class PortalNode {
 
   constructor(private opt: Options) {
     try {
-      const { target, port } = opt;
-      if (target) {
-        const socket = client.connect(
-          "http://" + target.url + ":" + target.port
-        );
-        socket.on("connect", () => {
-          socket.emit("rpc", Request(this.kid));
-        });
-        socket.on("rpc", (data: actions) => {
-          if (data.rpc === "Offer") {
-            this.peers[data.serverKid] = PeerModule(data.serverKid);
-            this.answer(socket, data);
-          }
-        });
-      }
-
-      const srv = new http.Server();
-      const io = (this.io = socketio(srv));
-      srv.listen(port);
-      io.on("connection", socket => {
-        try {
-          socket.on("rpc", (data: actions) => {
-            if (data.rpc === "Request") {
-              this.peers[data.clientKid] = PeerModule(data.clientKid);
-              this.offer(io.sockets.sockets[socket.id], data);
-            }
-            if (data.rpc === "Answer") {
-              const peer = this.peers[data.clientKid];
-              peer.setAnswer(data.sdp);
-            }
-          });
-        } catch (error) {
-          console.error(error);
-        }
-      });
+      this.asGuest();
+      this.asHost();
     } catch (error) {
       console.error(error);
     }
+  }
+
+  private asGuest() {
+    const { target } = this.opt;
+    if (target) {
+      const socket = client.connect("http://" + target.url + ":" + target.port);
+      socket.on("connect", () => {
+        socket.emit("rpc", Request(this.kid));
+      });
+      socket.on("rpc", (data: actions) => {
+        if (data.rpc === "Offer") {
+          this.peers[data.serverKid] = PeerModule(data.serverKid);
+          this.answer(socket, data);
+        }
+      });
+    }
+  }
+
+  private asHost() {
+    const { port } = this.opt;
+    const srv = new http.Server();
+    const io = (this.io = socketio(srv));
+    srv.listen(port);
+    io.on("connection", socket => {
+      try {
+        socket.on("rpc", (data: actions) => {
+          if (data.rpc === "Request") {
+            console.log("start connect", data.clientKid);
+            this.peers[data.clientKid] = PeerModule(data.clientKid);
+            this.offer(io.sockets.sockets[socket.id], data);
+          }
+          if (data.rpc === "Answer") {
+            const peer = this.peers[data.clientKid];
+            peer.setAnswer(data.sdp);
+          }
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    });
   }
 
   private async offer(socket: SocketIO.Socket, data: Request) {
