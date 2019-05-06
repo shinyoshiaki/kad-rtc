@@ -36,7 +36,8 @@ export default class Kademlia {
   }
 
   async store(value: string) {
-    await store(value, this.di);
+    const key = await store(value, this.di);
+    return key;
   }
 
   async findValue(key: string) {
