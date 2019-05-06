@@ -8,7 +8,7 @@ export default class Kademlia {
     di: DependencyInjection;
     constructor(kid: string, modules: Modules, opt?: Partial<Options>);
     findNode(searchkid: string): Promise<Peer | undefined>;
-    store(value: string): Promise<void>;
+    store(value: string): Promise<string>;
     findValue(key: string): Promise<string | undefined>;
     add(peer: Peer): Promise<void>;
 }

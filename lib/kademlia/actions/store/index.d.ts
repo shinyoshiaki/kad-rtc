@@ -5,5 +5,5 @@ declare const Store: (key: string, value: string) => {
     value: string;
 };
 export declare type Store = ReturnType<typeof Store>;
-export default function store(value: string, di: DependencyInjection): Promise<void>;
+export default function store(value: string, di: DependencyInjection): Promise<string>;
 export {};
