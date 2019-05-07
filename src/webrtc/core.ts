@@ -283,7 +283,7 @@ export default class WebRTC {
       };
 
       channel.onerror = err => console.warn(err);
-      channel.onclose = () => console.warn("close", this.nodeId);
+      channel.onclose = () => {};
     });
   }
 
