@@ -1,6 +1,7 @@
 import { DependencyInjection } from "../../di";
-import { FindValueResult } from "./listen/proxy";
+import { FindValueResult, Offer } from "./listen/proxy";
 import { listeners } from "../../listeners";
+import Peer from "../../modules/peer/base";
 
 const FindValue = (key: string, except: string[]) => {
   return { rpc: "FindValue" as const, key, except };
@@ -20,44 +21,61 @@ export default async function findValue(key: string, di: DependencyInjection) {
 
   let result: string | undefined;
 
-  job: for (
+  const findValueAnswer = async (offer: Offer, peer: Peer) => {
+    const { peerkid, sdp } = offer;
+    const connect = peerCreate(peerkid);
+    const answer = await connect.setOffer(sdp);
+
+    peer.rpc(FindValueAnswer(answer, peerkid));
+    const res = await connect.onConnect.asPromise(3333).catch(console.error);
+    if (res) {
+      kTable.add(connect);
+      listeners(connect, di);
+    }
+  };
+
+  const findValueResult = async (peer: Peer) => {
+    const except = kTable.allPeers.map(item => item.kid);
+    peer.rpc(FindValue(key, except));
+
+    const res = await peer
+      .eventRpc<FindValueResult>("FindValueResult")
+      .asPromise(3333)
+      .catch(console.error);
+
+    if (res) {
+      const { value, offers } = res.data;
+      if (value) {
+        result = value;
+      } else if (offers) {
+        if (offers.length > 0) {
+          return { offers, peer };
+        }
+      }
+    }
+    return { offers: [], peer };
+  };
+
+  const job = async () => {
+    const findValueResultResult = await Promise.all(
+      kTable.allPeers.map(peer => findValueResult(peer))
+    );
+    await Promise.all(
+      findValueResultResult
+        .map(item =>
+          item.offers.map(offer => findValueAnswer(offer, item.peer))
+        )
+        .flatMap(v => v)
+    );
+  };
+
+  for (
     let preHash = "";
     preHash !== kTable.getHash(key);
     preHash = kTable.getHash(key)
   ) {
-    for (let peer of kTable.allPeers) {
-      const except = kTable.allPeers.map(item => item.kid);
-      peer.rpc(FindValue(key, except));
-
-      const res = await peer
-        .eventRpc<FindValueResult>("FindValueResult")
-        .asPromise(3333)
-        .catch(console.error);
-
-      if (!res) {
-        continue;
-      }
-
-      const { value, offers } = res.data;
-      if (value) {
-        result = value;
-        break job;
-      } else if (offers) {
-        if (offers.length === 0) continue;
-
-        for (let offer of offers) {
-          const { peerkid, sdp } = offer;
-          const connect = peerCreate(peerkid);
-          const answer = await connect.setOffer(sdp);
-
-          peer.rpc(FindValueAnswer(answer, peerkid));
-          await connect.onConnect.asPromise(3333).catch(console.error);
-
-          kTable.add(connect);
-          listeners(connect, di);
-        }
-      }
-    }
+    await job();
+    if (result) break;
   }
 
   return result;

@@ -5,7 +5,7 @@ export const PeerModule = (kid: string) => new Peer(kid);
 export default class Peer {
   onRpc = new Event<any>();
   onDisconnect = new Event();
-  onConnect = new Event();
+  onConnect = new Event<boolean>();
 
   constructor(public kid: string) {}
 

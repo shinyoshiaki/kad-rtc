@@ -9,10 +9,13 @@ export default class Peer implements Base {
   private peer: WebRTC = new WebRTC({ disable_stun: true });
   onRpc = new Event<any>();
   onDisconnect = this.peer.onDisconnect as any;
-  onConnect = this.peer.onConnect as any;
+  onConnect = new Event<boolean>();
 
   constructor(public kid: string) {
     this.peer.nodeId = kid;
+    this.peer.onConnect.once(() => {
+      this.onConnect.excute(true);
+    });
     const discon = this.peer.onData.subscribe(raw => {
       try {
         const data = JSON.parse(raw.data);
