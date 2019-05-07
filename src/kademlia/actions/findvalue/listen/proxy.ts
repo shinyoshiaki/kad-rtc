@@ -3,11 +3,11 @@ import { FindValuePeerOffer } from "./peer";
 import { DependencyInjection } from "../../../di";
 import { FindValue, FindValueAnswer } from "..";
 
-const FindValueResult = (
-  data: Partial<{ value: string; offers: { peerkid: string; sdp: any }[] }>
-) => {
+const FindValueResult = (data: Partial<{ value: string; offers: Offer[] }>) => {
   return { rpc: "FindValueResult" as const, data };
 };
+
+export type Offer = { peerkid: string; sdp: any };
 
 export type FindValueResult = ReturnType<typeof FindValueResult>;
 
@@ -54,24 +54,24 @@ export default class FindValueProxy {
       const peers = kTable.findNode(key);
       const offers: { peerkid: string; sdp: any }[] = [];
 
-      for (let peer of peers) {
-        if (peer.kid === this.listen.kid) continue;
-        if (except.includes(peer.kid)) continue;
+      const findValuePeerOffer = async (peer: Peer) => {
+        if (!(peer.kid === this.listen.kid || except.includes(peer.kid))) {
+          peer.rpc(FindValueProxyOpen(this.listen.kid));
 
-        peer.rpc(FindValueProxyOpen(this.listen.kid));
+          const res = await peer
+            .eventRpc<FindValuePeerOffer>("FindValuePeerOffer")
+            .asPromise(3333)
+            .catch(console.error);
 
-        const res = await peer
-          .eventRpc<FindValuePeerOffer>("FindValuePeerOffer")
-          .asPromise(3333)
-          .catch(console.error);
-
-        if (!res) {
-          continue;
+          if (res) {
+            const { peerkid, sdp } = res;
+            offers.push({ peerkid, sdp });
+          }
         }
+      };
 
-        const { peerkid, sdp } = res;
-        offers.push({ peerkid, sdp });
-      }
+      await Promise.all(peers.map(peer => findValuePeerOffer(peer)));
+
       this.listen.rpc(FindValueResult({ offers }));
     }
   }
