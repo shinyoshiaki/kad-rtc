@@ -14,10 +14,12 @@ export default class Peer implements Base {
   constructor(public kid: string) {
     this.peer.nodeId = kid;
     const discon = this.peer.onData.subscribe(raw => {
-      const data = JSON.parse(raw.data);
-      if (data.rpc) {
-        this.onRpc.excute(data);
-      }
+      try {
+        const data = JSON.parse(raw.data);
+        if (data.rpc) {
+          this.onRpc.excute(data);
+        }
+      } catch (error) {}
     });
     this.peer.onDisconnect.once(() => {
       discon.unSubscribe();
