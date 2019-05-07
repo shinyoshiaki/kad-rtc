@@ -47,24 +47,24 @@ export default class FindNodeProxy {
     const peers = kTable.findNode(searchkid);
     const offers: { peerkid: string; sdp: any }[] = [];
 
-    for (let peer of peers) {
-      if (peer.kid === this.listen.kid) continue;
-      if (except.includes(peer.kid)) continue;
+    const findNodePeerOffer = async (peer: Peer) => {
+      if (!(peer.kid === this.listen.kid || except.includes(peer.kid))) {
+        peer.rpc(FindNodeProxyOpen(this.listen.kid));
 
-      peer.rpc(FindNodeProxyOpen(this.listen.kid));
+        const res = await peer
+          .eventRpc<FindNodePeerOffer>("FindNodePeerOffer")
+          .asPromise(3333)
+          .catch(console.warn);
 
-      const res = await peer
-        .eventRpc<FindNodePeerOffer>("FindNodePeerOffer")
-        .asPromise(3333)
-        .catch(console.warn);
-
-      if (!res) {
-        continue;
+        if (res) {
+          const { peerkid, sdp } = res;
+          offers.push({ peerkid, sdp });
+        }
       }
+    };
 
-      const { peerkid, sdp } = res;
-      offers.push({ peerkid, sdp });
-    }
+    await Promise.all(peers.map(peer => findNodePeerOffer(peer)));
+
     this.listen.rpc(FindNodeProxyOffer(offers));
   }
 
