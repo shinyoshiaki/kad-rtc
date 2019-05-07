@@ -16,7 +16,6 @@ async function testSetupNodes(kBucketSize: number, num: number) {
       target: { url: "localhost", port: portalPort },
       kadOption: { kBucketSize }
     });
-    console.log(i);
     if (i > 12) {
       i;
     }
@@ -48,6 +47,12 @@ describe("guest", () => {
       }
 
       (nodes[0] as PortalNode).close();
+
+      await new Promise(r => setTimeout(r, 0));
+
+      nodes.forEach(node =>
+        node.kademlia.di.kTable.allPeers.forEach(peer => peer.disconnect())
+      );
     },
     1000 * 6000
   );

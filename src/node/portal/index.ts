@@ -82,7 +82,6 @@ export default class PortalNode {
       try {
         socket.on("rpc", (data: actions) => {
           if (data.rpc === "Request") {
-            console.log("start connect", data.clientKid);
             this.peers[data.clientKid] = PeerModule(data.clientKid);
             this.offer(io.sockets.sockets[socket.id], data);
           }

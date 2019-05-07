@@ -2,9 +2,6 @@ import Base from "./base";
 import Event from "rx.mini";
 import WebRTC from "../../../webrtc";
 
-let peerNum = 0;
-const peerStack: WebRTC[] = [];
-
 export const PeerModule = (kid: string) => new Peer(kid);
 
 export default class Peer implements Base {
@@ -43,23 +40,7 @@ export default class Peer implements Base {
     return observer;
   };
 
-  manageLimit = async () => {
-    if (peerNum > 255) {
-      peerStack.push(this.peer);
-      peerNum++;
-      // const discon = peerStack.shift();
-      // await discon!.disconnect();
-      // peerNum--;
-    } else {
-      peerStack.push(this.peer);
-      peerNum++;
-    }
-    // console.log(peerNum);
-  };
-
   createOffer = async () => {
-    await this.manageLimit();
-
     this.peer.makeOffer();
     const offer = await this.peer.onSignal.asPromise();
     await new Promise(r => setTimeout(r, 0));
@@ -67,8 +48,6 @@ export default class Peer implements Base {
   };
 
   setOffer = async (offer: any) => {
-    await this.manageLimit();
-
     this.peer.setSdp(offer);
     const answer = await this.peer.onSignal.asPromise();
     await new Promise(r => setTimeout(r, 0));

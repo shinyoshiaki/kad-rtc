@@ -6,6 +6,8 @@ import {
 
 import Event from "rx.mini";
 
+const isNode = typeof process !== "undefined" && typeof require !== "undefined";
+
 export interface message {
   label: string;
   data: any;
@@ -240,7 +242,9 @@ export default class WebRTC {
         const dc = this.rtc.createDataChannel(label);
         this.dataChannels[label] = dc;
         await this.dataChannelEvents(dc);
-      } catch (dce) {}
+      } catch (dce) {
+        console.error(dce);
+      }
     }
   }
 
@@ -283,7 +287,11 @@ export default class WebRTC {
   async send(data: any, label?: string) {
     label = label || "datachannel";
     if (!Object.keys(this.dataChannels).includes(label)) {
-      await this.createDatachannel(label);
+      if (isNode) {
+        this.createDatachannel(label);
+      } else {
+        await this.createDatachannel(label);
+      }
     }
     try {
       this.dataChannels[label].send(data);
