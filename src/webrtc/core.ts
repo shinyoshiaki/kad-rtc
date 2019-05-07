@@ -6,7 +6,10 @@ import {
 
 import Event from "rx.mini";
 
-const isNode = typeof process !== "undefined" && typeof require !== "undefined";
+const injectableProcess = typeof process !== "undefined" ? process : undefined;
+
+const injectableNavigator =
+  typeof window !== "undefined" ? window.navigator : undefined;
 
 export interface message {
   label: string;
@@ -280,17 +283,21 @@ export default class WebRTC {
       };
 
       channel.onerror = err => console.warn(err);
-      channel.onclose = () => console.warn("close", this.nodeId);
+      channel.onclose = () => {};
     });
   }
 
   async send(data: any, label?: string) {
     label = label || "datachannel";
     if (!Object.keys(this.dataChannels).includes(label)) {
-      if (isNode) {
+      try {
+        if (injectableNavigator!.platform) {
+          await this.createDatachannel(label);
+        } else {
+          this.createDatachannel(label);
+        }
+      } catch (_) {
         this.createDatachannel(label);
-      } else {
-        await this.createDatachannel(label);
       }
     }
     try {

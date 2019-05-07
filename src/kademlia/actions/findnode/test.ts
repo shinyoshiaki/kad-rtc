@@ -12,57 +12,40 @@ const num = 10;
 export async function testSetupNodes(kBucketSize: number, num: number) {
   const nodes: DependencyInjection[] = [];
 
-  const kOffer = dependencyInjection(
-    sha1("0").toString(),
-    { peerCreate: PeerModule, kvs: KvsModule() },
-    {
-      kBucketSize
+  for (let i = 0; i < num; i++) {
+    if (nodes.length === 0) {
+      const node = dependencyInjection(
+        sha1(i.toString()).toString(),
+        { peerCreate: PeerModule, kvs: KvsModule() },
+        {
+          kBucketSize
+        }
+      );
+      nodes.push(node);
+    } else {
+      const pre = nodes.slice(-1)[0];
+      const push = dependencyInjection(
+        sha1(i.toString()).toString(),
+        { peerCreate: PeerModule, kvs: KvsModule() },
+        {
+          kBucketSize
+        }
+      );
+      const offer = PeerModule(push.kTable.kid);
+      const offerSdp = await offer.createOffer();
+      const answer = PeerModule(pre.kTable.kid);
+      const answerSdp = await answer.setOffer(offerSdp);
+      await offer.setAnswer(answerSdp);
+
+      pre.kTable.add(offer);
+      listeners(offer, pre);
+      push.kTable.add(answer);
+      listeners(answer, push);
+
+      nodes.push(push);
     }
-  );
-  const kAnswer = dependencyInjection(
-    sha1("1").toString(),
-    { peerCreate: PeerModule, kvs: KvsModule() },
-    {
-      kBucketSize
-    }
-  );
-
-  const offer = PeerModule(kAnswer.kTable.kid);
-  const offerSdp = await offer.createOffer();
-  const answer = PeerModule(kOffer.kTable.kid);
-  const answerSdp = await answer.setOffer(offerSdp);
-  await offer.setAnswer(answerSdp);
-
-  kOffer.kTable.add(offer);
-  listeners(offer, kOffer);
-
-  kAnswer.kTable.add(answer);
-  listeners(answer, kAnswer);
-
-  nodes.push(kOffer);
-  nodes.push(kAnswer);
-
-  for (let i = 2; i < 2 + num; i++) {
-    const pop = nodes.slice(-1)[0];
-    const push = dependencyInjection(
-      sha1(i.toString()).toString(),
-      { peerCreate: PeerModule, kvs: KvsModule() },
-      { kBucketSize }
-    );
-
-    const offer = PeerModule(push.kTable.kid);
-    const offerSdp = await offer.createOffer();
-    const answer = PeerModule(pop.kTable.kid);
-    const answerSdp = await answer.setOffer(offerSdp);
-    await offer.setAnswer(answerSdp);
-
-    pop.kTable.add(offer);
-    listeners(offer, pop);
-    push.kTable.add(answer);
-    listeners(answer, push);
-
-    nodes.push(push);
   }
+
   for (let node of nodes) {
     await findNode(node.kTable.kid, node);
   }

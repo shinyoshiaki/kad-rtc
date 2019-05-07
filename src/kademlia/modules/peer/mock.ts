@@ -10,7 +10,7 @@ export default class Peer implements Base {
 
   onRpc = new Event<any>();
   onDisconnect = new Event();
-  onConnect = new Event();
+  onConnect = new Event<boolean>();
 
   constructor(public kid: string) {
     this.onData.subscribe(raw => {
@@ -55,7 +55,7 @@ export default class Peer implements Base {
 
       setTimeout(() => {
         connect.excute();
-        this.onConnect.excute();
+        this.onConnect.excute(true);
 
         resolve(true);
       }, 0);
