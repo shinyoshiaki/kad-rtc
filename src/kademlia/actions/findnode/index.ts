@@ -1,6 +1,7 @@
-import { FindNodeProxyOffer } from "./listen/proxy";
+import { FindNodeProxyOffer, Offer } from "./listen/proxy";
 import { DependencyInjection } from "../../di";
 import { listeners } from "../../listeners";
+import Peer from "../../modules/peer/base";
 
 const FindNode = (searchkid: string, except: string[]) => {
   return { rpc: "FindNode" as const, searchkid, except };
@@ -23,36 +24,47 @@ export default async function findNode(
 
   if (kTable.getPeer(searchkid)) return kTable.getPeer(searchkid);
 
-  for (let peer of kTable.allPeers) {
+  const findNodeProxyOffer = async (peer: Peer) => {
     const except = kTable.allPeers.map(item => item.kid);
     peer.rpc(FindNode(searchkid, except));
 
-
     const res = await peer
-    .eventRpc<FindNodeProxyOffer>("FindNodeProxyOffer")
-    .asPromise(3333)
-    .catch(console.warn);
+      .eventRpc<FindNodeProxyOffer>("FindNodeProxyOffer")
+      .asPromise(3333)
+      .catch(console.warn);
 
-  if (!res) {
-    continue;
-  }
+    if (res) {
+      const { peers } = res;
+      if (peers.length > 0) {
+        return { peers, peer };
+      }
+    }
+    return { peers: [], peer };
+  };
 
-  const { peers } = res;
-  if (peers.length === 0) {
-    continue;
-  }
-
-  for (let offer of peers) {
+  const findNodeAnswer = async (peer: Peer, offer: Offer) => {
     const { peerkid, sdp } = offer;
     const connect = peerCreate(peerkid);
     const answer = await connect.setOffer(sdp);
 
     peer.rpc(FindNodeAnswer(answer, peerkid));
-    await connect.onConnect.asPromise(3333).catch(console.error);
+    const res = await connect.onConnect.asPromise(3333).catch(console.error);
 
-    kTable.add(connect);
-    listeners(connect, di);
-  }
-  }
+    if (res) {
+      kTable.add(connect);
+      listeners(connect, di);
+    }
+  };
+
+  const findNodeProxyOfferResult = await Promise.all(
+    kTable.findNode(searchkid).map(peer => findNodeProxyOffer(peer))
+  );
+
+  await Promise.all(
+    findNodeProxyOfferResult
+      .map(item => item.peers.map(offer => findNodeAnswer(item.peer, offer)))
+      .flatMap(v => v)
+  );
+
   return kTable.getPeer(searchkid);
 }

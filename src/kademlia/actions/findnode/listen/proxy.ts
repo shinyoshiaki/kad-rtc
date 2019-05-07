@@ -3,9 +3,11 @@ import { FindNode, FindNodeAnswer } from "..";
 import { FindNodePeerOffer } from "./peer";
 import { DependencyInjection } from "../../../di";
 
-const FindNodeProxyOffer = (peers: { peerkid: string; sdp: any }[]) => {
+const FindNodeProxyOffer = (peers: Offer[]) => {
   return { rpc: "FindNodeProxyOffer" as const, peers };
 };
+
+export type Offer = { peerkid: string; sdp: any };
 
 export type FindNodeProxyOffer = ReturnType<typeof FindNodeProxyOffer>;
 
