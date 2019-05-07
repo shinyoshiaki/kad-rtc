@@ -7,7 +7,11 @@ describe("webrtc", () => {
     async () => {
       const test = () =>
         new Promise(async resolve => {
-          const count = new Count(2, resolve);
+          const count = new Count(2, () => {
+            a.disconnect();
+            b.disconnect();
+            resolve();
+          });
 
           const a = PeerModule("a");
           const b = PeerModule("b");

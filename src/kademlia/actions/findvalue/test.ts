@@ -36,6 +36,10 @@ describe("findvalue", () => {
       }
 
       await new Promise(r => setTimeout(r, 0));
+
+      nodes.forEach(node =>
+        node.kTable.allPeers.forEach(peer => peer.disconnect())
+      );
     },
     1000 * 6000
   );
