@@ -44,7 +44,8 @@
     "sha1": "^1.1.1",
     "socket.io": "^2.1.1",
     "socket.io-client": "^2.1.1",
-    "webrtc4me": "^0.5.8"
+    "webrtc4me": "^0.5.8",
+    "wrtc": "^0.4.0"
   },
   "jest": {
     "moduleFileExtensions": [

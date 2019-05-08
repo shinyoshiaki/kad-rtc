@@ -1,0 +1,26 @@
+{
+  "name": "express",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "engines": {
+    "node": ">=11"
+  },
+  "scripts": {
+    "build": "tsc",
+    "type": "tsc --noEmit",
+    "server": "ts-node --project ./tsconfig.json ./src/index.ts",
+    "b": "ts-node --project ./tsconfig.json ./src/b.ts"
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "body-parser": "^1.19.0",
+    "express": "^4.16.4"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/express": "^4.16.1",
+    "ts-node": "^8.1.0",
+    "typescript": "^3.4.5"
+  }
+}
