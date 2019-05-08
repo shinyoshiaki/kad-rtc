@@ -8,7 +8,7 @@ export default class Peer implements Base {
     private send;
     onRpc: Event<any>;
     onDisconnect: Event<{}>;
-    onConnect: Event<{}>;
+    onConnect: Event<boolean>;
     constructor(kid: string);
     rpc: (send: {
         rpc: string;
@@ -17,7 +17,7 @@ export default class Peer implements Base {
     createOffer: () => Promise<Event<any>>;
     setOffer: (sdp: Event<any>) => Promise<{
         send: Event<any>;
-        connect: Event<{}>;
+        connect: Event<boolean>;
     }>;
     setAnswer: (sdp: {
         send: Event<any>;

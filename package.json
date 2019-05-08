@@ -12,7 +12,8 @@
     "publish": "npm publish --access=public",
     "test": "npm run type && jest --forceExit",
     "test_target": "jest --forceExit ./src/kademlia/actions/findnode/test.ts",
-    "server": "ts-node --project ./tsconfig.json ./src/cli.ts"
+    "server": "ts-node --project ./tsconfig.json ./src/cli.ts",
+    "build_examples": "cd examples && cd express && npm run build"
   },
   "main": "lib/index.js",
   "files": [

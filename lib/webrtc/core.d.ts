@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import Event from "./utill/event";
+import Event from "rx.mini";
 export interface message {
     label: string;
     data: any;

@@ -1,0 +1,1 @@
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../../../../../src/webrtc/index.ts"],"names":[],"mappings":";;;AAAA,0DAA4B;AAE5B,kBAAe,cAAM,CAAC","sourcesContent":["import WebRTC from \"./core\";\n\nexport default WebRTC;\n"]}
