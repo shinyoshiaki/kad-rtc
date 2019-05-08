@@ -16,7 +16,7 @@ export async function testSetupNodes(kBucketSize: number, num: number) {
     if (nodes.length === 0) {
       const node = dependencyInjection(
         sha1(i.toString()).toString(),
-        { peerCreate: PeerModule, kvs: KvsModule() },
+        { peerCreate: PeerModule, kvs: KvsModule },
         {
           kBucketSize
         }
@@ -26,7 +26,7 @@ export async function testSetupNodes(kBucketSize: number, num: number) {
       const pre = nodes.slice(-1)[0];
       const push = dependencyInjection(
         sha1(i.toString()).toString(),
-        { peerCreate: PeerModule, kvs: KvsModule() },
+        { peerCreate: PeerModule, kvs: KvsModule },
         {
           kBucketSize
         }

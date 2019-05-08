@@ -2,17 +2,13 @@ import http from "http";
 import socketio from "socket.io";
 import sha1 from "sha1";
 import client from "socket.io-client";
-import Kademlia from "../../kademlia";
-import { PeerModule } from "../../kademlia/modules/peer/webrtc";
-import Peer from "../../kademlia/modules/peer/base";
+
 import Event from "rx.mini";
-import { Option } from "../../kademlia/ktable";
-import { KvsModule } from "../../kademlia/modules/kvs/base";
+import { Kademlia, PeerModule, KvsModule, Peer } from "../../..";
 
 type Options = {
   port: number;
   target?: { url: string; port: number };
-  kadOption?: Partial<Option>;
 };
 
 const Request = (clientKid: string) => {
@@ -39,11 +35,7 @@ type actions = Offer | Request | Answer;
 
 export default class PortalNode {
   kid = sha1(Math.random().toString()).toString();
-  kademlia = new Kademlia(
-    this.kid,
-    { peerCreate: PeerModule, kvs: KvsModule() },
-    this.opt.kadOption
-  );
+  kademlia = new Kademlia(this.kid, { peerCreate: PeerModule, kvs: KvsModule });
   peers: { [key: string]: Peer } = {};
   onConnect = new Event();
   io: SocketIO.Server | undefined;
