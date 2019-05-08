@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Kademlia, PeerModule } from "../../../..";
+import { Kademlia, PeerModule } from "../../../../src";
 
 export default async function guest(kad: Kademlia, target: string) {
   const join = await axios.post(target + "/join", {
