@@ -8,4 +8,4 @@ feature/* -> 機能追加
 maintain/* -> 改善  
 develop -> feature,maintainのマージ先  
 master -> developのマージ先、ビルド、ドキュメンテーション  
-release/* -> プラットフォームごとのビルド  
+release/* -> masterのマージ先、プラットフォームごとのビルド  
