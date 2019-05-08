@@ -14,8 +14,7 @@ async function testSetupNodes(kBucketSize: number, num: number) {
     const newport = await aport();
     const node = new Portal({
       target: { url: "localhost", port },
-      port: newport,
-      kadOption: { kBucketSize }
+      port: newport
     });
     await node.onConnect.asPromise();
     nodes.push(node);

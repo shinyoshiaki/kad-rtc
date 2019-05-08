@@ -16,6 +16,5 @@
     "noUnusedLocals": false,
     "skipLibCheck": true,
     "noImplicitAny": false
-  },
-  "exclude": ["./examples"]
+  }
 }
