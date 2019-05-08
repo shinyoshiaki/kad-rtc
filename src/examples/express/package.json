@@ -9,8 +9,8 @@
   "scripts": {
     "build": "tsc",
     "type": "tsc --noEmit",
-    "server": "ts-node --project ./tsconfig.json ./src/index.ts",
-    "b": "ts-node --project ./tsconfig.json ./src/b.ts"
+    "portal": "ts-node --project ./tsconfig.json ./src/portalnode.ts",
+    "guest": "ts-node --project ./tsconfig.json ./src/guestnode.ts"
   },
   "dependencies": {
     "axios": "^0.18.0",

@@ -9,12 +9,11 @@ async function testSetupNodes(kBucketSize: number, num: number) {
   const portalPort = await aport();
   const nodes: (GuestNode | PortalNode)[] = [];
 
-  nodes.push(new PortalNode({ port: portalPort, kadOption: { kBucketSize } }));
+  nodes.push(new PortalNode({ port: portalPort }));
 
   for (let i = 0; i < num; i++) {
     const node = new GuestNode({
-      target: { url: "localhost", port: portalPort },
-      kadOption: { kBucketSize }
+      target: { url: "localhost", port: portalPort }
     });
     if (i > 12) {
       i;

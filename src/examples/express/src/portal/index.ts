@@ -1,34 +1,10 @@
 import Express from "express";
-import { Kademlia, KvsModule, PeerModule, Peer, genKid } from "../../../../";
+import { Kademlia, PeerModule, Peer } from "../../../..";
 import bodyParser from "body-parser";
-import axios from "axios";
 
-const kad = new Kademlia(genKid(), { kvs: KvsModule, peerCreate: PeerModule });
 const peers: { [key: string]: Peer } = {};
 
-export default async function potalnode(port: number, taget?: string) {
-  asHost(port);
-  if (taget) {
-    console.log("target");
-
-    const join = await axios.post(taget + "/join", {
-      kid: kad.kid
-    });
-    console.log({ join });
-    const { kid, offer } = join.data;
-    const peer = PeerModule(kid);
-    const answer = await peer.setOffer(offer);
-    const res = await axios.post(taget + "/answer", {
-      kid: kad.kid,
-      answer
-    });
-    if (res) {
-      console.log("connected");
-    }
-  }
-}
-
-async function asHost(port: number) {
+export default async function potalnode(kad: Kademlia, port: number) {
   const app = Express();
 
   app.use(bodyParser.urlencoded({ extended: true }));
@@ -36,10 +12,6 @@ async function asHost(port: number) {
 
   app.listen(port, () => {
     console.log("Example app listening on port " + port);
-  });
-
-  app.get("/", (req: Express.Request, res: Express.Response) => {
-    return res.send("Hello world.");
   });
 
   app.post("/join", async (req: Express.Request, res: Express.Response) => {
