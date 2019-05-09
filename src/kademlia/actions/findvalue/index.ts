@@ -27,7 +27,7 @@ export default async function findValue(key: string, di: DependencyInjection) {
     const answer = await connect.setOffer(sdp);
 
     peer.rpc(FindValueAnswer(answer, peerkid));
-    const res = await connect.onConnect.asPromise(3333).catch(console.error);
+    const res = await connect.onConnect.asPromise(3333).catch(console.warn);
     if (res) {
       kTable.add(connect);
       listeners(connect, di);
@@ -41,7 +41,7 @@ export default async function findValue(key: string, di: DependencyInjection) {
     const res = await peer
       .eventRpc<FindValueResult>("FindValueResult")
       .asPromise(3333)
-      .catch(console.error);
+      .catch(console.warn);
 
     if (res) {
       const { value, offers } = res.data;

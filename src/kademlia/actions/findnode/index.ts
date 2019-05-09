@@ -48,7 +48,7 @@ export default async function findNode(
     const answer = await connect.setOffer(sdp);
 
     peer.rpc(FindNodeAnswer(answer, peerkid));
-    const res = await connect.onConnect.asPromise(3333).catch(console.error);
+    const res = await connect.onConnect.asPromise(3333).catch(console.warn);
 
     if (res) {
       kTable.add(connect);
