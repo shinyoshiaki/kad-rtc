@@ -30,7 +30,7 @@ export default async function store(value: string, di: DependencyInjection) {
     await peer
       .eventRpc<OnStore>("OnStore")
       .asPromise(3333)
-      .catch(console.error);
+      .catch(console.warn);
   };
 
   await Promise.all(peers.map(peer => onStore(peer)));
