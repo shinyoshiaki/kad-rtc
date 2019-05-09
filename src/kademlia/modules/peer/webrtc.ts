@@ -19,11 +19,14 @@ export default class Peer implements Base {
     });
     const onData = this.peer.onData.subscribe(raw => {
       try {
-        const data = bson.deserialize(raw.data);
+        const buffer = Buffer.from(raw.data);
+        const data = bson.deserialize(buffer);
         if (data.rpc) {
           this.onRpc.excute(data);
         }
-      } catch (error) {}
+      } catch (error) {
+        console.error(error);
+      }
     });
     this.peer.onDisconnect.once(() => {
       onData.unSubscribe();
@@ -42,7 +45,8 @@ export default class Peer implements Base {
     const observer = new Event<any>();
     const once = this.peer.onData.subscribe(raw => {
       if (raw.label === rpc) {
-        const data = bson.deserialize(Buffer.from(raw.data));
+        const buffer = Buffer.from(raw.data);
+        const data = bson.deserialize(buffer);
         observer.excute(data);
         once.unSubscribe();
       }
