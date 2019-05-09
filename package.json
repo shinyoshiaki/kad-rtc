@@ -20,7 +20,7 @@
     "src"
   ],
   "dependencies": {
-    "bson": "3.0.2",
+    "bson": "^4.0.2",
     "buffer": "^5.2.1",
     "buffer-to-arraybuffer": "^0.0.5",
     "kad-distance": "git+https://git@github.com/shinyoshiaki/kad-distance.git",
@@ -31,7 +31,7 @@
     "wrtc": "^0.4.0"
   },
   "devDependencies": {
-    "@types/bson": "^1.0.11",
+    "@types/bson": "^4.0.0",
     "@types/events": "^1.2.0",
     "@types/jest": "^24.0.6",
     "@types/node": "^10.11.7",

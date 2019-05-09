@@ -19,7 +19,8 @@ describe("findvalue", () => {
 
       const testStore = async (value: string) => {
         const node = nodes[0];
-        await store(value, node);
+        const key = sha1(value).toString();
+        await store(key, value, node);
       };
 
       await testStore("test");

@@ -54,7 +54,7 @@ export default class FindNodeProxy {
         const res = await peer
           .eventRpc<FindNodePeerOffer>("FindNodePeerOffer")
           .asPromise(3333)
-          .catch(console.warn);
+          .catch(() => {});
 
         if (res) {
           const { peerkid, sdp } = res;

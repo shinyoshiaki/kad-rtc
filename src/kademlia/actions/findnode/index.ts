@@ -31,7 +31,7 @@ export default async function findNode(
     const res = await peer
       .eventRpc<FindNodeProxyOffer>("FindNodeProxyOffer")
       .asPromise(3333)
-      .catch(console.warn);
+      .catch(() => {});
 
     if (res) {
       const { peers } = res;
@@ -48,7 +48,7 @@ export default async function findNode(
     const answer = await connect.setOffer(sdp);
 
     peer.rpc(FindNodeAnswer(answer, peerkid));
-    const res = await connect.onConnect.asPromise(3333).catch(console.warn);
+    const res = await connect.onConnect.asPromise(3333).catch(() => {});
 
     if (res) {
       kTable.add(connect);
