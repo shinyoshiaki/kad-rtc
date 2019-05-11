@@ -19,7 +19,7 @@ export default async function findValue(key: string, di: DependencyInjection) {
   const { kTable } = di;
   const { peerCreate } = di.modules;
 
-  let result: string | ArrayBuffer | undefined;
+  let result: string | ArrayBuffer | undefined | Buffer;
 
   const findValueAnswer = async (offer: Offer, peer: Peer) => {
     const { peerkid, sdp } = offer;
