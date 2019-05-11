@@ -50,6 +50,7 @@ export default class Kademlia {
     kTable.add(peer);
     listeners(peer, this.di);
 
+    await new Promise(r => setTimeout(r, 1000));
     await findNode(this.kid, this.di);
   }
 }
