@@ -33,10 +33,7 @@ export default class Peer implements Base {
     });
   }
 
-  rpc = (send: {
-    rpc: string;
-    [key: string]: string | number | ArrayBuffer;
-  }) => {
+  rpc = (send: { rpc: string; [key: string]: string | number | Buffer }) => {
     const packet = bson.serialize(send);
     this.peer.send(packet, send.rpc);
   };
