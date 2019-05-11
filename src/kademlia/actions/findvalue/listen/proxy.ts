@@ -67,7 +67,7 @@ export default class FindValueProxy {
 
           if (res) {
             const { peerkid, sdp } = res;
-            offers.push({ peerkid, sdp });
+            if (typeof peerkid === "string") offers.push({ peerkid, sdp });
           }
         }
       };

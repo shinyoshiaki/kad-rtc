@@ -45,6 +45,7 @@ export default async function findValue(key: string, di: DependencyInjection) {
 
     if (res) {
       const { value, offers } = res.data;
+
       if (value) {
         result = value;
       } else if (offers) {
