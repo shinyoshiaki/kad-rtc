@@ -35,8 +35,8 @@ export default class Kademlia {
     return target;
   }
 
-  async store(value: string) {
-    const key = await store(value, this.di);
+  async store(key: string, value: string | ArrayBuffer) {
+    await store(key, value, this.di);
     return key;
   }
 
@@ -50,6 +50,7 @@ export default class Kademlia {
     kTable.add(peer);
     listeners(peer, this.di);
 
+    await new Promise(r => setTimeout(r, 1000));
     await findNode(this.kid, this.di);
   }
 }

@@ -3,7 +3,9 @@ import { FindValuePeerOffer } from "./peer";
 import { DependencyInjection } from "../../../di";
 import { FindValue, FindValueAnswer } from "..";
 
-const FindValueResult = (data: Partial<{ value: string; offers: Offer[] }>) => {
+const FindValueResult = (
+  data: Partial<{ value: string | ArrayBuffer; offers: Offer[] }>
+) => {
   return { rpc: "FindValueResult" as const, data };
 };
 
@@ -61,7 +63,7 @@ export default class FindValueProxy {
           const res = await peer
             .eventRpc<FindValuePeerOffer>("FindValuePeerOffer")
             .asPromise(3333)
-            .catch(console.warn);
+            .catch(() => {});
 
           if (res) {
             const { peerkid, sdp } = res;
