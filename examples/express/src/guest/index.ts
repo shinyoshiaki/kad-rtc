@@ -13,6 +13,7 @@ export default async function guest(kad: Kademlia, target: string) {
     kid: kad.kid,
     answer
   });
+  kad.add(peer);
   if (res) {
     console.log("connected");
   }
