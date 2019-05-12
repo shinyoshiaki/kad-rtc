@@ -323,6 +323,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/dom-mediacapture-record@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@types/dom-mediacapture-record/-/dom-mediacapture-record-1.0.1.tgz#9936ecf8fd8095bde40528190995b73bf325e034"
+  integrity sha512-NroLu+QuHP7VJKUWBs3RgAXQoX8lEHaScG7ACOxPIOQ6VaM7lvTLVOp9bsFspkIPlCMElLHRJCYdA47rDTZLTw==
+
 "@types/events@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@types/events/-/events-1.2.0.tgz#81a6731ce4df43619e5c8c945383b3e62a89ea86"
