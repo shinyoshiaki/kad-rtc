@@ -3,6 +3,8 @@ import Event from "rx.mini";
 import WebRTC from "../../../webrtc";
 import * as bson from "bson";
 
+type RPC = { rpc: string; [key: string]: string | Buffer };
+
 export const PeerModule = (kid: string) => new Peer(kid);
 
 export default class Peer implements Base {
@@ -19,11 +21,8 @@ export default class Peer implements Base {
     });
     const onData = this.peer.onData.subscribe(raw => {
       try {
-        const buffer = Buffer.from(raw.data);
-        const data = bson.deserialize(buffer);
-        if (data.rpc) {
-          this.onRpc.excute(data);
-        }
+        const data = this.parseRPC(raw.data);
+        if (data) this.onRpc.excute(data);
       } catch (error) {
         console.error(error);
       }
@@ -33,19 +32,31 @@ export default class Peer implements Base {
     });
   }
 
-  rpc = (send: { rpc: string; [key: string]: string | number | Buffer }) => {
+  parseRPC = (data: ArrayBuffer) => {
+    const buffer = Buffer.from(data);
+    try {
+      const data: RPC = bson.deserialize(buffer);
+      if (data.rpc) {
+        return data;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    return undefined;
+  };
+
+  rpc = (send: RPC) => {
     const packet = bson.serialize(send);
-    this.peer.send(packet, send.rpc);
+    this.peer.send(packet);
   };
 
   eventRpc = (rpc: string) => {
     const observer = new Event<any>();
-    const once = this.peer.onData.subscribe(raw => {
-      if (raw.label === rpc) {
-        const buffer = Buffer.from(raw.data);
-        const data = bson.deserialize(buffer);
+    const onData = this.peer.onData.subscribe(raw => {
+      const data = this.parseRPC(raw.data);
+      if (data && data.rpc === rpc) {
         observer.excute(data);
-        once.unSubscribe();
+        onData.unSubscribe();
       }
     });
     return observer;

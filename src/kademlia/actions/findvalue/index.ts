@@ -40,11 +40,12 @@ export default async function findValue(key: string, di: DependencyInjection) {
 
     const res = await peer
       .eventRpc<FindValueResult>("FindValueResult")
-      .asPromise(3333)
+      .asPromise(11111)
       .catch(() => {});
 
     if (res) {
       const { value, offers } = res.data;
+
       if (value) {
         result = value;
       } else if (offers) {

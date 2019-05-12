@@ -29,7 +29,7 @@ type actions = FindValue | FindValueAnswer;
 
 export default class FindValueProxy {
   constructor(private listen: Peer, private di: DependencyInjection) {
-    const discon = listen.onRpc.subscribe((data: actions) => {
+    const onRpc = listen.onRpc.subscribe((data: actions) => {
       switch (data.rpc) {
         case "FindValue":
           this.findvalue(data);
@@ -40,7 +40,7 @@ export default class FindValueProxy {
       }
     });
 
-    listen.onDisconnect.once(() => discon.unSubscribe());
+    listen.onDisconnect.once(() => onRpc.unSubscribe());
   }
 
   async findvalue(data: FindValue) {
@@ -67,7 +67,7 @@ export default class FindValueProxy {
 
           if (res) {
             const { peerkid, sdp } = res;
-            offers.push({ peerkid, sdp });
+            if (typeof peerkid === "string") offers.push({ peerkid, sdp });
           }
         }
       };
