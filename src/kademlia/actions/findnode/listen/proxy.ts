@@ -45,7 +45,7 @@ export default class FindNodeProxy {
     const { searchkid, except } = data;
     const { kTable } = this.di;
     const peers = kTable.findNode(searchkid);
-    const offers: { peerkid: string; sdp: any }[] = [];
+    const offers: { peerkid: string; sdp: object }[] = [];
 
     const findNodePeerOffer = async (peer: Peer) => {
       if (!(peer.kid === this.listen.kid || except.includes(peer.kid))) {
@@ -58,7 +58,7 @@ export default class FindNodeProxy {
 
         if (res) {
           const { peerkid, sdp } = res;
-          offers.push({ peerkid, sdp });
+          if (sdp) offers.push({ peerkid, sdp });
         }
       }
     };

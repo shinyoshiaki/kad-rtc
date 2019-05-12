@@ -2,12 +2,14 @@ import Kbucket, { Option as OptBucket } from "./kbucket";
 import { distance } from "kad-distance";
 import Peer from "../modules/peer/base";
 import sha1 from "sha1";
+import Candidates from "./candidates";
 
 export type Option = OptBucket;
 
 export default class Ktable {
   private kbuckets: Kbucket[] = [];
   private k = 20;
+  candidates = new Candidates();
 
   constructor(public kid: string, opt: Partial<Option> = {}) {
     const { k } = this;

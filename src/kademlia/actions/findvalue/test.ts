@@ -1,4 +1,4 @@
-import { testSetupNodes } from "../findnode/test";
+import { testSetupNodes } from "../../../utill/testtools";
 import store from "../store";
 import sha1 from "sha1";
 import findValue from ".";
