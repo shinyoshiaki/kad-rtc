@@ -27,7 +27,7 @@ type actions = FindNode | FindNodeAnswer;
 
 export default class FindNodeProxy {
   constructor(private listen: Peer, private di: DependencyInjection) {
-    const discon = listen.onRpc.subscribe((data: actions) => {
+    const onRpc = listen.onRpc.subscribe((data: actions) => {
       switch (data.rpc) {
         case "FindNode":
           this.findnode(data);
@@ -38,7 +38,7 @@ export default class FindNodeProxy {
       }
     });
 
-    listen.onDisconnect.once(() => discon.unSubscribe());
+    listen.onDisconnect.once(() => onRpc.unSubscribe());
   }
 
   async findnode(data: FindNode) {

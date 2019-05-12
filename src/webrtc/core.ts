@@ -301,7 +301,6 @@ export default class WebRTC {
       }
     }
     try {
-      await new Promise(r => setTimeout(r));
       this.dataChannels[label].send(data);
     } catch (error) {
       console.warn(error);
