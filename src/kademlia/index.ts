@@ -45,12 +45,13 @@ export default class Kademlia {
     return res;
   }
 
-  async add(peer: Peer) {
+  async add(peer: Peer, opt: Partial<{ notfind: boolean }> = {}) {
     const { kTable } = this.di;
     kTable.add(peer);
     listeners(peer, this.di);
-
-    await new Promise(r => setTimeout(r, 1000));
-    await findNode(this.kid, this.di);
+    if (!opt.notfind) {
+      await new Promise(r => setTimeout(r, 1000));
+      await findNode(this.kid, this.di);
+    }
   }
 }

@@ -44,7 +44,7 @@
       "args": [
         "--project",
         "${workspaceRoot}/tsconfig.json",
-        "${workspaceRoot}/src/cli.ts"
+        "${workspaceRoot}/examples/express/src/portalnode.ts"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"

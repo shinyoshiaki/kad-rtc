@@ -46,7 +46,7 @@ export default async function potalnode(kad: Kademlia, port: number) {
       if (answer && kid) {
         const peer = peers[kid];
         await peer.setAnswer(answer);
-        kad.add(peer);
+        kad.add(peer, { notfind: true });
         delete peers[kid];
         console.log("connected");
         return res.send("connected");

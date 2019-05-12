@@ -16,14 +16,14 @@ export default function listenStore(peer: Peer, di: DependencyInjection) {
 
 class ListenStore {
   constructor(private listen: Peer, private di: DependencyInjection) {
-    const discon = listen.onRpc.subscribe((data: actions) => {
+    const onRpc = listen.onRpc.subscribe((data: actions) => {
       switch (data.rpc) {
         case "store":
           this.store(data);
           break;
       }
     });
-    listen.onDisconnect.once(() => discon.unSubscribe());
+    listen.onDisconnect.once(() => onRpc.unSubscribe());
   }
 
   store(data: Store) {
