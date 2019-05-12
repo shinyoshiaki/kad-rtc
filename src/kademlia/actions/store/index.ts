@@ -3,6 +3,7 @@ import sha1 from "sha1";
 import { DependencyInjection } from "../../di";
 import { OnStore } from "./listen";
 import Peer from "../../modules/peer/base";
+import { timeout } from "../../const";
 
 const Store = (key: string, value: string | ArrayBuffer) => {
   return { rpc: "store" as const, key, value };
@@ -32,7 +33,7 @@ export default async function store(
     peer.rpc(Store(key, value));
     await peer
       .eventRpc<OnStore>("OnStore")
-      .asPromise(3333)
+      .asPromise(timeout)
       .catch(() => {});
   };
 
