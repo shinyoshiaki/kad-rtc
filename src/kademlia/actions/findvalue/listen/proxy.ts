@@ -2,6 +2,7 @@ import Peer from "../../../modules/peer/base";
 import { FindValuePeerOffer } from "./peer";
 import { DependencyInjection } from "../../../di";
 import { FindValue, FindValueAnswer } from "..";
+import { timeout } from "../../../const";
 
 const FindValueResult = (
   data: Partial<{ value: string | ArrayBuffer; offers: Offer[] }>
@@ -62,7 +63,7 @@ export default class FindValueProxy {
 
           const res = await peer
             .eventRpc<FindValuePeerOffer>("FindValuePeerOffer")
-            .asPromise(3333)
+            .asPromise(timeout)
             .catch(() => {});
 
           if (res) {

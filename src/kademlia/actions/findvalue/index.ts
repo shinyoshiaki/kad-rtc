@@ -2,6 +2,7 @@ import { DependencyInjection } from "../../di";
 import { FindValueResult, Offer } from "./listen/proxy";
 import { listeners } from "../../listeners";
 import Peer from "../../modules/peer/base";
+import { timeout } from "../../const";
 
 const FindValue = (key: string, except: string[]) => {
   return { rpc: "FindValue" as const, key, except };
@@ -27,7 +28,7 @@ export default async function findValue(key: string, di: DependencyInjection) {
     const answer = await connect.setOffer(sdp);
 
     peer.rpc(FindValueAnswer(answer, peerkid));
-    const res = await connect.onConnect.asPromise(3333).catch(() => {});
+    const res = await connect.onConnect.asPromise(timeout).catch(() => {});
     if (res) {
       kTable.add(connect);
       listeners(connect, di);
@@ -40,7 +41,7 @@ export default async function findValue(key: string, di: DependencyInjection) {
 
     const res = await peer
       .eventRpc<FindValueResult>("FindValueResult")
-      .asPromise(11111)
+      .asPromise(timeout)
       .catch(() => {});
 
     if (res) {

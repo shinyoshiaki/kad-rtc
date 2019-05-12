@@ -2,6 +2,7 @@ import { FindNodeProxyOffer, Offer } from "./listen/proxy";
 import { DependencyInjection } from "../../di";
 import { listeners } from "../../listeners";
 import Peer from "../../modules/peer/base";
+import { timeout } from "../../const";
 
 const FindNode = (searchkid: string, except: string[]) => {
   return { rpc: "FindNode" as const, searchkid, except };
@@ -30,7 +31,7 @@ export default async function findNode(
 
     const res = await peer
       .eventRpc<FindNodeProxyOffer>("FindNodeProxyOffer")
-      .asPromise(3333)
+      .asPromise(timeout)
       .catch(() => {});
 
     if (res) {
@@ -48,7 +49,7 @@ export default async function findNode(
     const answer = await connect.setOffer(sdp);
 
     peer.rpc(FindNodeAnswer(answer, peerkid));
-    const res = await connect.onConnect.asPromise(3333).catch(() => {});
+    const res = await connect.onConnect.asPromise(timeout).catch(() => {});
 
     if (res) {
       kTable.add(connect);

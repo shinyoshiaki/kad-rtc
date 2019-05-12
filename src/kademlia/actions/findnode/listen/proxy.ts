@@ -2,6 +2,7 @@ import Peer from "../../../modules/peer/base";
 import { FindNode, FindNodeAnswer } from "..";
 import { FindNodePeerOffer } from "./peer";
 import { DependencyInjection } from "../../../di";
+import { timeout } from '../../../const';
 
 const FindNodeProxyOffer = (peers: Offer[]) => {
   return { rpc: "FindNodeProxyOffer" as const, peers };
@@ -53,7 +54,7 @@ export default class FindNodeProxy {
 
         const res = await peer
           .eventRpc<FindNodePeerOffer>("FindNodePeerOffer")
-          .asPromise(11111)
+          .asPromise(timeout)
           .catch(() => {});
 
         if (res) {
