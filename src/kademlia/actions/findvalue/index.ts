@@ -17,7 +17,7 @@ const FindValueAnswer = (sdp: any, peerkid: string) => {
 export type FindValueAnswer = ReturnType<typeof FindValueAnswer>;
 
 export default async function findValue(key: string, di: DependencyInjection) {
-  const { kTable } = di;
+  const { kTable, jobs } = di;
   const { peerCreate } = di.modules;
 
   let result: string | ArrayBuffer | undefined | Buffer;
@@ -60,12 +60,17 @@ export default async function findValue(key: string, di: DependencyInjection) {
 
   const job = async () => {
     const findValueResultResult = await Promise.all(
-      kTable.allPeers.map(peer => findValueResult(peer))
+      kTable.allPeers.map(async peer => {
+        const res = await jobs.add(findValueResult, [peer]);
+        return res;
+      })
     );
     await Promise.all(
       findValueResultResult
         .map(item =>
-          item.offers.map(offer => findValueAnswer(offer, item.peer))
+          item.offers.map(async offer => {
+            await jobs.add(findValueAnswer, [offer, item.peer]);
+          })
         )
         .flatMap(v => v)
     );

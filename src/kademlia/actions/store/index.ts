@@ -16,7 +16,7 @@ export default async function store(
   value: string | ArrayBuffer,
   di: DependencyInjection
 ) {
-  const { kTable } = di;
+  const { kTable, jobs } = di;
   const { kvs } = di.modules;
 
   for (
@@ -37,7 +37,11 @@ export default async function store(
       .catch(() => {});
   };
 
-  await Promise.all(peers.map(peer => onStore(peer)));
+  await Promise.all(
+    peers.map(async peer => {
+      await jobs.add(onStore, [peer]);
+    })
+  );
 
   kvs.set(key, value);
   return key;
