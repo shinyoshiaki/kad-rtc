@@ -21,7 +21,6 @@
   "dependencies": {
     "bson": "^4.0.2",
     "buffer": "^5.2.1",
-    "buffer-to-arraybuffer": "^0.0.5",
     "kad-distance": "git+https://git@github.com/shinyoshiaki/kad-distance.git",
     "keypair": "^1.0.1",
     "rx.mini": "git+https://git@github.com/shinyoshiaki/rx.mini.git",
@@ -40,7 +39,7 @@
     "ts-jest": "^24.0.0",
     "ts-node": "^8.1.0",
     "tslib": "^1.9.3",
-    "typescript": "^3.4.1"
+    "typescript": "^3.4.5"
   },
   "jest": {
     "moduleFileExtensions": [
