@@ -28,11 +28,11 @@ describe("jobsystem", () => {
       const ev4 = jobsys.add(string, ["4", 2]);
       expect(jobsys.jobs.length).toBe(1);
 
-      const d = await ev3.asPromise();
+      const d = await ev3;
       expect(d).toBe("3");
       expect(jobsys.jobs.length).toBe(0);
 
-      const res = await ev4.asPromise();
+      const res = await ev4;
       expect(res).toBe("4");
     },
     1000 * 60

@@ -18,6 +18,7 @@ class Worker {
       this.running = true;
 
       const { func, args, event } = job;
+
       const res = await func(...args);
       event.excute(res);
 
@@ -43,7 +44,7 @@ export default class JobSystem {
     this.workers = [...Array(a)].map(() => new Worker(this.jobs));
   }
 
-  add<T extends (...args: any[]) => Promise<any>>(
+  async add<T extends (...args: any[]) => Promise<any>>(
     func: T,
     args: AA<typeof func>
   ) {
@@ -57,6 +58,6 @@ export default class JobSystem {
       this.workers.forEach(worker => worker.wakeup());
     }
 
-    return event;
+    return event.asPromise();
   }
 }

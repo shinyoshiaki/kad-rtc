@@ -20,7 +20,7 @@ export default async function findNode(
   searchkid: string,
   di: DependencyInjection
 ) {
-  const { kTable } = di;
+  const { kTable, jobs } = di;
   const { peerCreate } = di.modules;
 
   if (kTable.getPeer(searchkid)) return kTable.getPeer(searchkid);
@@ -58,12 +58,19 @@ export default async function findNode(
   };
 
   const findNodeProxyOfferResult = await Promise.all(
-    kTable.findNode(searchkid).map(peer => findNodeProxyOffer(peer))
+    kTable.findNode(searchkid).map(async peer => {
+      const res = await jobs.add(findNodeProxyOffer, [peer]);
+      return res;
+    })
   );
 
   await Promise.all(
     findNodeProxyOfferResult
-      .map(item => item.peers.map(offer => findNodeAnswer(item.peer, offer)))
+      .map(async item =>
+        item.peers.map(async offer => {
+          await jobs.add(findNodeAnswer, [item.peer, offer]);
+        })
+      )
       .flatMap(v => v)
   );
 
