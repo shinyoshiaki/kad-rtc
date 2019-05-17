@@ -1,1 +1,0 @@
-{"version":3,"file":"index.js","sourceRoot":"","sources":["../../../../src/kademlia/modules/peer/index.ts"],"names":[],"mappings":";;AAAA,qCAAsC;AAEtC,kBAAe,mBAAU,CAAC","sourcesContent":["import { PeerModule } from \"./webrtc\";\n\nexport default PeerModule;\n"]}
