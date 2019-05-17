@@ -31,13 +31,11 @@ export default async function findValue(key: string, di: DependencyInjection) {
       peer.rpc(FindValueAnswer(answer, peerkid));
       const res = await connect.onConnect.asPromise(timeout).catch(() => {});
       if (res) {
-        kTable.add(connect);
         listeners(connect, di);
       }
     } else {
       const res = await connect.asPromise(timeout).catch(() => {});
       if (res) {
-        kTable.add(res);
         listeners(res, di);
       }
     }

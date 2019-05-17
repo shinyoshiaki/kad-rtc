@@ -53,13 +53,11 @@ export default async function findNode(
       const res = await connect.onConnect.asPromise(timeout).catch(() => {});
 
       if (res) {
-        kTable.add(connect);
         listeners(connect, di);
       }
     } else {
       const res = await connect.asPromise(timeout).catch(() => {});
       if (res) {
-        kTable.add(res);
         listeners(res, di);
       }
     }

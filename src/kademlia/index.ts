@@ -46,8 +46,6 @@ export default class Kademlia {
   }
 
   async add(peer: Peer, opt: Partial<{ notfind: boolean }> = {}) {
-    const { kTable } = this.di;
-    kTable.add(peer);
     listeners(peer, this.di);
     if (!opt.notfind) {
       await new Promise(r => setTimeout(r, 1000));
