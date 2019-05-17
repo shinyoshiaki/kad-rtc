@@ -17,21 +17,29 @@ const FindValueAnswer = (sdp: any, peerkid: string) => {
 export type FindValueAnswer = ReturnType<typeof FindValueAnswer>;
 
 export default async function findValue(key: string, di: DependencyInjection) {
-  const { kTable } = di;
-  const { peerCreate } = di.modules;
+  const { kTable, signaling } = di;
 
   let result: string | ArrayBuffer | undefined | Buffer;
 
   const findValueAnswer = async (offer: Offer, peer: Peer) => {
     const { peerkid, sdp } = offer;
-    const connect = peerCreate(peerkid);
-    const answer = await connect.setOffer(sdp);
+    const connect = signaling.create(peerkid);
 
-    peer.rpc(FindValueAnswer(answer, peerkid));
-    const res = await connect.onConnect.asPromise(timeout).catch(() => {});
-    if (res) {
-      kTable.add(connect);
-      listeners(connect, di);
+    if (connect instanceof Peer) {
+      const answer = await connect.setOffer(sdp);
+
+      peer.rpc(FindValueAnswer(answer, peerkid));
+      const res = await connect.onConnect.asPromise(timeout).catch(() => {});
+      if (res) {
+        kTable.add(connect);
+        listeners(connect, di);
+      }
+    } else {
+      const res = await connect.asPromise(timeout).catch(() => {});
+      if (res) {
+        kTable.add(res);
+        listeners(res, di);
+      }
     }
   };
 
