@@ -6,7 +6,7 @@ export default class KevValueStore {
 
   set(key: string, value: string | ArrayBuffer) {
     this.db[key] = value;
-    this.onSet.excute({ key, value });
+    this.onSet.execute({ key, value });
   }
 
   get = (key: string): string | ArrayBuffer | undefined => this.db[key];

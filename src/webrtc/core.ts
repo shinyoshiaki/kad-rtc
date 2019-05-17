@@ -76,7 +76,7 @@ export default class WebRTC {
 
     peer.ontrack = evt => {
       const stream = evt.streams[0];
-      this.onAddTrack.excute(stream);
+      this.onAddTrack.execute(stream);
       this.remoteStream = stream;
     };
 
@@ -109,11 +109,11 @@ export default class WebRTC {
       if (!this.isConnected) {
         if (evt.candidate) {
           if (trickle) {
-            this.onSignal.excute({ type: "candidate", ice: evt.candidate });
+            this.onSignal.execute({ type: "candidate", ice: evt.candidate });
           }
         } else {
           if (!trickle && peer.localDescription) {
-            this.onSignal.excute(peer.localDescription);
+            this.onSignal.execute(peer.localDescription);
           }
         }
       }
@@ -135,7 +135,7 @@ export default class WebRTC {
   hangUp() {
     this.isDisconnected = true;
     this.isConnected = false;
-    this.onDisconnect.excute();
+    this.onDisconnect.execute();
   }
 
   makeOffer() {
@@ -161,7 +161,7 @@ export default class WebRTC {
       const local = this.rtc.localDescription;
 
       if (trickle && local) {
-        this.onSignal.excute(local);
+        this.onSignal.execute(local);
       }
 
       this.negotiation();
@@ -217,7 +217,7 @@ export default class WebRTC {
     if (this.isConnected) {
       this.send(JSON.stringify(local), "update");
     } else if (trickle && local) {
-      this.onSignal.excute(local);
+      this.onSignal.execute(local);
     }
 
     this.negotiation();
@@ -256,7 +256,7 @@ export default class WebRTC {
       channel.onopen = () => {
         if (!this.isConnected) {
           this.isConnected = true;
-          this.onConnect.excute();
+          this.onConnect.execute();
         }
         resolve();
       };
@@ -271,7 +271,7 @@ export default class WebRTC {
             if (event.data === "ping") this.send("pong", "live");
             else if (this.timeoutPing) clearTimeout(this.timeoutPing);
           } else {
-            this.onData.excute({
+            this.onData.execute({
               label: channel.label,
               data: event.data,
               nodeId: this.nodeId
