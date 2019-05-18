@@ -1,6 +1,6 @@
 import Ktable, { Option } from "./ktable";
 import Modules from "./modules";
-import JobSystem from "./jobsystem";
+import JobSystem from "./services/jobsystem";
 
 type Options = Option;
 
