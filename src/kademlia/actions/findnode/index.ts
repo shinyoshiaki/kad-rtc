@@ -50,13 +50,17 @@ export default async function findNode(
       const answer = await peer.setOffer(sdp);
 
       proxy.rpc(FindNodeAnswer(answer, peerkid));
-      const res = await peer.onConnect.asPromise(timeout).catch(() => {});
+      const res = await peer.onConnect.asPromise(timeout).catch(() => {
+        signaling.delete(peerkid);
+      });
 
       if (res) {
         listeners(peer, di);
       }
     } else if (candidate) {
-      const res = await candidate.asPromise(timeout).catch(() => {});
+      const res = await candidate.asPromise(timeout).catch(() => {
+        signaling.delete(peerkid);
+      });
       if (res) {
         listeners(res, di);
       }

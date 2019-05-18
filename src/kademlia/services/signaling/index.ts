@@ -10,6 +10,10 @@ export default class Signaling {
     return Object.keys(this.candidates).includes(kid);
   }
 
+  delete(kid: string) {
+    delete this.candidates[kid];
+  }
+
   create(kid: string) {
     if (this.exist(kid)) {
       return { candidate: this.candidates[kid] };

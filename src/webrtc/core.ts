@@ -290,15 +290,7 @@ export default class WebRTC {
   async send(data: any, label?: string) {
     label = label || "datachannel";
     if (!Object.keys(this.dataChannels).includes(label)) {
-      try {
-        if (injectableNavigator!.platform) {
-          await this.createDatachannel(label);
-        } else {
-          this.createDatachannel(label);
-        }
-      } catch (_) {
-        this.createDatachannel(label);
-      }
+      await this.createDatachannel(label);
     }
     try {
       this.dataChannels[label].send(data);
