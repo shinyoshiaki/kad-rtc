@@ -42,21 +42,21 @@ export default async function findNode(
     return { peers: [], peer };
   };
 
-  const findNodeAnswer = async (peer: Peer, offer: Offer) => {
+  const findNodeAnswer = async (proxy: Peer, offer: Offer) => {
     const { peerkid, sdp } = offer;
-    const connect = signaling.create(peerkid);
+    const { peer, candidate } = signaling.create(peerkid);
 
-    if (connect instanceof Peer) {
-      const answer = await connect.setOffer(sdp);
+    if (peer) {
+      const answer = await peer.setOffer(sdp);
 
-      peer.rpc(FindNodeAnswer(answer, peerkid));
-      const res = await connect.onConnect.asPromise(timeout).catch(() => {});
+      proxy.rpc(FindNodeAnswer(answer, peerkid));
+      const res = await peer.onConnect.asPromise(timeout).catch(() => {});
 
       if (res) {
-        listeners(connect, di);
+        listeners(peer, di);
       }
-    } else {
-      const res = await connect.asPromise(timeout).catch(() => {});
+    } else if (candidate) {
+      const res = await candidate.asPromise(timeout).catch(() => {});
       if (res) {
         listeners(res, di);
       }

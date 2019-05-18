@@ -21,20 +21,20 @@ export default async function findValue(key: string, di: DependencyInjection) {
 
   let result: string | ArrayBuffer | undefined | Buffer;
 
-  const findValueAnswer = async (offer: Offer, peer: Peer) => {
+  const findValueAnswer = async (offer: Offer, proxy: Peer) => {
     const { peerkid, sdp } = offer;
-    const connect = signaling.create(peerkid);
+    const { peer, candidate } = signaling.create(peerkid);
 
-    if (connect instanceof Peer) {
-      const answer = await connect.setOffer(sdp);
+    if (peer) {
+      const answer = await peer.setOffer(sdp);
 
-      peer.rpc(FindValueAnswer(answer, peerkid));
-      const res = await connect.onConnect.asPromise(timeout).catch(() => {});
+      proxy.rpc(FindValueAnswer(answer, peerkid));
+      const res = await peer.onConnect.asPromise(timeout).catch(() => {});
       if (res) {
-        listeners(connect, di);
+        listeners(peer, di);
       }
-    } else {
-      const res = await connect.asPromise(timeout).catch(() => {});
+    } else if (candidate) {
+      const res = await candidate.asPromise(timeout).catch(() => {});
       if (res) {
         listeners(res, di);
       }

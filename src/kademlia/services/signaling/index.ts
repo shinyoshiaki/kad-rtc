@@ -12,7 +12,7 @@ export default class Signaling {
 
   create(kid: string) {
     if (this.exist(kid)) {
-      return this.candidates[kid];
+      return { candidate: this.candidates[kid] };
     } else {
       const event = new Event<Peer>();
       this.candidates[kid] = event;
@@ -21,7 +21,7 @@ export default class Signaling {
         event.execute(peer);
         delete this.candidates[kid];
       });
-      return peer;
+      return { peer };
     }
   }
 }
