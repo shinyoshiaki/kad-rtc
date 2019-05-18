@@ -20,7 +20,7 @@ class Worker {
       const { func, args, event } = job;
 
       const res = await func(...args);
-      event.excute(res);
+      event.execute(res);
 
       this.execute();
     } else {

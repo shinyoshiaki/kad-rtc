@@ -16,14 +16,14 @@ export default class Peer implements Base {
     this.onData.subscribe(raw => {
       const data = raw.data;
       if (data.rpc) {
-        this.onRpc.excute(data);
+        this.onRpc.execute(data);
       }
     });
   }
 
   rpc = (send: { rpc: string }) => {
     setTimeout(() => {
-      if (this.send) this.send.excute({ data: send, label: send.rpc });
+      if (this.send) this.send.execute({ data: send, label: send.rpc });
     }, 0);
   };
 
@@ -32,7 +32,7 @@ export default class Peer implements Base {
     const once = this.onData.subscribe(raw => {
       if (raw.label === rpc) {
         const data = raw.data;
-        observer.excute(data);
+        observer.execute(data);
         once.unSubscribe();
       }
     });
@@ -54,8 +54,8 @@ export default class Peer implements Base {
       const connect: Event<{}> = sdp.connect;
 
       setTimeout(() => {
-        connect.excute();
-        this.onConnect.excute(true);
+        connect.execute();
+        this.onConnect.execute(true);
 
         resolve(true);
       }, 0);
