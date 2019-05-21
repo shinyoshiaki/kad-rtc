@@ -46,44 +46,44 @@ export default class FindValueProxy {
 
   async findvalue(data: FindValue) {
     const { key, except } = data;
-    const { kTable } = this.di;
+    const { kTable, eventManager } = this.di;
     const { kvs } = this.di.modules;
 
     const value = kvs.get(key);
 
     if (value) {
-      this.listen.rpc(FindValueResult({ value }));
+      eventManager.run(this.listen, FindValueResult({ value }));
     } else {
       const peers = kTable.findNode(key);
       const offers: { peerkid: string; sdp: any }[] = [];
 
       const findValuePeerOffer = async (peer: Peer) => {
         if (!(peer.kid === this.listen.kid || except.includes(peer.kid))) {
-          peer.rpc(FindValueProxyOpen(this.listen.kid));
-
-          const res = await peer
-            .eventRpc<FindValuePeerOffer>("FindValuePeerOffer")
-            .asPromise(timeout)
-            .catch(() => {});
+          const wait = eventManager.getWait<FindValuePeerOffer>(
+            peer,
+            FindValueProxyOpen(this.listen.kid)
+          );
+          const res = await wait(timeout).catch(() => {});
 
           if (res) {
             const { peerkid, sdp } = res;
-            if (typeof peerkid === "string") offers.push({ peerkid, sdp });
+            offers.push({ peerkid, sdp });
           }
         }
       };
 
       await Promise.all(peers.map(peer => findValuePeerOffer(peer)));
 
-      this.listen.rpc(FindValueResult({ offers }));
+      eventManager.run(this.listen, FindValueResult({ offers }));
     }
   }
 
   async findValueAnswer(data: FindValueAnswer) {
     const { sdp, peerkid } = data;
+    const id = (data as any).id;
     const { kTable } = this.di;
     const peer = kTable.getPeer(peerkid);
     if (!peer) return;
-    peer.rpc(FindValueProxyAnswer(sdp, this.listen.kid));
+    peer.rpc({ ...FindValueProxyAnswer(sdp, this.listen.kid), id });
   }
 }

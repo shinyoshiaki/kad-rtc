@@ -2,6 +2,12 @@ import Event from "rx.mini";
 
 export const PeerModule = (kid: string) => new Peer(kid);
 
+export type RPC = {
+  rpc: string;
+  [key: string]: string | Buffer | ArrayBuffer;
+  id: string;
+};
+
 export default class Peer {
   onRpc = new Event<any>();
   onDisconnect = new Event();
@@ -9,9 +15,10 @@ export default class Peer {
 
   constructor(public kid: string) {}
 
-  rpc = (data: { rpc: string }) => {};
+  rpc = (data: { rpc: string; id: string }) => {};
 
-  eventRpc = <T extends { rpc: string }>(rpc: T["rpc"]) => new Event<T>();
+  eventRpc = <T extends { rpc: string }>(rpc: T["rpc"], id: string) =>
+    new Event<T>();
 
   createOffer = async (): Promise<any> => {};
 

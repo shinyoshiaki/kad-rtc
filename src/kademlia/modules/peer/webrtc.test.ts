@@ -1,5 +1,6 @@
 import { PeerModule } from "./webrtc";
 import { Count } from "../../../utill/testtools";
+import Uuid from "../../../utill/uuid";
 
 describe("webrtc", () => {
   test(
@@ -13,6 +14,8 @@ describe("webrtc", () => {
             resolve();
           });
 
+          const uuid = new Uuid();
+
           const a = PeerModule("a");
           const b = PeerModule("b");
           const offer = await a.createOffer();
@@ -20,18 +23,24 @@ describe("webrtc", () => {
           a.setAnswer(answer);
 
           a.onConnect.once(async () => {
-            const data = { rpc: "a", msg: "a" };
+            const data = { rpc: "a", msg: "a", id: uuid.get() };
             a.rpc(data);
-            const res = await a.eventRpc("b").asPromise();
-            expect(res.msg).toBe("b");
-            count.check();
+            a.onRpc.subscribe(v => {
+              if (v.rpc === "b") {
+                expect(v.msg).toBe("b");
+                count.check();
+              }
+            });
           });
           b.onConnect.once(async () => {
-            const data = { rpc: "b", msg: "b" };
+            const data = { rpc: "b", msg: "b", id: uuid.get() };
             b.rpc(data);
-            const res = await b.eventRpc("a").asPromise();
-            expect(res.msg).toBe("a");
-            count.check();
+            b.onRpc.subscribe(v => {
+              if (v.rpc === "a") {
+                expect(v.msg).toBe("a");
+                count.check();
+              }
+            });
           });
         });
       await test();
