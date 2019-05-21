@@ -31,6 +31,7 @@ export default class FindNodePeer {
 
   async findNodeProxyOpen(data: FindNodeProxyOpen) {
     const { finderkid } = data;
+    const id = (data as any).id;
     const { kTable } = this.di;
     const { peerCreate } = this.di.modules;
 
@@ -39,7 +40,7 @@ export default class FindNodePeer {
 
     const offer = await peer.createOffer();
 
-    this.listen.rpc(FindNodePeerOffer(offer, kTable.kid));
+    this.listen.rpc({ ...FindNodePeerOffer(offer, kTable.kid), id });
   }
 
   async findNodeProxyAnswer(data: FindNodeProxyAnswer) {
