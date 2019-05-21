@@ -17,12 +17,12 @@ export default class Peer implements Base {
   constructor(public kid: string) {
     this.peer.nodeId = kid;
     this.peer.onConnect.once(() => {
-      this.onConnect.excute(true);
+      this.onConnect.execute(true);
     });
     const onData = this.peer.onData.subscribe(raw => {
       try {
         const data = this.parseRPC(raw.data);
-        if (data) this.onRpc.excute(data);
+        if (data) this.onRpc.execute(data);
       } catch (error) {
         console.error(error);
       }
@@ -55,7 +55,7 @@ export default class Peer implements Base {
     const onData = this.peer.onData.subscribe(raw => {
       const data = this.parseRPC(raw.data);
       if (data && data.rpc === rpc) {
-        observer.excute(data);
+        observer.execute(data);
         onData.unSubscribe();
       }
     });

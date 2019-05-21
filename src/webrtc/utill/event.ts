@@ -15,7 +15,7 @@ export default class Event<T> {
     };
   }
 
-  excute(data?: T) {
+  execute(data?: T) {
     for (let item of this.event.stack) {
       if (data) item.func(data);
       else item.func(undefined as any);

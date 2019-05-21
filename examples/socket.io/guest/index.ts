@@ -62,6 +62,6 @@ export default class GuestNode {
     await peer.onConnect.asPromise();
 
     await this.kademlia.add(peer);
-    this.onConnect.excute();
+    this.onConnect.execute();
   }
 }
