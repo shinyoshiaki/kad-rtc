@@ -10,16 +10,14 @@ export default class EventManager {
     rpc: { rpc: string; [key: string]: any }
   ) {
     this.uuid.setPrefix(peer.kid);
-    const id = this.uuid.get();
+    const id = this.uuid.get() + rpc.rpc;
 
     const event = new Event<T>();
 
     const onRpc = peer.onRpc.subscribe((v: T) => {
-      if (v.rpc === rpc.rpc) {
-        if (v.id === id) {
-          event.execute(v);
-          onRpc.unSubscribe();
-        }
+      if (v.id === id) {
+        event.execute(v);
+        onRpc.unSubscribe();
       }
     });
 

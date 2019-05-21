@@ -31,7 +31,8 @@ export default class FindValuePeer {
 
   async findValueProxyOpen(data: FindValueProxyOpen) {
     const { finderkid } = data;
-    const { kTable, eventManager } = this.di;
+    const id = (data as any).id;
+    const { kTable } = this.di;
     const { peerCreate } = this.di.modules;
 
     const peer = peerCreate(finderkid);
@@ -39,7 +40,7 @@ export default class FindValuePeer {
 
     const offer = await peer.createOffer();
 
-    eventManager.run(this.listen, FindValuePeerOffer(offer, kTable.kid));
+    this.listen.rpc({ ...FindValuePeerOffer(offer, kTable.kid), id });
   }
 
   async findValueProxyAnswer(data: FindValueProxyAnswer) {

@@ -44,6 +44,7 @@ export default class FindNodeProxy {
 
   async findnode(data: FindNode) {
     const { searchkid, except } = data;
+    const id = (data as any).id;
     const { kTable, eventManager } = this.di;
     const peers = kTable.findNode(searchkid);
     const offers: { peerkid: string; sdp: any }[] = [];
@@ -65,7 +66,7 @@ export default class FindNodeProxy {
 
     await Promise.all(peers.map(peer => findNodePeerOffer(peer)));
 
-    eventManager.run(this.listen, FindNodeProxyOffer(offers));
+    this.listen.rpc({ ...FindNodeProxyOffer(offers), id });
   }
 
   async findnodeanswer(data: FindNodeAnswer) {

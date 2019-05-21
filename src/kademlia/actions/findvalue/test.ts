@@ -1,7 +1,7 @@
-import { testSetupNodes } from "../findnode/test";
 import store from "../store";
 import sha1 from "sha1";
 import findValue from ".";
+import { testSetupNodes } from "../../../utill/testtools";
 
 const kBucketSize = 8;
 const num = 10;

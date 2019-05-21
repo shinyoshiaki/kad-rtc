@@ -46,13 +46,14 @@ export default class FindValueProxy {
 
   async findvalue(data: FindValue) {
     const { key, except } = data;
+    const id = (data as any).id;
     const { kTable, eventManager } = this.di;
     const { kvs } = this.di.modules;
 
     const value = kvs.get(key);
 
     if (value) {
-      eventManager.run(this.listen, FindValueResult({ value }));
+      this.listen.rpc({ ...FindValueResult({ value }), id });
     } else {
       const peers = kTable.findNode(key);
       const offers: { peerkid: string; sdp: any }[] = [];
@@ -74,7 +75,7 @@ export default class FindValueProxy {
 
       await Promise.all(peers.map(peer => findValuePeerOffer(peer)));
 
-      eventManager.run(this.listen, FindValueResult({ offers }));
+      this.listen.rpc({ ...FindValueResult({ offers }), id });
     }
   }
 
