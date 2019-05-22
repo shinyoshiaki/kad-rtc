@@ -4,7 +4,7 @@ import findValue from ".";
 import { testSetupNodes } from "../../../utill/testtools";
 
 const kBucketSize = 8;
-const num = 50;
+const num = 10;
 
 const getRandomInt = (min: number, max: number) =>
   Math.floor(
