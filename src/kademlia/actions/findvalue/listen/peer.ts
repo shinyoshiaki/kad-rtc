@@ -45,13 +45,11 @@ export default class FindValuePeer {
 
   async findValueProxyAnswer(data: FindValueProxyAnswer) {
     const { finderkid, sdp } = data;
-    const { kTable } = this.di;
 
     const peer = this.signaling[finderkid];
     if (!peer) return;
     await peer.setAnswer(sdp);
 
-    kTable.add(peer);
     listeners(peer, this.di);
   }
 }

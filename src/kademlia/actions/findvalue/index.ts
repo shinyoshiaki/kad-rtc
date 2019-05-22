@@ -31,7 +31,6 @@ export default async function findValue(key: string, di: DependencyInjection) {
 
     const res = await connect.onConnect.asPromise(timeout).catch(() => {});
     if (res) {
-      kTable.add(connect);
       listeners(connect, di);
     }
   };
