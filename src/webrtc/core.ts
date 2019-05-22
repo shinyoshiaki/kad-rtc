@@ -291,14 +291,8 @@ export default class WebRTC {
     label = label || "datachannel";
     if (!Object.keys(this.dataChannels).includes(label)) {
       try {
-        if (injectableNavigator!.platform) {
-          await this.createDatachannel(label);
-        } else {
-          this.createDatachannel(label);
-        }
-      } catch (_) {
-        this.createDatachannel(label);
-      }
+        await this.createDatachannel(label);
+      } catch (_) {}
     }
     try {
       this.dataChannels[label].send(data);
