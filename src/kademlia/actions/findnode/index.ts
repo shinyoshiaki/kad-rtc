@@ -20,7 +20,7 @@ export default async function findNode(
   searchkid: string,
   di: DependencyInjection
 ) {
-  const { kTable, eventManager } = di;
+  const { kTable, rpcManager } = di;
   const { peerCreate } = di.modules;
 
   if (kTable.getPeer(searchkid)) return kTable.getPeer(searchkid);
@@ -28,7 +28,7 @@ export default async function findNode(
   const findNodeProxyOffer = async (peer: Peer) => {
     const except = kTable.allPeers.map(item => item.kid);
 
-    const wait = eventManager.getWait<FindNodeProxyOffer>(
+    const wait = rpcManager.getWait<FindNodeProxyOffer>(
       peer,
       FindNode(searchkid, except)
     );
@@ -49,7 +49,7 @@ export default async function findNode(
     const connect = peerCreate(peerkid);
     const answer = await connect.setOffer(sdp);
 
-    eventManager.run(peer, FindNodeAnswer(answer, peerkid));
+    rpcManager.run(peer, FindNodeAnswer(answer, peerkid));
     const res = await connect.onConnect.asPromise(timeout).catch(() => {});
 
     if (res) {

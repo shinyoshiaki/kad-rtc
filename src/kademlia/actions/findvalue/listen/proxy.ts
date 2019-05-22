@@ -47,7 +47,7 @@ export default class FindValueProxy {
   async findvalue(data: FindValue) {
     const { key, except } = data;
     const id = (data as any).id;
-    const { kTable, eventManager } = this.di;
+    const { kTable, rpcManager } = this.di;
     const { kvs } = this.di.modules;
 
     const value = kvs.get(key);
@@ -60,7 +60,7 @@ export default class FindValueProxy {
 
       const findValuePeerOffer = async (peer: Peer) => {
         if (!(peer.kid === this.listen.kid || except.includes(peer.kid))) {
-          const wait = eventManager.getWait<FindValuePeerOffer>(
+          const wait = rpcManager.getWait<FindValuePeerOffer>(
             peer,
             FindValueProxyOpen(this.listen.kid)
           );

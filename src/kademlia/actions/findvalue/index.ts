@@ -17,7 +17,7 @@ const FindValueAnswer = (sdp: any, peerkid: string) => {
 export type FindValueAnswer = ReturnType<typeof FindValueAnswer>;
 
 export default async function findValue(key: string, di: DependencyInjection) {
-  const { kTable, eventManager } = di;
+  const { kTable, rpcManager } = di;
   const { peerCreate } = di.modules;
 
   let result: string | ArrayBuffer | undefined | Buffer;
@@ -27,7 +27,7 @@ export default async function findValue(key: string, di: DependencyInjection) {
     const connect = peerCreate(peerkid);
     const answer = await connect.setOffer(sdp);
 
-    eventManager.run(peer, FindValueAnswer(answer, peerkid));
+    rpcManager.run(peer, FindValueAnswer(answer, peerkid));
 
     const res = await connect.onConnect.asPromise(timeout).catch(() => {});
     if (res) {
@@ -39,7 +39,7 @@ export default async function findValue(key: string, di: DependencyInjection) {
   const findValueResult = async (peer: Peer) => {
     const except = kTable.allPeers.map(item => item.kid);
 
-    const wait = eventManager.getWait<FindValueResult>(
+    const wait = rpcManager.getWait<FindValueResult>(
       peer,
       FindValue(key, except)
     );
