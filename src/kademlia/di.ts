@@ -1,6 +1,7 @@
 import Ktable, { Option } from "./ktable";
 import Modules from "./modules";
 import Signaling from "./services/signaling";
+import EventManager from "./services/eventmanager";
 
 type Options = Option;
 
@@ -8,6 +9,7 @@ export type DependencyInjection = {
   kTable: Ktable;
   signaling: Signaling;
   modules: Modules;
+  eventManager: EventManager;
 };
 
 export const dependencyInjection = (
@@ -18,6 +20,7 @@ export const dependencyInjection = (
   return {
     kTable: new Ktable(kid, opt),
     modules,
-    signaling: new Signaling(modules.peerCreate)
+    signaling: new Signaling(modules.peerCreate),
+    eventManager: new EventManager()
   };
 };

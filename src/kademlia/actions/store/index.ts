@@ -16,7 +16,7 @@ export default async function store(
   value: string | ArrayBuffer,
   di: DependencyInjection
 ) {
-  const { kTable } = di;
+  const { kTable, eventManager } = di;
   const { kvs } = di.modules;
 
   for (
@@ -30,11 +30,8 @@ export default async function store(
   const peers = di.kTable.findNode(key);
 
   const onStore = async (peer: Peer) => {
-    peer.rpc(Store(key, value));
-    await peer
-      .eventRpc<OnStore>("OnStore")
-      .asPromise(timeout)
-      .catch(() => {});
+    const wait = eventManager.getWait(peer, Store(key, value));
+    await wait(timeout).catch(() => {});
   };
 
   await Promise.all(peers.map(peer => onStore(peer)));

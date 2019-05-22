@@ -92,7 +92,7 @@ export default class WebRTC {
 
             this.send("ping", "live");
           } catch (error) {
-            console.warn({ error });
+            console.log({ error });
           }
           break;
         case "connected":
@@ -147,7 +147,7 @@ export default class WebRTC {
       if (this.negotiating || this.rtc.signalingState != "stable") return;
       this.negotiating = true;
 
-      const sdp = await this.rtc.createOffer().catch(console.warn);
+      const sdp = await this.rtc.createOffer().catch(console.log);
 
       if (!sdp) return;
 
@@ -193,7 +193,7 @@ export default class WebRTC {
     if (this.isOffer) {
       await this.rtc
         .setRemoteDescription(new RTCSessionDescription(sdp))
-        .catch(console.warn);
+        .catch(console.log);
     }
   }
 
@@ -202,15 +202,15 @@ export default class WebRTC {
 
     await this.rtc
       .setRemoteDescription(new RTCSessionDescription(offer))
-      .catch(console.warn);
+      .catch(console.log);
 
-    const answer = await this.rtc.createAnswer().catch(console.warn);
+    const answer = await this.rtc.createAnswer().catch(console.log);
     if (!answer) {
-      console.warn("no answer");
+      console.log("no answer");
       return;
     }
 
-    await this.rtc.setLocalDescription(answer).catch(console.warn);
+    await this.rtc.setLocalDescription(answer).catch(console.log);
 
     const local = this.rtc.localDescription;
 
@@ -234,7 +234,7 @@ export default class WebRTC {
       case "candidate":
         await this.rtc
           .addIceCandidate(new RTCIceCandidate(sdp.ice))
-          .catch(console.warn);
+          .catch(console.log);
         break;
     }
   }
@@ -278,11 +278,11 @@ export default class WebRTC {
             });
           }
         } catch (error) {
-          console.warn(error);
+          console.log(error);
         }
       };
 
-      channel.onerror = err => console.warn(err);
+      channel.onerror = err => console.log(err);
       channel.onclose = () => {};
     });
   }
@@ -295,7 +295,7 @@ export default class WebRTC {
     try {
       this.dataChannels[label].send(data);
     } catch (error) {
-      console.warn(error);
+      console.log(error);
     }
   }
 
