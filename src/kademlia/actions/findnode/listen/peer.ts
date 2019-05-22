@@ -45,13 +45,11 @@ export default class FindNodePeer {
 
   async findNodeProxyAnswer(data: FindNodeProxyAnswer) {
     const { finderkid, sdp } = data;
-    const { kTable } = this.di;
 
     const peer = this.signaling[finderkid];
     if (!peer) return;
     await peer.setAnswer(sdp);
 
-    kTable.add(peer);
     listeners(peer, this.di);
   }
 }

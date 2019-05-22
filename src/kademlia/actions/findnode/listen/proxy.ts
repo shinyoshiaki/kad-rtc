@@ -45,13 +45,13 @@ export default class FindNodeProxy {
   async findnode(data: FindNode) {
     const { searchkid, except } = data;
     const id = (data as any).id;
-    const { kTable, eventManager } = this.di;
+    const { kTable, rpcManager } = this.di;
     const peers = kTable.findNode(searchkid);
     const offers: { peerkid: string; sdp: any }[] = [];
 
     const findNodePeerOffer = async (peer: Peer) => {
       if (!(peer.kid === this.listen.kid || except.includes(peer.kid))) {
-        const wait = eventManager.getWait<FindNodePeerOffer>(
+        const wait = rpcManager.getWait<FindNodePeerOffer>(
           peer,
           FindNodeProxyOpen(this.listen.kid)
         );
