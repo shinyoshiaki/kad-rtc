@@ -1,13 +1,15 @@
 import Ktable, { Option } from "./ktable";
 import Modules from "./modules";
-import EventManager from "./services/eventmanager";
+import RpcManager from "./services/rpcmanager";
+import Signaling from "./services/signaling";
 
 type Options = Option;
 
 export type DependencyInjection = {
   kTable: Ktable;
   modules: Modules;
-  eventManager: EventManager;
+  rpcManager: RpcManager;
+  signaling: Signaling;
 };
 
 export const dependencyInjection = (
@@ -18,6 +20,7 @@ export const dependencyInjection = (
   return {
     kTable: new Ktable(kid, opt),
     modules,
-    eventManager: new EventManager()
+    rpcManager: new RpcManager(),
+    signaling: new Signaling(modules.peerCreate)
   };
 };

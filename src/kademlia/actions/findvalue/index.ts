@@ -17,29 +17,14 @@ const FindValueAnswer = (sdp: any, peerkid: string) => {
 export type FindValueAnswer = ReturnType<typeof FindValueAnswer>;
 
 export default async function findValue(key: string, di: DependencyInjection) {
-  const { kTable, eventManager } = di;
-  const { peerCreate } = di.modules;
+  const { kTable, rpcManager, signaling } = di;
 
   let result: string | ArrayBuffer | undefined | Buffer;
-
-  const findValueAnswer = async (offer: Offer, peer: Peer) => {
-    const { peerkid, sdp } = offer;
-    const connect = peerCreate(peerkid);
-    const answer = await connect.setOffer(sdp);
-
-    eventManager.run(peer, FindValueAnswer(answer, peerkid));
-
-    const res = await connect.onConnect.asPromise(timeout).catch(() => {});
-    if (res) {
-      kTable.add(connect);
-      listeners(connect, di);
-    }
-  };
 
   const findValueResult = async (peer: Peer) => {
     const except = kTable.allPeers.map(item => item.kid);
 
-    const wait = eventManager.getWait<FindValueResult>(
+    const wait = rpcManager.getWait<FindValueResult>(
       peer,
       FindValue(key, except)
     );
@@ -57,6 +42,27 @@ export default async function findValue(key: string, di: DependencyInjection) {
       }
     }
     return { offers: [], peer };
+  };
+
+  const findValueAnswer = async (offer: Offer, proxy: Peer) => {
+    const { peerkid, sdp } = offer;
+
+    const { peer, candidate } = signaling.create(peerkid);
+
+    if (peer) {
+      const answer = await peer.setOffer(sdp);
+
+      rpcManager.run(proxy, FindValueAnswer(answer, peerkid));
+      const res = await peer.onConnect.asPromise(timeout).catch(() => {
+        signaling.delete(peerkid);
+      });
+      if (res) {
+        listeners(peer, di);
+      }
+    } else if (candidate) {
+      const peer = await candidate.asPromise(timeout).catch(() => {});
+      if (peer) listeners(peer, di);
+    }
   };
 
   const job = async () => {

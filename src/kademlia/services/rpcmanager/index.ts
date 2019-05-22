@@ -2,7 +2,7 @@ import Peer, { RPC } from "../../modules/peer/base";
 import Uuid from "../../../utill/uuid";
 import Event from "rx.mini";
 
-export default class EventManager {
+export default class RpcManager {
   private uuid = new Uuid();
 
   getWait<T extends { rpc: string; [key: string]: unknown }>(
