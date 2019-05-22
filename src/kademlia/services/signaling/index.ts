@@ -25,7 +25,7 @@ export default class Signaling {
 
       peer.onConnect.once(() => {
         event.execute(peer);
-        delete this.candidates[kid];
+        this.delete(kid);
       });
 
       return { peer };
