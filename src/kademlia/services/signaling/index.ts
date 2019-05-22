@@ -2,7 +2,7 @@ import Event from "rx.mini";
 import Peer from "../../modules/peer/base";
 
 export default class Signaling {
-  candidates: { [kid: string]: Event<Peer> } = {};
+  private candidates: { [kid: string]: Event<Peer> } = {};
 
   constructor(private peerCreate: (kid: string) => Peer) {}
 
@@ -20,11 +20,14 @@ export default class Signaling {
     } else {
       const event = new Event<Peer>();
       this.candidates[kid] = event;
+
       const peer = this.peerCreate(kid);
+
       peer.onConnect.once(() => {
         event.execute(peer);
         delete this.candidates[kid];
       });
+
       return { peer };
     }
   }
