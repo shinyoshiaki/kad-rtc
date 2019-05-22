@@ -56,7 +56,7 @@ export default class FindValueProxy {
       this.listen.rpc({ ...FindValueResult({ value }), id });
     } else {
       const peers = kTable.findNode(key);
-      const offers: { peerkid: string; sdp: any }[] = [];
+      const offers: { peerkid: string; sdp: object }[] = [];
 
       const findValuePeerOffer = async (peer: Peer) => {
         if (!(peer.kid === this.listen.kid || except.includes(peer.kid))) {
@@ -68,7 +68,7 @@ export default class FindValueProxy {
 
           if (res) {
             const { peerkid, sdp } = res;
-            offers.push({ peerkid, sdp });
+            if (sdp) offers.push({ peerkid, sdp });
           }
         }
       };

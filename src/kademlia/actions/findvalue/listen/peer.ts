@@ -3,7 +3,7 @@ import { DependencyInjection } from "../../../di";
 import { listeners } from "../../../listeners";
 import { FindValueProxyOpen, FindValueProxyAnswer } from "./proxy";
 
-const FindValuePeerOffer = (sdp: any, peerkid: string) => {
+const FindValuePeerOffer = (peerkid: string, sdp?: object) => {
   return { rpc: "FindValuePeerOffer" as const, sdp, peerkid };
 };
 
@@ -41,7 +41,9 @@ export default class FindValuePeer {
 
       const offer = await peer.createOffer();
 
-      this.listen.rpc({ ...FindValuePeerOffer(offer, kTable.kid), id });
+      this.listen.rpc({ ...FindValuePeerOffer(kTable.kid, offer), id });
+    } else {
+      this.listen.rpc({ ...FindValuePeerOffer(kTable.kid), id });
     }
   }
 
