@@ -62,7 +62,7 @@ export class StreamVideo extends Media {
       )) as any;
       if (buf) {
         this.chunks.push(buf);
-        eventChunk.excute(Buffer.from(buf));
+        eventChunk.execute(Buffer.from(buf));
       }
     };
 
