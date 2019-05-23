@@ -1,7 +1,5 @@
 import findNode from "../findnode";
-import sha1 from "sha1";
 import { DependencyInjection } from "../../di";
-import { OnStore } from "./listen";
 import Peer from "../../modules/peer/base";
 import { timeout } from "../../const";
 
