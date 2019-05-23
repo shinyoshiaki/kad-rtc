@@ -3,7 +3,7 @@ import { DependencyInjection } from "../../../di";
 import { listeners } from "../../../listeners";
 import { FindValueProxyOpen, FindValueProxyAnswer } from "./proxy";
 
-const FindValuePeerOffer = (sdp: any, peerkid: string) => {
+const FindValuePeerOffer = (peerkid: string, sdp?: object) => {
   return { rpc: "FindValuePeerOffer" as const, sdp, peerkid };
 };
 
@@ -12,7 +12,7 @@ export type FindValuePeerOffer = ReturnType<typeof FindValuePeerOffer>;
 type actions = FindValueProxyOpen | FindValueProxyAnswer;
 
 export default class FindValuePeer {
-  signaling: { [key: string]: Peer } = {};
+  candidates: { [key: string]: Peer } = {};
 
   constructor(private listen: Peer, private di: DependencyInjection) {
     const onRpc = listen.onRpc.subscribe((data: actions) => {
@@ -31,26 +31,29 @@ export default class FindValuePeer {
 
   async findValueProxyOpen(data: FindValueProxyOpen) {
     const { finderkid } = data;
-    const { kTable } = this.di;
-    const { peerCreate } = this.di.modules;
+    const id = (data as any).id;
+    const { kTable, signaling } = this.di;
 
-    const peer = peerCreate(finderkid);
-    this.signaling[finderkid] = peer;
+    const { peer } = signaling.create(finderkid);
 
-    const offer = await peer.createOffer();
+    if (peer) {
+      this.candidates[finderkid] = peer;
 
-    this.listen.rpc(FindValuePeerOffer(offer, kTable.kid));
+      const offer = await peer.createOffer();
+
+      this.listen.rpc({ ...FindValuePeerOffer(kTable.kid, offer), id });
+    } else {
+      this.listen.rpc({ ...FindValuePeerOffer(kTable.kid), id });
+    }
   }
 
   async findValueProxyAnswer(data: FindValueProxyAnswer) {
     const { finderkid, sdp } = data;
-    const { kTable } = this.di;
 
-    const peer = this.signaling[finderkid];
+    const peer = this.candidates[finderkid];
     if (!peer) return;
     await peer.setAnswer(sdp);
 
-    kTable.add(peer);
     listeners(peer, this.di);
   }
 }

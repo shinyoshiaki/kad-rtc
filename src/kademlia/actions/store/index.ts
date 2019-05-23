@@ -1,7 +1,5 @@
 import findNode from "../findnode";
-import sha1 from "sha1";
 import { DependencyInjection } from "../../di";
-import { OnStore } from "./listen";
 import Peer from "../../modules/peer/base";
 import { timeout } from "../../const";
 
@@ -16,7 +14,7 @@ export default async function store(
   value: string | ArrayBuffer,
   di: DependencyInjection
 ) {
-  const { kTable } = di;
+  const { kTable, rpcManager, jobSystem } = di;
   const { kvs } = di.modules;
 
   for (
@@ -30,14 +28,13 @@ export default async function store(
   const peers = di.kTable.findNode(key);
 
   const onStore = async (peer: Peer) => {
-    peer.rpc(Store(key, value));
-    await peer
-      .eventRpc<OnStore>("OnStore")
-      .asPromise(timeout)
-      .catch(() => {});
+    const wait = rpcManager.getWait(peer, Store(key, value));
+    await wait(timeout).catch(() => {});
   };
 
-  await Promise.all(peers.map(peer => onStore(peer)));
+  await Promise.all(
+    peers.map(async peer => await jobSystem.add(onStore, [peer]))
+  );
 
   kvs.set(key, value);
   return key;

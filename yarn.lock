@@ -3243,7 +3243,7 @@ rsvp@^4.8.4:
 
 "rx.mini@git+https://git@github.com/shinyoshiaki/rx.mini.git":
   version "0.0.2"
-  resolved "git+https://git@github.com/shinyoshiaki/rx.mini.git#a0796cd16258cd27dc2141bfbd3079e20d84c955"
+  resolved "git+https://git@github.com/shinyoshiaki/rx.mini.git#dc48ce5afb6cf2f544c615e7f9391c0bc38fd1a9"
 
 rxjs@^6.4.0:
   version "6.5.1"

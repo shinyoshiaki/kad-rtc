@@ -1,1 +1,5 @@
-export const timeout = 20000;
+export let timeout = 10000;
+
+export function updateTimeout(n: number) {
+  timeout = n;
+}

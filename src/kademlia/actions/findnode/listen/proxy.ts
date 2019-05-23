@@ -2,13 +2,13 @@ import Peer from "../../../modules/peer/base";
 import { FindNode, FindNodeAnswer } from "..";
 import { FindNodePeerOffer } from "./peer";
 import { DependencyInjection } from "../../../di";
-import { timeout } from '../../../const';
+import { timeout } from "../../../const";
 
 const FindNodeProxyOffer = (peers: Offer[]) => {
   return { rpc: "FindNodeProxyOffer" as const, peers };
 };
 
-export type Offer = { peerkid: string; sdp: any };
+export type Offer = { peerkid: string; sdp: object };
 
 export type FindNodeProxyOffer = ReturnType<typeof FindNodeProxyOffer>;
 
@@ -44,36 +44,37 @@ export default class FindNodeProxy {
 
   async findnode(data: FindNode) {
     const { searchkid, except } = data;
-    const { kTable } = this.di;
+    const id = (data as any).id;
+    const { kTable, rpcManager } = this.di;
     const peers = kTable.findNode(searchkid);
-    const offers: { peerkid: string; sdp: any }[] = [];
+    const offers: { peerkid: string; sdp: object }[] = [];
 
     const findNodePeerOffer = async (peer: Peer) => {
       if (!(peer.kid === this.listen.kid || except.includes(peer.kid))) {
-        peer.rpc(FindNodeProxyOpen(this.listen.kid));
-
-        const res = await peer
-          .eventRpc<FindNodePeerOffer>("FindNodePeerOffer")
-          .asPromise(timeout)
-          .catch(() => {});
+        const wait = rpcManager.getWait<FindNodePeerOffer>(
+          peer,
+          FindNodeProxyOpen(this.listen.kid)
+        );
+        const res = await wait(timeout).catch(() => {});
 
         if (res) {
           const { peerkid, sdp } = res;
-          offers.push({ peerkid, sdp });
+          if (sdp) offers.push({ peerkid, sdp });
         }
       }
     };
 
     await Promise.all(peers.map(peer => findNodePeerOffer(peer)));
 
-    this.listen.rpc(FindNodeProxyOffer(offers));
+    this.listen.rpc({ ...FindNodeProxyOffer(offers), id });
   }
 
   async findnodeanswer(data: FindNodeAnswer) {
     const { sdp, peerkid } = data;
+    const id = (data as any).id;
     const { kTable } = this.di;
     const peer = kTable.getPeer(peerkid);
     if (!peer) return;
-    peer.rpc(FindNodeProxyAnswer(sdp, this.listen.kid));
+    peer.rpc({ ...FindNodeProxyAnswer(sdp, this.listen.kid), id });
   }
 }

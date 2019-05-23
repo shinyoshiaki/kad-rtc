@@ -1,28 +1,26 @@
-import Base from "./base";
+import Base, { RPC } from "./base";
 import Event from "rx.mini";
 import WebRTC from "../../../webrtc";
 import * as bson from "bson";
-
-type RPC = { rpc: string; [key: string]: string | Buffer };
 
 export const PeerModule = (kid: string) => new Peer(kid);
 
 export default class Peer implements Base {
   private type = "webrtc";
   private peer: WebRTC = new WebRTC({ disable_stun: true });
-  onRpc = new Event<any>();
+  onRpc = new Event<RPC>();
   onDisconnect = this.peer.onDisconnect as any;
   onConnect = new Event<boolean>();
 
   constructor(public kid: string) {
     this.peer.nodeId = kid;
     this.peer.onConnect.once(() => {
-      this.onConnect.excute(true);
+      this.onConnect.execute(true);
     });
     const onData = this.peer.onData.subscribe(raw => {
       try {
         const data = this.parseRPC(raw.data);
-        if (data) this.onRpc.excute(data);
+        if (data) this.onRpc.execute(data);
       } catch (error) {
         console.error(error);
       }
@@ -50,13 +48,15 @@ export default class Peer implements Base {
     this.peer.send(packet);
   };
 
-  eventRpc = (rpc: string) => {
+  eventRpc = (rpc: string, id: string) => {
     const observer = new Event<any>();
     const onData = this.peer.onData.subscribe(raw => {
       const data = this.parseRPC(raw.data);
       if (data && data.rpc === rpc) {
-        observer.excute(data);
-        onData.unSubscribe();
+        if (data.id === id) {
+          observer.execute(data);
+          onData.unSubscribe();
+        }
       }
     });
     return observer;
