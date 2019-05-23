@@ -133,9 +133,11 @@ export default class WebRTC {
   }
 
   hangUp() {
+    console.log("hungup", this.nodeId);
     this.isDisconnected = true;
     this.isConnected = false;
     this.onDisconnect.execute();
+    this.disconnect();
   }
 
   makeOffer() {
@@ -291,19 +293,14 @@ export default class WebRTC {
     label = label || "datachannel";
     if (!Object.keys(this.dataChannels).includes(label)) {
       try {
-        if (injectableNavigator!.platform) {
-          await this.createDatachannel(label);
-        } else {
-          this.createDatachannel(label);
-        }
-      } catch (_) {
-        this.createDatachannel(label);
-      }
+        await this.createDatachannel(label);
+      } catch (_) {}
     }
     try {
       this.dataChannels[label].send(data);
     } catch (error) {
       console.warn(error);
+      this.hangUp();
     }
   }
 
@@ -311,7 +308,7 @@ export default class WebRTC {
     this.rtc.addTrack(track, stream);
   }
 
-  async disconnect() {
+  disconnect() {
     const { rtc, dataChannels } = this;
 
     for (let key in dataChannels) {
@@ -332,7 +329,5 @@ export default class WebRTC {
     rtc.ondatachannel = null;
     rtc.close();
     this.rtc = null as any;
-
-    await new Promise(r => setTimeout(r, 1000 * 30));
   }
 }

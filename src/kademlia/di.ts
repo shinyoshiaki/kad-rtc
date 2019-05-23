@@ -2,6 +2,7 @@ import Ktable, { Option } from "./ktable";
 import Modules from "./modules";
 import RpcManager from "./services/rpcmanager";
 import Signaling from "./services/signaling";
+import JobSystem from "./services/jobsystem";
 
 type Options = Option;
 
@@ -10,6 +11,7 @@ export type DependencyInjection = {
   modules: Modules;
   rpcManager: RpcManager;
   signaling: Signaling;
+  jobSystem: JobSystem;
 };
 
 export const dependencyInjection = (
@@ -21,6 +23,7 @@ export const dependencyInjection = (
     kTable: new Ktable(kid, opt),
     modules,
     rpcManager: new RpcManager(),
-    signaling: new Signaling(modules.peerCreate)
+    signaling: new Signaling(modules.peerCreate),
+    jobSystem: new JobSystem()
   };
 };
