@@ -2,8 +2,11 @@ import Peer from "../../../modules/peer/base";
 import { FindValuePeerOffer } from "./peer";
 import { DependencyInjection } from "../../../di";
 import { FindValue, FindValueAnswer } from "..";
+import { timeout } from "../../../const";
 
-const FindValueResult = (data: Partial<{ value: string; offers: Offer[] }>) => {
+const FindValueResult = (
+  data: Partial<{ value: string | ArrayBuffer; offers: Offer[] }>
+) => {
   return { rpc: "FindValueResult" as const, data };
 };
 
@@ -27,7 +30,7 @@ type actions = FindValue | FindValueAnswer;
 
 export default class FindValueProxy {
   constructor(private listen: Peer, private di: DependencyInjection) {
-    const discon = listen.onRpc.subscribe((data: actions) => {
+    const onRpc = listen.onRpc.subscribe((data: actions) => {
       switch (data.rpc) {
         case "FindValue":
           this.findvalue(data);
@@ -38,49 +41,50 @@ export default class FindValueProxy {
       }
     });
 
-    listen.onDisconnect.once(() => discon.unSubscribe());
+    listen.onDisconnect.once(() => onRpc.unSubscribe());
   }
 
   async findvalue(data: FindValue) {
     const { key, except } = data;
-    const { kTable } = this.di;
+    const id = (data as any).id;
+    const { kTable, rpcManager } = this.di;
     const { kvs } = this.di.modules;
 
     const value = kvs.get(key);
 
     if (value) {
-      this.listen.rpc(FindValueResult({ value }));
+      this.listen.rpc({ ...FindValueResult({ value }), id });
     } else {
       const peers = kTable.findNode(key);
-      const offers: { peerkid: string; sdp: any }[] = [];
+      const offers: { peerkid: string; sdp: object }[] = [];
 
       const findValuePeerOffer = async (peer: Peer) => {
         if (!(peer.kid === this.listen.kid || except.includes(peer.kid))) {
-          peer.rpc(FindValueProxyOpen(this.listen.kid));
-
-          const res = await peer
-            .eventRpc<FindValuePeerOffer>("FindValuePeerOffer")
-            .asPromise(3333)
-            .catch(console.error);
+          const wait = rpcManager.getWait<FindValuePeerOffer>(
+            peer,
+            FindValueProxyOpen(this.listen.kid)
+          );
+          const res = await wait(timeout).catch(() => {});
 
           if (res) {
             const { peerkid, sdp } = res;
-            offers.push({ peerkid, sdp });
+            if (sdp) offers.push({ peerkid, sdp });
           }
         }
       };
 
       await Promise.all(peers.map(peer => findValuePeerOffer(peer)));
 
-      this.listen.rpc(FindValueResult({ offers }));
+      this.listen.rpc({ ...FindValueResult({ offers }), id });
     }
   }
 
   async findValueAnswer(data: FindValueAnswer) {
     const { sdp, peerkid } = data;
+    const id = (data as any).id;
     const { kTable } = this.di;
     const peer = kTable.getPeer(peerkid);
     if (!peer) return;
-    peer.rpc(FindValueProxyAnswer(sdp, this.listen.kid));
+    peer.rpc({ ...FindValueProxyAnswer(sdp, this.listen.kid), id });
   }
 }

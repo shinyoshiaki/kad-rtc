@@ -1,45 +1,62 @@
-import Base from "./base";
+import Base, { RPC } from "./base";
 import Event from "rx.mini";
 import WebRTC from "../../../webrtc";
+import * as bson from "bson";
 
 export const PeerModule = (kid: string) => new Peer(kid);
 
 export default class Peer implements Base {
   private type = "webrtc";
   private peer: WebRTC = new WebRTC({ disable_stun: true });
-  onRpc = new Event<any>();
+  onRpc = new Event<RPC>();
   onDisconnect = this.peer.onDisconnect as any;
   onConnect = new Event<boolean>();
 
   constructor(public kid: string) {
     this.peer.nodeId = kid;
     this.peer.onConnect.once(() => {
-      this.onConnect.excute(true);
+      this.onConnect.execute(true);
     });
-    const discon = this.peer.onData.subscribe(raw => {
+    const onData = this.peer.onData.subscribe(raw => {
       try {
-        const data = JSON.parse(raw.data);
-        if (data.rpc) {
-          this.onRpc.excute(data);
-        }
-      } catch (error) {}
+        const data = this.parseRPC(raw.data);
+        if (data) this.onRpc.execute(data);
+      } catch (error) {
+        console.error(error);
+      }
     });
     this.peer.onDisconnect.once(() => {
-      discon.unSubscribe();
+      onData.unSubscribe();
     });
   }
 
-  rpc = (send: { rpc: string }) => {
-    this.peer.send(JSON.stringify(send), send.rpc);
+  parseRPC = (data: ArrayBuffer) => {
+    const buffer = Buffer.from(data);
+    try {
+      const data: RPC = bson.deserialize(buffer);
+      if (data.rpc) {
+        return data;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    return undefined;
   };
 
-  eventRpc = (rpc: string) => {
+  rpc = (send: RPC) => {
+    const packet = bson.serialize(send);
+    this.peer.send(packet);
+  };
+
+  eventRpc = (rpc: string, id: string) => {
     const observer = new Event<any>();
-    const once = this.peer.onData.subscribe(raw => {
-      if (raw.label === rpc) {
-        const data = JSON.parse(raw.data);
-        observer.excute(data);
-        once.unSubscribe();
+    const onData = this.peer.onData.subscribe(raw => {
+      const data = this.parseRPC(raw.data);
+      if (data && data.rpc === rpc) {
+        if (data.id === id) {
+          observer.execute(data);
+          onData.unSubscribe();
+        }
       }
     });
     return observer;

@@ -76,7 +76,7 @@ export default class WebRTC {
 
     peer.ontrack = evt => {
       const stream = evt.streams[0];
-      this.onAddTrack.excute(stream);
+      this.onAddTrack.execute(stream);
       this.remoteStream = stream;
     };
 
@@ -109,11 +109,11 @@ export default class WebRTC {
       if (!this.isConnected) {
         if (evt.candidate) {
           if (trickle) {
-            this.onSignal.excute({ type: "candidate", ice: evt.candidate });
+            this.onSignal.execute({ type: "candidate", ice: evt.candidate });
           }
         } else {
           if (!trickle && peer.localDescription) {
-            this.onSignal.excute(peer.localDescription);
+            this.onSignal.execute(peer.localDescription);
           }
         }
       }
@@ -133,9 +133,11 @@ export default class WebRTC {
   }
 
   hangUp() {
+    console.log("hungup", this.nodeId);
     this.isDisconnected = true;
     this.isConnected = false;
-    this.onDisconnect.excute();
+    this.onDisconnect.execute();
+    this.disconnect();
   }
 
   makeOffer() {
@@ -161,7 +163,7 @@ export default class WebRTC {
       const local = this.rtc.localDescription;
 
       if (trickle && local) {
-        this.onSignal.excute(local);
+        this.onSignal.execute(local);
       }
 
       this.negotiation();
@@ -217,7 +219,7 @@ export default class WebRTC {
     if (this.isConnected) {
       this.send(JSON.stringify(local), "update");
     } else if (trickle && local) {
-      this.onSignal.excute(local);
+      this.onSignal.execute(local);
     }
 
     this.negotiation();
@@ -256,7 +258,7 @@ export default class WebRTC {
       channel.onopen = () => {
         if (!this.isConnected) {
           this.isConnected = true;
-          this.onConnect.excute();
+          this.onConnect.execute();
         }
         resolve();
       };
@@ -271,7 +273,7 @@ export default class WebRTC {
             if (event.data === "ping") this.send("pong", "live");
             else if (this.timeoutPing) clearTimeout(this.timeoutPing);
           } else {
-            this.onData.excute({
+            this.onData.execute({
               label: channel.label,
               data: event.data,
               nodeId: this.nodeId
@@ -291,19 +293,14 @@ export default class WebRTC {
     label = label || "datachannel";
     if (!Object.keys(this.dataChannels).includes(label)) {
       try {
-        if (injectableNavigator!.platform) {
-          await this.createDatachannel(label);
-        } else {
-          this.createDatachannel(label);
-        }
-      } catch (_) {
-        this.createDatachannel(label);
-      }
+        await this.createDatachannel(label);
+      } catch (_) {}
     }
     try {
       this.dataChannels[label].send(data);
     } catch (error) {
       console.warn(error);
+      this.hangUp();
     }
   }
 
@@ -311,7 +308,7 @@ export default class WebRTC {
     this.rtc.addTrack(track, stream);
   }
 
-  async disconnect() {
+  disconnect() {
     const { rtc, dataChannels } = this;
 
     for (let key in dataChannels) {
@@ -332,7 +329,5 @@ export default class WebRTC {
     rtc.ondatachannel = null;
     rtc.close();
     this.rtc = null as any;
-
-    await new Promise(r => setTimeout(r, 1000 * 30));
   }
 }

@@ -1,14 +1,10 @@
 import http from "http";
 import socketio from "socket.io";
-import sha1 from "sha1";
-import client from "socket.io-client";
-
 import Event from "rx.mini";
-import { Kademlia, PeerModule, KvsModule, Peer } from "../../..";
+import { Kademlia, PeerModule, KvsModule, Peer, genKid } from "../../../src/";
 
 type Options = {
   port: number;
-  target?: { url: string; port: number };
 };
 
 const Request = (clientKid: string) => {
@@ -29,39 +25,19 @@ const Answer = (sdp: string, clientKid: string) => {
 
 type Answer = ReturnType<typeof Answer>;
 
-type actions = Offer | Request | Answer;
-
-// server offer
+type actions = Request | Answer;
 
 export default class PortalNode {
-  kid = sha1(Math.random().toString()).toString();
-  kademlia = new Kademlia(this.kid, { peerCreate: PeerModule, kvs: KvsModule });
+  kademlia = new Kademlia(genKid(), { peerCreate: PeerModule, kvs: KvsModule });
   peers: { [key: string]: Peer } = {};
   onConnect = new Event();
   io: SocketIO.Server | undefined;
 
   constructor(private opt: Options) {
     try {
-      this.asGuest();
       this.asHost();
     } catch (error) {
       console.error(error);
-    }
-  }
-
-  private asGuest() {
-    const { target } = this.opt;
-    if (target) {
-      const socket = client.connect("http://" + target.url + ":" + target.port);
-      socket.on("connect", () => {
-        socket.emit("rpc", Request(this.kid));
-      });
-      socket.on("rpc", (data: actions) => {
-        if (data.rpc === "Offer") {
-          this.peers[data.serverKid] = PeerModule(data.serverKid);
-          this.answer(socket, data);
-        }
-      });
     }
   }
 
@@ -96,21 +72,6 @@ export default class PortalNode {
     await peer.onConnect.asPromise();
 
     await this.kademlia.add(peer);
-    this.onConnect.excute();
-  }
-
-  private async answer(socket: SocketIOClient.Socket, data: Offer) {
-    const peer = this.peers[data.serverKid];
-
-    const sdp = await peer.setOffer(data.sdp);
-    socket.emit("rpc", Answer(sdp, this.kademlia.kid));
-    await peer.onConnect.asPromise();
-
-    await this.kademlia.add(peer);
-    this.onConnect.excute();
-  }
-
-  close() {
-    if (this.io) this.io.close();
+    this.onConnect.execute();
   }
 }

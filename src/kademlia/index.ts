@@ -35,8 +35,8 @@ export default class Kademlia {
     return target;
   }
 
-  async store(value: string) {
-    const key = await store(value, this.di);
+  async store(key: string, value: string | ArrayBuffer) {
+    await store(key, value, this.di);
     return key;
   }
 
@@ -45,11 +45,13 @@ export default class Kademlia {
     return res;
   }
 
-  async add(peer: Peer) {
+  async add(peer: Peer, opt: Partial<{ notfind: boolean }> = {}) {
     const { kTable } = this.di;
     kTable.add(peer);
     listeners(peer, this.di);
-
-    await findNode(this.kid, this.di);
+    if (!opt.notfind) {
+      await new Promise(r => setTimeout(r, 1000));
+      await findNode(this.kid, this.di);
+    }
   }
 }

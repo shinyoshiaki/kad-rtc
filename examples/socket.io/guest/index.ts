@@ -1,7 +1,6 @@
-import sha1 from "sha1";
 import client from "socket.io-client";
 import Event from "rx.mini";
-import { Kademlia, PeerModule, KvsModule, Peer } from "../../..";
+import { Kademlia, PeerModule, KvsModule, Peer, genKid } from "../../../src";
 
 type Options = {
   target: { url: string; port: number };
@@ -25,22 +24,26 @@ const Answer = (sdp: string, clientKid: string) => {
 
 type Answer = ReturnType<typeof Answer>;
 
-type actions = Offer | Request | Answer;
-
-// server offer
+type actions = Offer;
 
 export default class GuestNode {
-  kid = sha1(Math.random().toString()).toString();
-  kademlia = new Kademlia(this.kid, { peerCreate: PeerModule, kvs: KvsModule });
+  kademlia = new Kademlia(genKid(), { peerCreate: PeerModule, kvs: KvsModule });
   peers: { [key: string]: Peer } = {};
   onConnect = new Event();
 
   constructor(private opt: Options) {
     try {
-      const { target } = opt;
+      this.asGuest();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  private asGuest() {
+    const { target } = this.opt;
+    if (target) {
       const socket = client.connect("http://" + target.url + ":" + target.port);
       socket.on("connect", () => {
-        socket.emit("rpc", Request(this.kid));
+        socket.emit("rpc", Request(this.kademlia.kid));
       });
       socket.on("rpc", (data: actions) => {
         if (data.rpc === "Offer") {
@@ -48,8 +51,6 @@ export default class GuestNode {
           this.answer(socket, data);
         }
       });
-    } catch (error) {
-      console.error(error);
     }
   }
 
@@ -61,6 +62,6 @@ export default class GuestNode {
     await peer.onConnect.asPromise();
 
     await this.kademlia.add(peer);
-    this.onConnect.excute();
+    this.onConnect.execute();
   }
 }

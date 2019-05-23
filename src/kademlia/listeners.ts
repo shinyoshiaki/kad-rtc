@@ -5,6 +5,7 @@ import { DependencyInjection } from "./di";
 import listenFindValue from "./actions/findvalue/listen";
 
 export function listeners(peer: Peer, di: DependencyInjection) {
+  di.kTable.add(peer);
   listenStore(peer, di);
   listenFindnode(peer, di);
   listenFindValue(peer, di);

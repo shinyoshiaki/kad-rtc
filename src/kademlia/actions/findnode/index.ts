@@ -2,6 +2,7 @@ import { FindNodeProxyOffer, Offer } from "./listen/proxy";
 import { DependencyInjection } from "../../di";
 import { listeners } from "../../listeners";
 import Peer from "../../modules/peer/base";
+import { timeout } from "../../const";
 
 const FindNode = (searchkid: string, except: string[]) => {
   return { rpc: "FindNode" as const, searchkid, except };
@@ -19,19 +20,19 @@ export default async function findNode(
   searchkid: string,
   di: DependencyInjection
 ) {
-  const { kTable } = di;
-  const { peerCreate } = di.modules;
+  const { kTable, rpcManager, signaling } = di;
 
   if (kTable.getPeer(searchkid)) return kTable.getPeer(searchkid);
 
   const findNodeProxyOffer = async (peer: Peer) => {
     const except = kTable.allPeers.map(item => item.kid);
-    peer.rpc(FindNode(searchkid, except));
 
-    const res = await peer
-      .eventRpc<FindNodeProxyOffer>("FindNodeProxyOffer")
-      .asPromise(3333)
-      .catch(console.warn);
+    const wait = rpcManager.getWait<FindNodeProxyOffer>(
+      peer,
+      FindNode(searchkid, except)
+    );
+
+    const res = await wait(timeout).catch(() => {});
 
     if (res) {
       const { peers } = res;
@@ -42,17 +43,23 @@ export default async function findNode(
     return { peers: [], peer };
   };
 
-  const findNodeAnswer = async (peer: Peer, offer: Offer) => {
+  const findNodeAnswer = async (proxy: Peer, offer: Offer) => {
     const { peerkid, sdp } = offer;
-    const connect = peerCreate(peerkid);
-    const answer = await connect.setOffer(sdp);
+    const { peer, candidate } = signaling.create(peerkid);
+    if (peer) {
+      const answer = await peer.setOffer(sdp);
 
-    peer.rpc(FindNodeAnswer(answer, peerkid));
-    const res = await connect.onConnect.asPromise(3333).catch(console.error);
+      rpcManager.run(proxy, FindNodeAnswer(answer, peerkid));
+      const res = await peer.onConnect.asPromise(timeout).catch(() => {
+        signaling.delete(peerkid);
+      });
 
-    if (res) {
-      kTable.add(connect);
-      listeners(connect, di);
+      if (res) {
+        listeners(peer, di);
+      }
+    } else if (candidate) {
+      const peer = await candidate.asPromise(timeout).catch(() => {});
+      if (peer) listeners(peer, di);
     }
   };
 
