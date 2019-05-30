@@ -7,7 +7,7 @@ import {
   updateTimeout
 } from "../../../../src";
 
-updateTimeout(10000);
+updateTimeout(2 * 3000);
 
 const kad: Kademlia = new Kademlia(
   genKid(),
