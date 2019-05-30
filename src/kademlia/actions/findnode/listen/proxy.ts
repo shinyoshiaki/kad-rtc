@@ -3,6 +3,7 @@ import { FindNode, FindNodeAnswer } from "..";
 import { FindNodePeerOffer } from "./peer";
 import { DependencyInjection } from "../../../di";
 import { timeout } from "../../../const";
+import { ID } from "../../../services/rpcmanager";
 
 const FindNodeProxyOffer = (peers: Offer[]) => {
   return { rpc: "FindNodeProxyOffer" as const, peers };
@@ -24,7 +25,7 @@ const FindNodeProxyAnswer = (sdp: any, finderkid: string) => {
 
 export type FindNodeProxyAnswer = ReturnType<typeof FindNodeProxyAnswer>;
 
-type actions = FindNode | FindNodeAnswer;
+type actions = (FindNode | FindNodeAnswer) & ID;
 
 export default class FindNodeProxy {
   constructor(private listen: Peer, private di: DependencyInjection) {
@@ -42,10 +43,10 @@ export default class FindNodeProxy {
     listen.onDisconnect.once(() => onRpc.unSubscribe());
   }
 
-  async findnode(data: FindNode) {
-    const { searchkid, except } = data;
-    const id = (data as any).id;
+  async findnode(data: FindNode & ID) {
     const { kTable, rpcManager } = this.di;
+    const { searchkid, except, id } = data;
+
     const peers = kTable.findNode(searchkid);
     const offers: { peerkid: string; sdp: object }[] = [];
 
@@ -69,10 +70,10 @@ export default class FindNodeProxy {
     this.listen.rpc({ ...FindNodeProxyOffer(offers), id });
   }
 
-  async findnodeanswer(data: FindNodeAnswer) {
-    const { sdp, peerkid } = data;
-    const id = (data as any).id;
+  async findnodeanswer(data: FindNodeAnswer & ID) {
     const { kTable } = this.di;
+    const { sdp, peerkid, id } = data;
+
     const peer = kTable.getPeer(peerkid);
     if (!peer) return;
     peer.rpc({ ...FindNodeProxyAnswer(sdp, this.listen.kid), id });
