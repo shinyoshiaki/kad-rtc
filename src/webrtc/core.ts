@@ -6,11 +6,6 @@ import {
 
 import Event from "rx.mini";
 
-const injectableProcess = typeof process !== "undefined" ? process : undefined;
-
-const injectableNavigator =
-  typeof window !== "undefined" ? window.navigator : undefined;
-
 export interface message {
   label: string;
   data: any;
@@ -42,7 +37,7 @@ export default class WebRTC {
   isOffer = false;
 
   remoteStream: MediaStream | undefined;
-  timeoutPing: any;
+  timeoutPing?: any;
 
   constructor(public opt: Partial<option> = {}) {
     const { nodeId, stream, track } = opt;

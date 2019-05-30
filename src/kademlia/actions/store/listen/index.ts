@@ -1,6 +1,7 @@
 import { Store } from "..";
 import Peer from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
+import { ID } from "../../../services/rpcmanager";
 
 const OnStore = () => {
   return { rpc: "OnStore" as const };
@@ -8,7 +9,7 @@ const OnStore = () => {
 
 export type OnStore = ReturnType<typeof OnStore>;
 
-type actions = Store;
+type actions = Store & ID;
 
 export default function listenStore(peer: Peer, di: DependencyInjection) {
   return new ListenStore(peer, di);
@@ -26,10 +27,10 @@ class ListenStore {
     listen.onDisconnect.once(() => onRpc.unSubscribe());
   }
 
-  store(data: Store) {
-    const { key, value } = data;
-    const id = (data as any).id;
+  store(data: Store & ID) {
     const { kvs } = this.di.modules;
+    const { key, value, id } = data;
+
     kvs.set(key, value);
 
     this.listen.rpc({ ...OnStore(), id });

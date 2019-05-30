@@ -4,6 +4,6 @@ import { updateTimeout } from "../../../src/kademlia/const";
 
 const kad = new Kademlia(genKid(), { kvs: KvsModule, peerCreate: PeerModule });
 
-updateTimeout(5000);
+updateTimeout(3000);
 
 portalnode(kad, 60000);

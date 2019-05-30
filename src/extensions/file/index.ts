@@ -30,10 +30,6 @@ export async function storeFile(file: ArrayBuffer[], kad: Kademlia) {
       jobs.push({ key, value });
     });
 
-    // for (let job of jobs) {
-    //   await kad.store(job.key, job.value);
-    // }
-
     const workers = new JobSystem({ a: 10 });
 
     await Promise.all(
@@ -49,10 +45,10 @@ export async function storeFile(file: ArrayBuffer[], kad: Kademlia) {
 
 export async function findFile(headerKey: string, kad: Kademlia) {
   const chunks: Buffer[] = [];
-  const first = await kad.findValue(headerKey);
-  if (!first) return;
+  const firstItem = await kad.findValue(headerKey);
+  if (!firstItem) return;
   const firstJson: { value: Buffer; next: string } = bson.deserialize(
-    (first as any).buffer
+    (firstItem.value as any).buffer
   );
   console.log({ firstJson });
 
@@ -65,18 +61,18 @@ export async function findFile(headerKey: string, kad: Kademlia) {
             resolve(true);
             break;
           }
-          const value: any = await kad.findValue(json.next);
+          const value = await kad.findValue(json.next);
           if (!value) {
             reject(false);
             break;
           }
-          json = bson.deserialize(value.buffer);
+          json = bson.deserialize((value.value as any).buffer);
           console.log({ json });
         }
       } catch (error) {}
     });
 
-  if (first) {
+  if (firstItem) {
     const res = await work().catch(console.error);
     if (res) {
       return chunks.map(buffer => buffer.buffer);

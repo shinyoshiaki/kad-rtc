@@ -35,8 +35,8 @@ export default class Kademlia {
     return target;
   }
 
-  async store(key: string, value: string | ArrayBuffer) {
-    await store(key, value, this.di);
+  async store(key: string, value: string | ArrayBuffer, msg?: string) {
+    await store(this.di, key, value, msg);
     return key;
   }
 

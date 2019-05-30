@@ -52,7 +52,7 @@ const App: React.FC = () => {
 
   const findText = useApi(async (key: string) => {
     const res = await kad.findValue(key);
-    return res;
+    return res.value;
   });
 
   return (
