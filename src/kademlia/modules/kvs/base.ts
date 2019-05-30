@@ -1,7 +1,9 @@
 import Event from "rx.mini";
 
+export type Item = { value: string | ArrayBuffer; msg?: string };
+
 export default class KevValueStore {
-  db: { [key: string]: { value: string | ArrayBuffer; msg?: string } } = {};
+  db: { [key: string]: Item } = {};
   onSet = new Event<{ key: string; value: string | ArrayBuffer }>();
 
   set(key: string, value: string | ArrayBuffer, msg?: string) {
@@ -9,9 +11,7 @@ export default class KevValueStore {
     this.onSet.execute({ key, value });
   }
 
-  get = (key: string): string | ArrayBuffer | undefined => this.db[key].value;
-
-  getMsg = (key: string): string | undefined => this.db[key].msg;
+  get = (key: string): Item | undefined => this.db[key];
 }
 
 export const KvsModule = (() => new KevValueStore())();

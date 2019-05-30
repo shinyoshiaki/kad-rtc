@@ -3,10 +3,9 @@ import { FindValuePeerOffer } from "./peer";
 import { DependencyInjection } from "../../../di";
 import { FindValue, FindValueAnswer } from "..";
 import { timeout } from "../../../const";
+import { Item } from "../../../modules/kvs/base";
 
-const FindValueResult = (
-  data: Partial<{ value: string | ArrayBuffer; offers: Offer[] }>
-) => {
+const FindValueResult = (data: Partial<{ item: Item; offers: Offer[] }>) => {
   return { rpc: "FindValueResult" as const, data };
 };
 
@@ -50,10 +49,10 @@ export default class FindValueProxy {
     const { kTable, rpcManager } = this.di;
     const { kvs } = this.di.modules;
 
-    const value = kvs.get(key);
+    const item = kvs.get(key);
 
-    if (value) {
-      this.listen.rpc({ ...FindValueResult({ value }), id });
+    if (item) {
+      this.listen.rpc({ ...FindValueResult({ item }), id });
     } else {
       const peers = kTable.findNode(key);
       const offers: { peerkid: string; sdp: object }[] = [];

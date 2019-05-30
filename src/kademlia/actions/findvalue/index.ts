@@ -3,6 +3,7 @@ import { FindValueResult, Offer } from "./listen/proxy";
 import { listeners } from "../../listeners";
 import Peer from "../../modules/peer/base";
 import { timeout } from "../../const";
+import { Item } from "../../modules/kvs/base";
 
 const FindValue = (key: string, except: string[]) => {
   return { rpc: "FindValue" as const, key, except };
@@ -19,7 +20,7 @@ export type FindValueAnswer = ReturnType<typeof FindValueAnswer>;
 export default async function findValue(key: string, di: DependencyInjection) {
   const { kTable, rpcManager, signaling } = di;
 
-  let result: string | ArrayBuffer | undefined | Buffer;
+  let result: Item | undefined;
 
   const findValueResult = async (peer: Peer) => {
     const except = kTable.allPeers.map(item => item.kid);
@@ -31,10 +32,10 @@ export default async function findValue(key: string, di: DependencyInjection) {
     const res = await wait(timeout).catch(() => {});
 
     if (res) {
-      const { value, offers } = res.data;
+      const { item, offers } = res.data;
 
-      if (value) {
-        result = value;
+      if (item) {
+        result = item;
       } else if (offers) {
         if (offers.length > 0) {
           return { offers, peer };
@@ -53,12 +54,11 @@ export default async function findValue(key: string, di: DependencyInjection) {
       const answer = await peer.setOffer(sdp);
 
       rpcManager.run(proxy, FindValueAnswer(answer, peerkid));
+
       const res = await peer.onConnect.asPromise(timeout).catch(() => {
         signaling.delete(peerkid);
       });
-      if (res) {
-        listeners(peer, di);
-      }
+      if (res) listeners(peer, di);
     } else if (candidate) {
       const peer = await candidate.asPromise(timeout).catch(() => {});
       if (peer) listeners(peer, di);
