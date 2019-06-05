@@ -29,9 +29,9 @@ class ListenStore {
 
   store(data: Store & ID) {
     const { kvs } = this.di.modules;
-    const { key, value, id } = data;
+    const { key, value, id, msg } = data;
 
-    kvs.set(key, value);
+    kvs.set(key, value, msg);
 
     this.listen.rpc({ ...OnStore(), id });
   }

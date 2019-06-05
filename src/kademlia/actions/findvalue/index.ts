@@ -29,7 +29,7 @@ export default async function findValue(key: string, di: DependencyInjection) {
       peer,
       FindValue(key, except)
     );
-    const res = await wait(timeout).catch(() => {});
+    const res = await wait(timeout * 2).catch(() => {});
 
     if (res) {
       const { item, offers } = res.data;

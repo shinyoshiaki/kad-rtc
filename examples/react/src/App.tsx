@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
-import guest, { kad } from "./guest";
+import guest, { kad } from "./services/kademlia";
 import { storeFile, findFile } from "../../../src";
 import { getSliceArrayBuffer } from "./util/file";
 import { useApi } from "./hooks/useApi";
 import { genKid } from "../../../src";
 import { useObject } from "./hooks/useObject";
 import styled from "styled-components";
+import Watch from "./components/watch";
+import Record from "./components/record";
 
 const App: React.FC = () => {
   const [kid, setkid] = useState("");
@@ -132,6 +134,14 @@ const App: React.FC = () => {
           </button>
           <p>{textobj.view}</p>
           {findText.loading && <p>doing</p>}
+        </Content>
+      </Content>
+      <Content>
+        <Content>
+          <Watch />
+        </Content>
+        <Content>
+          <Record />
         </Content>
       </Content>
       <Content>
