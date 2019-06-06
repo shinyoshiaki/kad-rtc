@@ -7,11 +7,15 @@ export class Media {
     while (!this.stop) {
       if (sb.updating || this.chunks.length === 0) {
         await new Promise(r => setTimeout(r, 10));
-        continue;
+      } else {
+        const chunk = this.chunks.shift();
+        try {
+          if (chunk) sb.appendBuffer(chunk);
+          await waitEvent(sb, "updateend", undefined);
+        } catch (error) {
+          console.warn(error, chunk, sb);
+        }
       }
-      const chunk = this.chunks.shift();
-      if (chunk) sb.appendBuffer(chunk);
-      await waitEvent(sb, "updateend", undefined);
     }
   }
 

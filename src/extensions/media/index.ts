@@ -3,7 +3,9 @@ import { waitEvent, readAsArrayBuffer, Media } from "./media";
 import Event from "rx.mini";
 import sha1 from "sha1";
 
-const interval = 200;
+const interval = 500;
+
+const mimeType = `video/webm; codecs="opus,vp8"`;
 
 export class StreamVideo extends Media {
   private async recordInterval(
@@ -11,8 +13,6 @@ export class StreamVideo extends Media {
     eventChunk: Event<ArrayBuffer>,
     onMsReady: (ms: MediaSource) => void
   ) {
-    const mimeType = `video/webm; codecs="opus,vp8"`;
-
     const mediaRecorder = new MediaRecorder(stream, {
       mimeType
     });
@@ -72,7 +72,7 @@ export class StreamVideo extends Media {
         const key = hash(buffer);
         const data = buffer;
         const msg = hash(ab);
-        kad.store(key, data, msg).then(res => console.log(res));
+        kad.store(key, data, msg);
         buffer = ab;
       } else {
         await new Promise(r => setTimeout(r, 0));
@@ -91,41 +91,52 @@ export class ReceiveVideo extends Media {
     onMsReady(ms);
 
     await waitEvent(ms, "sourceopen", undefined);
-    const mimeType = `video/webm; codecs="opus,vp8"`;
     const sb = ms.addSourceBuffer(mimeType);
 
     const first = await kad.findValue(headerKey);
     console.log({ first });
     if (!first) return;
 
-    let start = false;
-    const work = () =>
-      new Promise<boolean>(async (resolve, reject) => {
-        try {
-          for (let item = first; ; ) {
-            if (this.chunks.length > 10) {
-              if (!start) {
-                start = true;
-                console.log("start");
-                this.update(sb);
-              }
+    const work = async () => {
+      let start = false;
+      let buf = "";
+      try {
+        for (let item = first, retry = 0; retry < 20; ) {
+          if (this.chunks.length > (1000 / interval) * 10) {
+            if (!start) {
+              start = true;
+              this.update(sb);
             }
+          }
 
+          if (!item.msg) {
+            console.log("non msg", { retry });
+            retry++;
+            await new Promise(r => setTimeout(r, 100 * retry));
+            continue;
+          }
+          if (item.msg !== buf) {
             this.chunks.push((item.value as any).buffer);
-            if (!item.msg) {
-              reject(false);
-              break;
-            }
-            const next = await kad.findValue(item.msg);
-            console.log({ next });
-            if (!next) {
-              reject(false);
-              break;
-            }
+            buf = item.msg;
+          }
+
+          const next = await kad.findValue(item.msg);
+          console.log(item.msg, { next });
+          if (!next) {
+            console.log("fail next", { retry });
+            retry++;
+            await new Promise(r => setTimeout(r, 100 * retry));
+            continue;
+          } else {
             item = next;
           }
-        } catch (error) {}
-      });
+          if (retry > 0) retry--;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     if (first) {
       await work().catch(console.error);
     }
