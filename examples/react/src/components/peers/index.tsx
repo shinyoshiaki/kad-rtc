@@ -1,5 +1,5 @@
 import React, { FC, useState, useEffect } from "react";
-import { kad } from "../../guest";
+import { kad } from "../../services/kademlia";
 
 const Peers: FC = () => {
   const [allPeers, setallPeers] = useState<string[][]>([]);

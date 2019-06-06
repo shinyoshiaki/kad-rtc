@@ -29,13 +29,14 @@ export default async function findValue(key: string, di: DependencyInjection) {
       peer,
       FindValue(key, except)
     );
-    const res = await wait(timeout).catch(() => {});
+    const res = await wait(1000 * 20).catch(() => {});
 
     if (res) {
       const { item, offers } = res.data;
 
-      if (item) {
+      if (item && !result) {
         result = item;
+        return { offers: [], peer };
       } else if (offers) {
         if (offers.length > 0) {
           return { offers, peer };
@@ -71,9 +72,7 @@ export default async function findValue(key: string, di: DependencyInjection) {
     );
     await Promise.all(
       findValueResultResult
-        .map(item =>
-          item.offers.map(offer => findValueAnswer(offer, item.peer))
-        )
+        .map(v => v.offers.map(offer => findValueAnswer(offer, v.peer)))
         .flatMap(v => v)
     );
   };

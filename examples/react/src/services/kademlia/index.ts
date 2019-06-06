@@ -5,7 +5,7 @@ import {
   genKid,
   KvsModule,
   updateTimeout
-} from "../../../../src";
+} from "../../../../../src";
 
 updateTimeout(2 * 3000);
 

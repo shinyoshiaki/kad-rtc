@@ -5,6 +5,7 @@ import Peer from "./kademlia/modules/peer/base";
 import genKid from "./utill/kid";
 import { updateTimeout } from "./kademlia/const";
 import { storeFile, findFile } from "./extensions/file";
+import { StreamVideo, ReceiveVideo } from "./extensions/media";
 
 export {
   PeerModule,
@@ -14,5 +15,7 @@ export {
   genKid,
   updateTimeout,
   storeFile,
-  findFile
+  findFile,
+  StreamVideo,
+  ReceiveVideo
 };

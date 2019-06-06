@@ -18,6 +18,8 @@ export default async function store(
   const { kTable, rpcManager, jobSystem } = di;
   const { kvs } = di.modules;
 
+  kvs.set(key, value);
+
   for (
     let preHash = "";
     preHash !== kTable.getHash(key);
@@ -28,8 +30,10 @@ export default async function store(
 
   const peers = di.kTable.findNode(key);
 
+  const item = Store(key, value, msg);
+
   const onStore = async (peer: Peer) => {
-    const wait = rpcManager.getWait(peer, Store(key, value, msg));
+    const wait = rpcManager.getWait(peer, item);
     await wait(timeout).catch(() => {});
   };
 
@@ -37,6 +41,5 @@ export default async function store(
     peers.map(async peer => await jobSystem.add(onStore, [peer]))
   );
 
-  kvs.set(key, value);
-  return key;
+  return item;
 }
