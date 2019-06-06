@@ -7,7 +7,7 @@ import { Pack } from "rx.mini";
 export type Option = OptBucket;
 
 export default class Ktable {
-  private kbuckets: Kbucket[] = [];
+  readonly kbuckets: Kbucket[] = [];
   private k = 20;
   pack = Pack();
   onAdd = this.pack.event<Peer>();
