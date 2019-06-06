@@ -6,7 +6,7 @@ import sha1 from "sha1";
 export type Option = OptBucket;
 
 export default class Ktable {
-  private kbuckets: Kbucket[] = [];
+  readonly kbuckets: Kbucket[] = [];
   private k = 20;
 
   constructor(public kid: string, opt: Partial<Option> = {}) {
