@@ -7,7 +7,7 @@ import {
 import { Pack } from "rx.mini";
 
 export interface message {
-  label: string;
+  label: string | "datachannel";
   data: any;
   nodeId: string;
 }
@@ -83,15 +83,16 @@ export default class WebRTC {
         case "failed":
           break;
         case "disconnected":
-          try {
-            this.timeoutPing = setTimeout(() => {
-              this.hangUp();
-            }, 2000);
+          if (this.rtc)
+            try {
+              this.timeoutPing = setTimeout(() => {
+                this.hangUp();
+              }, 2000);
 
-            this.send("ping", "live");
-          } catch (error) {
-            console.warn({ error });
-          }
+              this.send("ping", "live");
+            } catch (error) {
+              console.warn("disconnected", { error });
+            }
           break;
         case "connected":
           if (this.timeoutPing) clearTimeout(this.timeoutPing);
@@ -261,7 +262,7 @@ export default class WebRTC {
             else if (this.timeoutPing) clearTimeout(this.timeoutPing);
           } else {
             this.onData.execute({
-              label: channel.label,
+              label: channel.label as string | "datachannel",
               data: event.data,
               nodeId: this.nodeId
             });
@@ -284,7 +285,12 @@ export default class WebRTC {
     try {
       this.dataChannels[label].send(data);
     } catch (error) {
-      console.warn(error);
+      await new Promise(r => r);
+      try {
+        this.dataChannels[label].send(data);
+      } catch (error) {
+        console.warn(error);
+      }
     }
   }
 
@@ -295,6 +301,8 @@ export default class WebRTC {
   private disconnect() {
     const { rtc, dataChannels } = this;
 
+    if (!rtc) return;
+
     for (let key in dataChannels) {
       const channel = dataChannels[key];
       channel.onmessage = null;
@@ -303,14 +311,7 @@ export default class WebRTC {
       channel.onerror = null;
       channel.close();
     }
-    this.dataChannels = null as any;
 
-    rtc.oniceconnectionstatechange = null;
-    rtc.onicegatheringstatechange = null;
-    rtc.onsignalingstatechange = null;
-    rtc.onicecandidate = null;
-    rtc.ontrack = null;
-    rtc.ondatachannel = null;
     rtc.close();
     this.rtc = null as any;
 

@@ -19,8 +19,10 @@ export default class Peer implements Base {
     });
     const onData = this.peer.onData.subscribe(raw => {
       try {
-        const data = this.parseRPC(raw.data);
-        if (data) this.onRpc.execute(data);
+        if (raw.label == "datachannel") {
+          const data = this.parseRPC(raw.data);
+          if (data) this.onRpc.execute(data);
+        }
       } catch (error) {
         console.error(error);
       }
@@ -38,7 +40,7 @@ export default class Peer implements Base {
         return data;
       }
     } catch (error) {
-      console.error(error);
+      console.error(error, buffer);
     }
     return undefined;
   };

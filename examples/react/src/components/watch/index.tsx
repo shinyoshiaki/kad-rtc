@@ -20,7 +20,7 @@ const Watch: FC = () => {
     <div>
       <input value={url} onChange={seturl} />
       <button onClick={watch}>watch</button>
-      <video ref={videoRef} autoPlay={true} />
+      <video ref={videoRef} autoPlay={true} style={{ maxWidth: "100%" }} />
     </div>
   );
 };

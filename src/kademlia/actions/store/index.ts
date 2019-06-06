@@ -18,6 +18,8 @@ export default async function store(
   const { kTable, rpcManager, jobSystem } = di;
   const { kvs } = di.modules;
 
+  kvs.set(key, value);
+
   for (
     let preHash = "";
     preHash !== kTable.getHash(key);
@@ -39,6 +41,5 @@ export default async function store(
     peers.map(async peer => await jobSystem.add(onStore, [peer]))
   );
 
-  kvs.set(key, value);
   return item;
 }
