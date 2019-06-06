@@ -10,19 +10,13 @@ class Media {
 
   async update(sb: SourceBuffer) {
     this.stop = false;
-    for (; this.stop === false; ) {
-      if (sb.updating || !this.chunks || this.chunks.length === 0) {
+    while (!this.stop) {
+      if (sb.updating || this.chunks.length === 0) {
         await new Promise(r => setTimeout(r, 10));
         continue;
       }
-      console.log("chunks", this.chunks);
       const chunk = this.chunks.shift();
-      if (!chunk) {
-        await new Promise(r => setTimeout(r, 10));
-        continue;
-      }
-      sb.appendBuffer(chunk);
-      console.info("appendBuffer:", chunk.byteLength, "B");
+      if (chunk) sb.appendBuffer(chunk);
       await waitEvent(sb, "updateend", undefined);
     }
   }
@@ -38,7 +32,7 @@ export class StreamVideo extends Media {
     eventChunk: Event<ArrayBuffer>,
     onMsReady: (ms: MediaSource) => void
   ) {
-    const mimeType = `video/webm; codecs="opus,vp8"`;
+    const mimeType = `video/mp4; codecs="opus,vp8"`;
 
     const mediaRecorder = new MediaRecorder(stream, {
       mimeType

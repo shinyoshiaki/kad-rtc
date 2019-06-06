@@ -2,12 +2,15 @@ import Kbucket, { Option as OptBucket } from "./kbucket";
 import { distance } from "kad-distance";
 import Peer from "../modules/peer/base";
 import sha1 from "sha1";
+import { Pack } from "rx.mini";
 
 export type Option = OptBucket;
 
 export default class Ktable {
   private kbuckets: Kbucket[] = [];
   private k = 20;
+  pack = Pack();
+  onAdd = this.pack.event<Peer>();
 
   constructor(public kid: string, opt: Partial<Option> = {}) {
     const { k } = this;
@@ -22,6 +25,7 @@ export default class Ktable {
     const length = distance(this.kid, peer.kid);
     const kbucket = this.kbuckets[length];
     kbucket.add(peer);
+    this.onAdd.execute(peer);
   }
 
   findNode = (kid: string): Peer[] =>

@@ -15,30 +15,30 @@ const Record: FC<{ onStream?: (m: MediaStream) => void }> = ({ onStream }) => {
     const streamVideo = new StreamVideo();
     const event = new Event<ArrayBuffer>();
 
-    let buffer: ArrayBuffer;
-    event.once(ab => {
-      buffer = ab;
-
-      const work = (ab: ArrayBuffer) => {
-        const key = sha1(Buffer.from(buffer)).toString();
-        const msg = sha1(Buffer.from(ab)).toString();
-        console.log(key, msg);
-        kad.store(key, buffer, msg);
-        buffer = ab;
-      };
-
-      event.once(ab => {
-        const key = sha1(Buffer.from(buffer)).toString();
-        setheader(key);
-        work(ab);
-        event.subscribe(ab => work(ab));
-      });
-    });
-
     streamVideo.recordInterval(stream, event as any, ms => {
       console.log({ ms });
       videoRef.current.src = URL.createObjectURL(ms);
     });
+
+    let buffer: ArrayBuffer = await event.asPromise();
+    const key = sha1(Buffer.from(buffer)).toString();
+    setheader(key);
+    const chunks: ArrayBuffer[] = [];
+    event.subscribe(async ab => {
+      chunks.push(ab);
+      console.log(chunks);
+    });
+    while (true) {
+      const ab = chunks.shift();
+      if (ab) {
+        const key = sha1(Buffer.from(buffer)).toString();
+        const msg = sha1(Buffer.from(ab)).toString();
+        kad.store(key, buffer, msg).then(res => console.log(res));
+        buffer = ab;
+      } else {
+        await new Promise(r => setTimeout(r, 0));
+      }
+    }
   };
   return (
     <div>

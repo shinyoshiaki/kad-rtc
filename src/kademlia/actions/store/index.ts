@@ -28,8 +28,10 @@ export default async function store(
 
   const peers = di.kTable.findNode(key);
 
+  const item = Store(key, value, msg);
+
   const onStore = async (peer: Peer) => {
-    const wait = rpcManager.getWait(peer, Store(key, value, msg));
+    const wait = rpcManager.getWait(peer, item);
     await wait(timeout).catch(() => {});
   };
 
@@ -38,5 +40,5 @@ export default async function store(
   );
 
   kvs.set(key, value);
-  return key;
+  return item;
 }

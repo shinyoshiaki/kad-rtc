@@ -62,87 +62,93 @@ const App: React.FC = () => {
       <p>{kid}</p>
       <Content>
         <p>file</p>
-        <Content>
-          <input
-            type="file"
-            onChange={async e => {
-              if (!fileStore.loading) {
-                const res = await fileStore.fetch(e);
-                if (res) fileobj.setState({ storedkey: res });
-              }
-            }}
-          />
-          <p>{fileobj.storedkey}</p>
-          {fileStore.loading && <p>doing</p>}
-        </Content>
-        <Content>
-          <input
-            onChange={e => fileobj.setState({ findkey: e.target.value })}
-            value={fileobj.findkey}
-          />
-          <button
-            onClick={() => {
-              if (!fileFind.loading) {
-                fileFind.fetch(fileobj.findkey);
-                fileobj.setState({ findkey: "" });
-              }
-            }}
-          >
-            find file
-          </button>
-          {fileFind.loading && <p>doing</p>}
-        </Content>
+        <div style={{ display: "flex" }}>
+          <Content>
+            <input
+              type="file"
+              onChange={async e => {
+                if (!fileStore.loading) {
+                  const res = await fileStore.fetch(e);
+                  if (res) fileobj.setState({ storedkey: res });
+                }
+              }}
+            />
+            <p>{fileobj.storedkey}</p>
+            {fileStore.loading && <p>doing</p>}
+          </Content>
+          <Content>
+            <input
+              onChange={e => fileobj.setState({ findkey: e.target.value })}
+              value={fileobj.findkey}
+            />
+            <button
+              onClick={() => {
+                if (!fileFind.loading) {
+                  fileFind.fetch(fileobj.findkey);
+                  fileobj.setState({ findkey: "" });
+                }
+              }}
+            >
+              find file
+            </button>
+            {fileFind.loading && <p>doing</p>}
+          </Content>
+        </div>
       </Content>
       <Content>
         <p>text</p>
-        <Content>
-          <input
-            onChange={e => textobj.setState({ value: e.target.value })}
-            value={textobj.value}
-          />
-          <button
-            onClick={async () => {
-              if (!storeText.loading) {
-                const res = await storeText.fetch(textobj.value);
-                textobj.setState({ value: "" });
-                textobj.setState({ storedkey: res });
-              }
-            }}
-          >
-            store text
-          </button>
-          <p>{textobj.storedkey}</p>
-          {storeText.loading && <p>doing</p>}
-        </Content>
-        <Content>
-          <input
-            onChange={e => textobj.setState({ findkey: e.target.value })}
-            value={textobj.findkey}
-          />
-          <button
-            onClick={async () => {
-              if (!findText.loading) {
-                const res = await findText.fetch(textobj.findkey);
-                textobj.setState({ findkey: "" });
-                if (typeof res === "string") {
-                  textobj.setState({ view: res });
+        <div style={{ display: "flex" }}>
+          <Content>
+            <input
+              onChange={e => textobj.setState({ value: e.target.value })}
+              value={textobj.value}
+            />
+            <button
+              onClick={async () => {
+                if (!storeText.loading) {
+                  const res = await storeText.fetch(textobj.value);
+                  textobj.setState({ value: "" });
+                  textobj.setState({ storedkey: res.key });
                 }
-              }
-            }}
-          >
-            find text
-          </button>
-          <p>{textobj.view}</p>
-          {findText.loading && <p>doing</p>}
-        </Content>
+              }}
+            >
+              store text
+            </button>
+            <p>{textobj.storedkey}</p>
+            {storeText.loading && <p>doing</p>}
+          </Content>
+          <Content>
+            <input
+              onChange={e => textobj.setState({ findkey: e.target.value })}
+              value={textobj.findkey}
+            />
+            <button
+              onClick={async () => {
+                if (!findText.loading) {
+                  const res = await findText.fetch(textobj.findkey);
+                  textobj.setState({ findkey: "" });
+                  if (typeof res === "string") {
+                    textobj.setState({ view: res });
+                  }
+                }
+              }}
+            >
+              find text
+            </button>
+            <p>{textobj.view}</p>
+            {findText.loading && <p>doing</p>}
+          </Content>
+        </div>
       </Content>
       <Content>
-        <Content>
-          <Watch />
-        </Content>
-        <Content>
-          <Record />
-        </Content>
+        <div style={{ display: "flex" }}>
+          <Content>
+            <Watch />
+          </Content>
+          <Content>
+            <Record />
+          </Content>
+        </div>
       </Content>
       <Content>
         <p>peers</p>

@@ -83,6 +83,6 @@ export default class Peer implements Base {
   };
 
   disconnect = () => {
-    this.peer.disconnect();
+    this.peer.hangUp();
   };
 }
