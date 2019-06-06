@@ -1,10 +1,10 @@
 import React, { FC, useRef, useState, useEffect } from "react";
-import { getLocalVideo } from "../../../../../src/webrtc/utill/media";
+
 import { kad } from "../../services/kademlia";
 import { StreamVideo } from "../../../../../src/extensions/media";
 import useFile from "../../hooks/useFile";
 
-const Record: FC<{ onStream?: (m: MediaStream) => void }> = ({ onStream }) => {
+const Record: FC<{}> = ({}) => {
   const videoRef = useRef<any | undefined>(undefined);
   const ref = useRef<any | undefined>(undefined);
   const [header, setheader] = useState<string>();
@@ -12,7 +12,6 @@ const Record: FC<{ onStream?: (m: MediaStream) => void }> = ({ onStream }) => {
 
   const init = async () => {
     const stream = ref.current.captureStream();
-    if (onStream) onStream(stream);
 
     new StreamVideo().streamViaKad(
       stream,
@@ -27,18 +26,22 @@ const Record: FC<{ onStream?: (m: MediaStream) => void }> = ({ onStream }) => {
   };
 
   useEffect(() => {
-    if (file) {
-      console.log({ file });
+    const start = async () => {
       ref.current.src = URL.createObjectURL(file);
+      await new Promise(r => setTimeout(r, 1000));
+      init();
+    };
+    if (file) {
+      start();
     }
   }, [file]);
 
   return (
     <div>
+      <input type="file" onChange={setfile} />
       <p>{header}</p>
       <video ref={videoRef} autoPlay={true} style={{ maxWidth: "100%" }} />
-      <input type="file" onChange={setfile} />
-      <button onClick={init}>start</button>
+
       <video ref={ref} autoPlay={true} style={{ width: 0, height: 0 }} />
     </div>
   );
