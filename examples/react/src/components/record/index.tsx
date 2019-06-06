@@ -41,7 +41,6 @@ const Record: FC<{}> = ({}) => {
       <input type="file" onChange={setfile} />
       <p>{header}</p>
       <video ref={videoRef} autoPlay={true} style={{ maxWidth: "100%" }} />
-
       <video ref={ref} autoPlay={true} style={{ width: 0, height: 0 }} />
     </div>
   );

@@ -44,19 +44,24 @@ export default class Kademlia {
     return res;
   }
 
-  async add(peer: Peer, opt: Partial<{ notfind: boolean }> = {}) {
+  async add(connect: Peer, opt: Partial<{ notfind: boolean }> = {}) {
     const { kTable } = this.di;
 
-    kTable.add(peer);
-    listeners(peer, this.di);
+    kTable.onAdd.subscribe(() => {
+      if (kTable.allKids.length > kTable.kBucketSize) {
+        console.log("finish portal", connect.kid);
+        setTimeout(() => {
+          if (connect) connect.disconnect();
+          connect = undefined;
+        }, 5000);
+      }
+    });
+
+    kTable.add(connect);
+    listeners(connect, this.di);
     if (!opt.notfind) {
       await new Promise(r => setTimeout(r, 1000));
       await findNode(this.kid, this.di);
     }
-    kTable.onAdd.subscribe(() => {
-      if (kTable.allKids.length > kTable.kBucketSize) {
-        peer.disconnect();
-      }
-    });
   }
 }
