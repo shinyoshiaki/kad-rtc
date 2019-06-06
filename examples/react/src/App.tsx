@@ -6,10 +6,11 @@ import { useApi } from "./hooks/useApi";
 import { genKid } from "../../../src";
 import { useObject } from "./hooks/useObject";
 import styled from "styled-components";
+import Peers from "./components/peers";
 
 const App: React.FC = () => {
   const [kid, setkid] = useState("");
-  const [allPeers, setallPeers] = useState<string[]>([]);
+
   const fileobj = useObject({ storedkey: "", findkey: "" });
   const textobj = useObject({
     storedkey: "",
@@ -22,7 +23,6 @@ const App: React.FC = () => {
     guest("http://localhost:60000");
     setInterval(() => {
       setkid(kad.kid);
-      setallPeers(kad.di.kTable.allKids);
     }, 1000);
   }, []);
 
@@ -135,10 +135,7 @@ const App: React.FC = () => {
         </Content>
       </Content>
       <Content>
-        <p>peers</p>
-        {allPeers.map(kid => (
-          <div key={kid}>{kid}</div>
-        ))}
+        <Peers />
       </Content>
     </div>
   );
