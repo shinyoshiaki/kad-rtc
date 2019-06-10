@@ -68,8 +68,10 @@ export class StreamVideo extends Media {
 
     while (true) {
       const ab = chunks.shift();
-      console.log(ab);
       if (ab) {
+        if (ab.byteLength > 16000) {
+          console.warn("to large", ab.byteLength);
+        }
         const key = hash(buffer);
         const data = buffer;
         const msg = hash(ab);
