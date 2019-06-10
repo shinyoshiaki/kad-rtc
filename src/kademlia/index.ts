@@ -46,20 +46,11 @@ export default class Kademlia {
 
   async add(connect: Peer, opt: Partial<{ notfind: boolean }> = {}) {
     const { kTable } = this.di;
-
-    kTable.onAdd.subscribe(() => {
-      if (kTable.allKids.length > kTable.kBucketSize) {
-        console.log("finish portal", connect.kid);
-        setTimeout(() => {
-          if (connect) connect.disconnect();
-          connect = undefined;
-        }, 5000);
-      }
-    });
+    const { notfind } = opt;
 
     kTable.add(connect);
     listeners(connect, this.di);
-    if (!opt.notfind) {
+    if (!notfind) {
       await new Promise(r => setTimeout(r, 1000));
       await findNode(this.kid, this.di);
     }

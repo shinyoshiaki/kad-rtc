@@ -68,6 +68,7 @@ export class StreamVideo extends Media {
 
     while (true) {
       const ab = chunks.shift();
+      console.log(ab);
       if (ab) {
         const key = hash(buffer);
         const data = buffer;

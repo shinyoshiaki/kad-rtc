@@ -15,7 +15,7 @@ export async function getSliceArrayBuffer(blob: Blob) {
         const chunk = (e.target as any).result;
         chunks.push(chunk);
         currentChunk++;
-        if (currentChunk < chunkNum) {
+        if (currentChunk <= chunkNum) {
           loadNext();
         } else {
           resolve(chunks);
