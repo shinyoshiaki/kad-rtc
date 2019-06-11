@@ -283,19 +283,20 @@ export default class WebRTC {
     });
   }
 
-  async send(data: string | ArrayBuffer | Buffer, label?: string) {
+  async send(data: string | ArrayBuffer | Buffer, label = "datachannel") {
     const { arrayBufferService } = this.services;
-    label = label || "datachannel";
+
     if (!Object.keys(this.dataChannels).includes(label)) {
       await this.createDatachannel(label);
     }
-    try {
+
+    const sendData = async () => {
       if (typeof data === "string") {
         this.dataChannels[label].send(data);
       } else {
         if (data.byteLength > 16000) {
           await this.createDatachannel(arrayBufferService.label);
-          await arrayBufferService.send(
+          arrayBufferService.send(
             data,
             label,
             this.dataChannels[arrayBufferService.label]
@@ -304,13 +305,17 @@ export default class WebRTC {
           this.dataChannels[label].send(data);
         }
       }
+    };
+
+    try {
+      sendData();
     } catch (error) {
       console.warn("retry", error);
       await new Promise(r => r);
       try {
-        this.dataChannels[label].send(data as any);
+        sendData();
       } catch (error) {
-        console.warn(error);
+        console.error("send fail", error);
       }
     }
   }

@@ -26,12 +26,11 @@ export default class ArrayBufferService {
     });
   }
 
-  async send(ab: ArrayBuffer, origin: string, rtc: RTCDataChannel) {
+  send(ab: ArrayBuffer, origin: string, rtc: RTCDataChannel) {
     this.origin = origin;
-    console.log(this.origin, origin, ab);
+    console.log(this.origin, origin);
     const chunks = sliceArraybuffer(ab, 16000);
     for (let chunk of chunks) {
-      await new Promise(r => setTimeout(r));
       rtc.send(chunk);
     }
     rtc.send(origin);

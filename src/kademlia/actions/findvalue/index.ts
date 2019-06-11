@@ -30,7 +30,7 @@ export default async function findValue(key: string, di: DependencyInjection) {
       peer,
       FindValue(key, except)
     );
-    const res = await wait(1000 * 20).catch(e => {
+    const res = await wait(1000 * 10).catch(e => {
       console.warn(e);
     });
 
