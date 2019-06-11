@@ -22,14 +22,16 @@ export default async function findValue(key: string, di: DependencyInjection) {
 
   let result: Item | undefined;
 
-  const findValueResult = async (peer: Peer) => {
+  const findValueProxy = async (peer: Peer) => {
     const except = kTable.allPeers.map(item => item.kid);
 
     const wait = rpcManager.getWait<FindValueResult>(
       peer,
       FindValue(key, except)
     );
-    const res = await wait(1000 * 20).catch(() => {});
+    const res = await wait(1000 * 20).catch(e => {
+      console.warn(e);
+    });
 
     if (res) {
       const { item, offers } = res.data;
@@ -68,7 +70,7 @@ export default async function findValue(key: string, di: DependencyInjection) {
 
   const job = async () => {
     const findValueResultResult = await Promise.all(
-      kTable.allPeers.map(peer => findValueResult(peer))
+      kTable.allPeers.map(peer => findValueProxy(peer))
     );
     await Promise.all(
       findValueResultResult

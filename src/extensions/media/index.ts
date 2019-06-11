@@ -101,10 +101,12 @@ export class ReceiveVideo extends Media {
     if (!first) return;
 
     const work = async () => {
-      let start = false;
-      let buf = "";
       try {
-        for (let item = first, retry = 0; retry < 20; ) {
+        for (
+          let item = first, buf = "", start = false, retry = 0;
+          retry < 20;
+
+        ) {
           if (this.chunks.length > (1000 / interval) * 10) {
             if (!start) {
               start = true;
@@ -116,6 +118,8 @@ export class ReceiveVideo extends Media {
             console.log("non msg", { retry });
             retry++;
             await new Promise(r => setTimeout(r, 100 * retry));
+            const res = await kad.findValue(buf);
+            if (res) item = res;
             continue;
           }
           if (item.msg !== buf) {
