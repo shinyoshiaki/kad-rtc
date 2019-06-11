@@ -5,7 +5,7 @@ import sha1 from "sha1";
 
 const interval = 500;
 
-const mimeType = `video/webm; codecs="opus,vp8"`;
+const mimeType = `video/webm; codecs="opus,vp9"`;
 
 export class StreamVideo extends Media {
   private async recordInterval(
@@ -103,7 +103,7 @@ export class ReceiveVideo extends Media {
     const work = async () => {
       try {
         for (
-          let item = first, buf = "", start = false, retry = 0;
+          let item = first, buf = headerKey, start = false, retry = 0;
           retry < 20;
 
         ) {
@@ -119,7 +119,10 @@ export class ReceiveVideo extends Media {
             retry++;
             await new Promise(r => setTimeout(r, 100 * retry));
             const res = await kad.findValue(buf);
-            if (res) item = res;
+            if (res) {
+              item = res;
+              if (retry > 0) retry--;
+            }
             continue;
           }
           if (item.msg !== buf) {
@@ -136,8 +139,8 @@ export class ReceiveVideo extends Media {
             continue;
           } else {
             item = next;
+            if (retry > 0) retry--;
           }
-          if (retry > 0) retry--;
         }
       } catch (error) {
         console.log(error);

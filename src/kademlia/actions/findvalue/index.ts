@@ -18,7 +18,8 @@ const FindValueAnswer = (sdp: any, peerkid: string) => {
 export type FindValueAnswer = ReturnType<typeof FindValueAnswer>;
 
 export default async function findValue(key: string, di: DependencyInjection) {
-  const { kTable, rpcManager, signaling } = di;
+  const { kTable, rpcManager, signaling, modules } = di;
+  const { kvs } = modules;
 
   let result: Item | undefined;
 
@@ -78,6 +79,8 @@ export default async function findValue(key: string, di: DependencyInjection) {
         .flatMap(v => v)
     );
   };
+
+  if (kvs.get(key)) return kvs.get(key);
 
   for (
     let preHash = "";
