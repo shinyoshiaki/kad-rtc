@@ -18,11 +18,12 @@ const FindValueAnswer = (sdp: any, peerkid: string) => {
 export type FindValueAnswer = ReturnType<typeof FindValueAnswer>;
 
 export default async function findValue(key: string, di: DependencyInjection) {
-  const { kTable, rpcManager, signaling } = di;
+  const { kTable, rpcManager, signaling, modules } = di;
+  const { kvs } = modules;
 
   let result: Item | undefined;
 
-  const findValueResult = async (peer: Peer) => {
+  const findValue = async (peer: Peer) => {
     const except = kTable.allPeers.map(item => item.kid);
 
     const wait = rpcManager.getWait<FindValueResult>(
@@ -68,7 +69,7 @@ export default async function findValue(key: string, di: DependencyInjection) {
 
   const job = async () => {
     const findValueResultResult = await Promise.all(
-      kTable.allPeers.map(peer => findValueResult(peer))
+      kTable.allPeers.map(peer => findValue(peer))
     );
     await Promise.all(
       findValueResultResult
@@ -76,6 +77,8 @@ export default async function findValue(key: string, di: DependencyInjection) {
         .flatMap(v => v)
     );
   };
+
+  if (kvs.get(key)) return kvs.get(key);
 
   for (
     let preHash = "";
