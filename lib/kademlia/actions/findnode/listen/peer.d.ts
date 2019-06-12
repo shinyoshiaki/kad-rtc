@@ -1,6 +1,7 @@
 import Peer from "../../../modules/peer/base";
 import { FindNodeProxyOpen, FindNodeProxyAnswer } from "./proxy";
 import { DependencyInjection } from "../../../di";
+import { ID } from "../../../services/rpcmanager";
 declare const FindNodePeerOffer: (peerkid: string, sdp?: object | undefined) => {
     rpc: "FindNodePeerOffer";
     sdp: object | undefined;
@@ -14,7 +15,7 @@ export default class FindNodePeer {
         [key: string]: Peer;
     };
     constructor(listen: Peer, di: DependencyInjection);
-    findNodeProxyOpen(data: FindNodeProxyOpen): Promise<void>;
+    findNodeProxyOpen(data: FindNodeProxyOpen & ID): Promise<void>;
     findNodeProxyAnswer(data: FindNodeProxyAnswer): Promise<void>;
 }
 export {};

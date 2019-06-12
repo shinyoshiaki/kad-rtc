@@ -29,7 +29,7 @@ describe("findvalue", () => {
         const key = sha1(value).toString();
         const node = nodes[getRandomInt(0, nodes.length - 1)];
         const res = await findValue(key, node);
-        expect(res).toBe(value);
+        expect(res!.value).toBe(value);
       };
 
       for (let _ in [...Array(kBucketSize)]) {

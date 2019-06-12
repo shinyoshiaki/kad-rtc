@@ -1,10 +1,15 @@
-import { Option as OptBucket } from "./kbucket";
+import Kbucket, { Option as OptBucket } from "./kbucket";
 import Peer from "../modules/peer/base";
 export declare type Option = OptBucket;
 export default class Ktable {
     kid: string;
-    private kbuckets;
+    readonly kbuckets: Kbucket[];
     private k;
+    pack: {
+        event: <T>() => import("rx.mini").default<T>;
+        finishAll: () => void;
+    };
+    onAdd: import("rx.mini").default<Peer>;
     constructor(kid: string, opt?: Partial<Option>);
     add(peer: Peer): void;
     findNode: (kid: string) => Peer[];
@@ -13,4 +18,5 @@ export default class Ktable {
     readonly kBucketSize: number;
     getPeer: (kid: string) => Peer | undefined;
     getHash: (kid: string) => string;
+    rmPeer: (kid: string) => void;
 }

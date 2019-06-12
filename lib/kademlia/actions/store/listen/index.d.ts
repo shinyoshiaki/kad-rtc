@@ -1,6 +1,7 @@
 import { Store } from "..";
 import Peer from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
+import { ID } from "../../../services/rpcmanager";
 declare const OnStore: () => {
     rpc: "OnStore";
 };
@@ -10,6 +11,6 @@ declare class ListenStore {
     private listen;
     private di;
     constructor(listen: Peer, di: DependencyInjection);
-    store(data: Store): void;
+    store(data: Store & ID): void;
 }
 export {};

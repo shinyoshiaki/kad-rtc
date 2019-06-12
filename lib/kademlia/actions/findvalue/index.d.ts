@@ -1,5 +1,5 @@
-/// <reference types="node" />
 import { DependencyInjection } from "../../di";
+import { Item } from "../../modules/kvs/base";
 declare const FindValue: (key: string, except: string[]) => {
     rpc: "FindValue";
     key: string;
@@ -12,5 +12,5 @@ declare const FindValueAnswer: (sdp: any, peerkid: string) => {
     peerkid: string;
 };
 export declare type FindValueAnswer = ReturnType<typeof FindValueAnswer>;
-export default function findValue(key: string, di: DependencyInjection): Promise<string | Buffer | ArrayBuffer | undefined>;
+export default function findValue(key: string, di: DependencyInjection): Promise<Item | undefined>;
 export {};

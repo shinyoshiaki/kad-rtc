@@ -1,4 +1,7 @@
 import Peer from "../../modules/peer/base";
+export declare type ID = {
+    id: string;
+};
 export default class RpcManager {
     private uuid;
     getWait<T extends {

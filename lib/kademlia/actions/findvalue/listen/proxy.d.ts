@@ -1,13 +1,15 @@
 import Peer from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
 import { FindValue, FindValueAnswer } from "..";
+import { Item } from "../../../modules/kvs/base";
+import { ID } from "../../../services/rpcmanager";
 declare const FindValueResult: (data: Partial<{
-    value: string | ArrayBuffer;
+    item: Item;
     offers: Offer[];
 }>) => {
     rpc: "FindValueResult";
     data: Partial<{
-        value: string | ArrayBuffer;
+        item: Item;
         offers: Offer[];
     }>;
 };
@@ -31,7 +33,7 @@ export default class FindValueProxy {
     private listen;
     private di;
     constructor(listen: Peer, di: DependencyInjection);
-    findvalue(data: FindValue): Promise<void>;
-    findValueAnswer(data: FindValueAnswer): Promise<void>;
+    findvalue(data: FindValue & ID): Promise<void>;
+    findValueAnswer(data: FindValueAnswer & ID): Promise<void>;
 }
 export {};

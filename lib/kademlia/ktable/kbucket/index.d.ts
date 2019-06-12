@@ -10,5 +10,6 @@ export default class Kbucket {
     }[];
     constructor(opt?: Partial<Option>);
     add(peer: Peer): void;
+    rmPeer(kid: string): void;
     readonly length: number;
 }

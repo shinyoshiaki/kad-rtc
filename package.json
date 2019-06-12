@@ -13,7 +13,9 @@
     "test": "npm run type && jest --forceExit",
     "test_target": "jest --forceExit ./src/kademlia/actions/findnode/test.ts",
     "server": "cd ./examples/express && npm run portal",
-    "react": "cd ./examples/react && npm run start"
+    "react": "cd ./examples/react && npm run start",
+    "react:build": "cd ./examples/react && npm run build",
+    "deploy": "npm run type && npm run test && npm run update && npm run react:build"
   },
   "main": "lib/index.js",
   "files": [
