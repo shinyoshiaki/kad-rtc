@@ -3,19 +3,25 @@ import { DependencyInjection } from "../../di";
 import Peer from "../../modules/peer/base";
 import { timeout } from "../../const";
 
-const Store = (key: string, value: string | ArrayBuffer) => {
-  return { rpc: "store" as const, key, value };
-};
+const Store = (key: string, value: string | ArrayBuffer, msg?: string) => ({
+  rpc: "store" as const,
+  key,
+  value,
+  msg
+});
 
 export type Store = ReturnType<typeof Store>;
 
 export default async function store(
+  di: DependencyInjection,
   key: string,
   value: string | ArrayBuffer,
-  di: DependencyInjection
+  msg?: string
 ) {
   const { kTable, rpcManager, jobSystem } = di;
   const { kvs } = di.modules;
+
+  kvs.set(key, value, msg as any);
 
   for (
     let preHash = "";
@@ -27,8 +33,10 @@ export default async function store(
 
   const peers = di.kTable.findNode(key);
 
+  const item = Store(key, value, msg);
+
   const onStore = async (peer: Peer) => {
-    const wait = rpcManager.getWait(peer, Store(key, value));
+    const wait = rpcManager.getWait(peer, item);
     await wait(timeout).catch(() => {});
   };
 
@@ -36,6 +44,5 @@ export default async function store(
     peers.map(async peer => await jobSystem.add(onStore, [peer]))
   );
 
-  kvs.set(key, value);
-  return key;
+  return item;
 }

@@ -1,4 +1,4 @@
-import { Option as OptTable } from "./ktable";
+import Ktable, { Option as OptTable } from "./ktable";
 import findNode from "./actions/findnode";
 import Peer from "./modules/peer/base";
 import { DependencyInjection, dependencyInjection } from "./di";
@@ -15,7 +15,7 @@ export default class Kademlia {
   constructor(
     public kid: string,
     modules: Modules,
-    opt: Partial<Options> = {}
+    private opt: Partial<Options> = {}
   ) {
     this.di = dependencyInjection(kid, modules, opt);
   }
@@ -35,9 +35,8 @@ export default class Kademlia {
     return target;
   }
 
-  async store(key: string, value: string | ArrayBuffer) {
-    await store(key, value, this.di);
-    return key;
+  async store(key: string, value: string | ArrayBuffer, msg?: string) {
+    return await store(this.di, key, value, msg);
   }
 
   async findValue(key: string) {
@@ -45,11 +44,13 @@ export default class Kademlia {
     return res;
   }
 
-  async add(peer: Peer, opt: Partial<{ notfind: boolean }> = {}) {
+  async add(connect: Peer, opt: Partial<{ notfind: boolean }> = {}) {
     const { kTable } = this.di;
-    kTable.add(peer);
-    listeners(peer, this.di);
-    if (!opt.notfind) {
+    const { notfind } = opt;
+
+    kTable.add(connect);
+    listeners(connect, this.di);
+    if (!notfind) {
       await new Promise(r => setTimeout(r, 1000));
       await findNode(this.kid, this.di);
     }

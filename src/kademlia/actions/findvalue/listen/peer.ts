@@ -2,6 +2,7 @@ import Peer from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
 import { listeners } from "../../../listeners";
 import { FindValueProxyOpen, FindValueProxyAnswer } from "./proxy";
+import { ID } from "../../../services/rpcmanager";
 
 const FindValuePeerOffer = (peerkid: string, sdp?: object) => {
   return { rpc: "FindValuePeerOffer" as const, sdp, peerkid };
@@ -9,7 +10,7 @@ const FindValuePeerOffer = (peerkid: string, sdp?: object) => {
 
 export type FindValuePeerOffer = ReturnType<typeof FindValuePeerOffer>;
 
-type actions = FindValueProxyOpen | FindValueProxyAnswer;
+type actions = (FindValueProxyOpen | FindValueProxyAnswer) & ID;
 
 export default class FindValuePeer {
   candidates: { [key: string]: Peer } = {};
@@ -29,9 +30,9 @@ export default class FindValuePeer {
     listen.onDisconnect.once(() => onRpc.unSubscribe());
   }
 
-  async findValueProxyOpen(data: FindValueProxyOpen) {
+  async findValueProxyOpen(data: FindValueProxyOpen & ID) {
     const { finderkid } = data;
-    const id = (data as any).id;
+    const id = data.id;
     const { kTable, signaling } = this.di;
 
     const { peer } = signaling.create(finderkid);

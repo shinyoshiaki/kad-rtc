@@ -1,43 +1,56 @@
 import { Kademlia } from "../..";
 import bson from "bson";
 import sha1 from "sha1";
-import { getSliceArrayBuffer } from "../../utill/file";
+import JobSystem from "../../kademlia/services/jobsystem";
 
-export async function storeFile(blob: Blob, kad: Kademlia) {
-  const file: ArrayBuffer[] = await getSliceArrayBuffer(blob);
-  const jobs: {
-    key: string;
-    value: Buffer;
-  }[] = [];
+export async function storeFile(file: ArrayBuffer[], kad: Kademlia) {
+  if (file.length > 0) {
+    const jobs: {
+      key: string;
+      value: Buffer;
+    }[] = [];
 
-  {
-    const last: ArrayBuffer = file.pop()!;
-    const item = { value: Buffer.from(last), next: undefined };
+    {
+      const last: ArrayBuffer = file.pop()!;
+      console.log({ last });
+      const item = { value: Buffer.from(last), next: undefined };
+      console.log({ item });
+      const value = bson.serialize(item);
+      const key = sha1(value).toString();
+      jobs.push({ key, value });
+    }
+    console.log({ file });
 
-    const value = bson.serialize(item);
-    const key = sha1(value).toString();
-    jobs.push({ key, value });
+    const reverse = file.reverse();
+    reverse.forEach(ab => {
+      const pre = jobs.slice(-1)[0];
+      const item = { value: Buffer.from(ab), next: pre.key };
+      const value = bson.serialize(item);
+      const key = sha1(value).toString();
+      jobs.push({ key, value });
+    });
+
+    const workers = new JobSystem({ a: 10 });
+
+    await Promise.all(
+      jobs.map(async job => {
+        await workers.add(kad.store.bind(kad), [job.key, job.value]);
+      })
+    );
+
+    return jobs.slice(-1)[0].key;
   }
-
-  const reverse = file.reverse();
-  reverse.forEach(ab => {
-    const pre = jobs.slice(-1)[0];
-    const item = { value: Buffer.from(ab), next: pre.key };
-    const value = bson.serialize(item);
-    const key = sha1(value).toString();
-    jobs.push({ key, value });
-  });
-
-  await Promise.all(jobs.map(job => kad.store(job.key, job.value)));
-  return jobs.slice(-1)[0].key;
+  return undefined;
 }
 
 export async function findFile(headerKey: string, kad: Kademlia) {
   const chunks: Buffer[] = [];
-  const first: any = await kad.findValue(headerKey);
+  const firstItem = await kad.findValue(headerKey);
+  if (!firstItem) return;
   const firstJson: { value: Buffer; next: string } = bson.deserialize(
-    first.buffer
+    (firstItem.value as any).buffer
   );
+  console.log({ firstJson });
 
   const work = () =>
     new Promise<boolean>(async (resolve, reject) => {
@@ -48,20 +61,21 @@ export async function findFile(headerKey: string, kad: Kademlia) {
             resolve(true);
             break;
           }
-          const value: any = await kad.findValue(json.next);
+          const value = await kad.findValue(json.next);
           if (!value) {
             reject(false);
             break;
           }
-          json = bson.deserialize(value.buffer);
+          json = bson.deserialize((value.value as any).buffer);
+          console.log({ json });
         }
       } catch (error) {}
     });
 
-  if (first) {
+  if (firstItem) {
     const res = await work().catch(console.error);
     if (res) {
-      return new Blob(chunks.map(uint => uint.buffer));
+      return chunks.map(buffer => buffer.buffer);
     }
   }
   return undefined;

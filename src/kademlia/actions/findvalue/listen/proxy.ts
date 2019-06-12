@@ -3,10 +3,10 @@ import { FindValuePeerOffer } from "./peer";
 import { DependencyInjection } from "../../../di";
 import { FindValue, FindValueAnswer } from "..";
 import { timeout } from "../../../const";
+import { Item } from "../../../modules/kvs/base";
+import { ID } from "../../../services/rpcmanager";
 
-const FindValueResult = (
-  data: Partial<{ value: string | ArrayBuffer; offers: Offer[] }>
-) => {
+const FindValueResult = (data: Partial<{ item: Item; offers: Offer[] }>) => {
   return { rpc: "FindValueResult" as const, data };
 };
 
@@ -14,19 +14,22 @@ export type Offer = { peerkid: string; sdp: any };
 
 export type FindValueResult = ReturnType<typeof FindValueResult>;
 
-const FindValueProxyOpen = (finderkid: string) => {
-  return { rpc: "FindValueProxyOpen" as const, finderkid };
-};
+const FindValueProxyOpen = (finderkid: string) => ({
+  rpc: "FindValueProxyOpen" as const,
+  finderkid
+});
 
 export type FindValueProxyOpen = ReturnType<typeof FindValueProxyOpen>;
 
-const FindValueProxyAnswer = (sdp: any, finderkid: string) => {
-  return { rpc: "FindValueProxyAnswer" as const, sdp, finderkid };
-};
+const FindValueProxyAnswer = (sdp: any, finderkid: string) => ({
+  rpc: "FindValueProxyAnswer" as const,
+  sdp,
+  finderkid
+});
 
 export type FindValueProxyAnswer = ReturnType<typeof FindValueProxyAnswer>;
 
-type actions = FindValue | FindValueAnswer;
+type actions = (FindValue | FindValueAnswer) & ID;
 
 export default class FindValueProxy {
   constructor(private listen: Peer, private di: DependencyInjection) {
@@ -44,16 +47,17 @@ export default class FindValueProxy {
     listen.onDisconnect.once(() => onRpc.unSubscribe());
   }
 
-  async findvalue(data: FindValue) {
-    const { key, except } = data;
-    const id = (data as any).id;
+  async findvalue(data: FindValue & ID) {
     const { kTable, rpcManager } = this.di;
+    const { key, except, id } = data;
+
     const { kvs } = this.di.modules;
 
-    const value = kvs.get(key);
+    const item = kvs.get(key);
 
-    if (value) {
-      this.listen.rpc({ ...FindValueResult({ value }), id });
+    if (item) {
+      if (!item.msg) console.warn(item);
+      this.listen.rpc({ ...FindValueResult({ item }), id });
     } else {
       const peers = kTable.findNode(key);
       const offers: { peerkid: string; sdp: object }[] = [];
@@ -79,10 +83,10 @@ export default class FindValueProxy {
     }
   }
 
-  async findValueAnswer(data: FindValueAnswer) {
-    const { sdp, peerkid } = data;
-    const id = (data as any).id;
+  async findValueAnswer(data: FindValueAnswer & ID) {
     const { kTable } = this.di;
+    const { sdp, peerkid, id } = data;
+
     const peer = kTable.getPeer(peerkid);
     if (!peer) return;
     peer.rpc({ ...FindValueProxyAnswer(sdp, this.listen.kid), id });
