@@ -6,7 +6,7 @@ export default class KevValueStore {
   db: { [key: string]: Item } = {};
   onSet = new Event<{ key: string; value: string | ArrayBuffer }>();
 
-  set(key: string, value: string | ArrayBuffer, msg?: string) {
+  set(key: string, value: string | ArrayBuffer, msg: string) {
     this.db[key] = { value, msg };
     this.onSet.execute({ key, value });
   }

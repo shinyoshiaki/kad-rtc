@@ -3,9 +3,12 @@ import { DependencyInjection } from "../../di";
 import Peer from "../../modules/peer/base";
 import { timeout } from "../../const";
 
-const Store = (key: string, value: string | ArrayBuffer, msg?: string) => {
-  return { rpc: "store" as const, key, value, msg };
-};
+const Store = (key: string, value: string | ArrayBuffer, msg?: string) => ({
+  rpc: "store" as const,
+  key,
+  value,
+  msg
+});
 
 export type Store = ReturnType<typeof Store>;
 
@@ -18,7 +21,7 @@ export default async function store(
   const { kTable, rpcManager, jobSystem } = di;
   const { kvs } = di.modules;
 
-  kvs.set(key, value);
+  kvs.set(key, value, msg as any);
 
   for (
     let preHash = "";
