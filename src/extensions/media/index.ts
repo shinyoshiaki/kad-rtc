@@ -14,7 +14,8 @@ export class StreamVideo extends Media {
     onMsReady: (ms: MediaSource) => void
   ) {
     const mediaRecorder = new MediaRecorder(stream, {
-      mimeType
+      mimeType,
+      videoBitsPerSecond: 256000
     });
     const ms = new MediaSource();
     onMsReady(ms);
@@ -69,6 +70,9 @@ export class StreamVideo extends Media {
     while (true) {
       const ab = chunks.shift();
       if (ab) {
+        if (ab.byteLength > 16000) {
+          console.warn("to large", ab.byteLength);
+        }
         const key = hash(buffer);
         const data = buffer;
         const msg = hash(ab);
@@ -112,16 +116,10 @@ export class ReceiveVideo extends Media {
           }
 
           if (!item.msg) {
-            console.log("non msg", { retry });
-            retry++;
-            await new Promise(r => setTimeout(r, 100 * retry));
-            const res = await kad.findValue(buf);
-            if (res) {
-              item = res;
-              if (retry > 0) retry--;
-            }
-            continue;
+            console.warn("file format error");
+            break;
           }
+
           if (item.msg !== buf) {
             this.chunks.push((item.value as any).buffer);
             buf = item.msg;

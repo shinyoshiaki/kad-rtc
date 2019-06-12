@@ -14,15 +14,18 @@ export type Offer = { peerkid: string; sdp: any };
 
 export type FindValueResult = ReturnType<typeof FindValueResult>;
 
-const FindValueProxyOpen = (finderkid: string) => {
-  return { rpc: "FindValueProxyOpen" as const, finderkid };
-};
+const FindValueProxyOpen = (finderkid: string) => ({
+  rpc: "FindValueProxyOpen" as const,
+  finderkid
+});
 
 export type FindValueProxyOpen = ReturnType<typeof FindValueProxyOpen>;
 
-const FindValueProxyAnswer = (sdp: any, finderkid: string) => {
-  return { rpc: "FindValueProxyAnswer" as const, sdp, finderkid };
-};
+const FindValueProxyAnswer = (sdp: any, finderkid: string) => ({
+  rpc: "FindValueProxyAnswer" as const,
+  sdp,
+  finderkid
+});
 
 export type FindValueProxyAnswer = ReturnType<typeof FindValueProxyAnswer>;
 
@@ -53,6 +56,7 @@ export default class FindValueProxy {
     const item = kvs.get(key);
 
     if (item) {
+      if (!item.msg) console.warn(item);
       this.listen.rpc({ ...FindValueResult({ item }), id });
     } else {
       const peers = kTable.findNode(key);

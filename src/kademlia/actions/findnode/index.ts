@@ -24,7 +24,7 @@ export default async function findNode(
 
   if (kTable.getPeer(searchkid)) return kTable.getPeer(searchkid);
 
-  const findNodeProxyOffer = async (peer: Peer) => {
+  const findNodeProxy = async (peer: Peer) => {
     const except = kTable.allPeers.map(item => item.kid);
 
     const wait = rpcManager.getWait<FindNodeProxyOffer>(
@@ -64,7 +64,7 @@ export default async function findNode(
   };
 
   const findNodeProxyOfferResult = await Promise.all(
-    kTable.findNode(searchkid).map(peer => findNodeProxyOffer(peer))
+    kTable.findNode(searchkid).map(peer => findNodeProxy(peer))
   );
 
   await Promise.all(

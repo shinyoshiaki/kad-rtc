@@ -5,6 +5,7 @@ import {
 } from "wrtc";
 
 import { Pack } from "rx.mini";
+import SetupServices from "./services";
 
 export interface message {
   label: string | "datachannel";
@@ -42,8 +43,11 @@ export default class WebRTC {
   remoteStream: MediaStream | undefined;
   timeoutPing: any | undefined;
 
+  services = SetupServices();
+
   constructor(public opt: Partial<option> = {}) {
     const { nodeId, stream, track } = opt;
+    const { arrayBufferService } = this.services;
 
     this.dataChannels = {};
     this.nodeId = nodeId || "peer";
@@ -55,6 +59,8 @@ export default class WebRTC {
     } else if (track) {
       this.rtc.addTrack(track);
     }
+
+    arrayBufferService.listen(this);
   }
 
   private prepareNewConnection() {
@@ -277,19 +283,39 @@ export default class WebRTC {
     });
   }
 
-  async send(data: any, label?: string) {
-    label = label || "datachannel";
+  async send(data: string | ArrayBuffer | Buffer, label = "datachannel") {
+    const { arrayBufferService } = this.services;
+
     if (!Object.keys(this.dataChannels).includes(label)) {
       await this.createDatachannel(label);
     }
+
+    const sendData = async () => {
+      if (typeof data === "string") {
+        this.dataChannels[label].send(data);
+      } else {
+        if (data.byteLength > 16000) {
+          await this.createDatachannel(arrayBufferService.label);
+          arrayBufferService.send(
+            data,
+            label,
+            this.dataChannels[arrayBufferService.label]
+          );
+        } else {
+          this.dataChannels[label].send(data);
+        }
+      }
+    };
+
     try {
-      this.dataChannels[label].send(data);
+      sendData();
     } catch (error) {
+      console.warn("retry", error);
       await new Promise(r => r);
       try {
-        this.dataChannels[label].send(data);
+        sendData();
       } catch (error) {
-        console.warn(error);
+        console.error("send fail", error);
       }
     }
   }
@@ -311,7 +337,14 @@ export default class WebRTC {
       channel.onerror = null;
       channel.close();
     }
+    this.dataChannels = null as any;
 
+    rtc.oniceconnectionstatechange = null;
+    rtc.onicegatheringstatechange = null;
+    rtc.onsignalingstatechange = null;
+    rtc.onicecandidate = null;
+    rtc.ontrack = null;
+    rtc.ondatachannel = null;
     rtc.close();
     this.rtc = null as any;
 
