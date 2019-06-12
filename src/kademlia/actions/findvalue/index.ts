@@ -23,14 +23,14 @@ export default async function findValue(key: string, di: DependencyInjection) {
 
   let result: Item | undefined;
 
-  const findValueProxy = async (peer: Peer) => {
+  const findValueProxy = async (proxy: Peer) => {
     const except = kTable.allPeers.map(item => item.kid);
 
     const wait = rpcManager.getWait<FindValueResult>(
-      peer,
+      proxy,
       FindValue(key, except)
     );
-    const res = await wait(1000 * 10).catch(e => {
+    const res = await wait(timeout).catch(e => {
       console.warn(e);
     });
 
@@ -39,14 +39,17 @@ export default async function findValue(key: string, di: DependencyInjection) {
 
       if (item && !result) {
         result = item;
-        return { offers: [], peer };
+        return { offers: [], proxy };
       } else if (offers) {
         if (offers.length > 0) {
-          return { offers, peer };
+          return { offers, proxy };
         }
       }
+    } else {
+      kTable.rmPeer(proxy.kid);
     }
-    return { offers: [], peer };
+
+    return { offers: [], proxy };
   };
 
   const findValueAnswer = async (offer: Offer, proxy: Peer) => {
@@ -73,11 +76,13 @@ export default async function findValue(key: string, di: DependencyInjection) {
     const findValueResultResult = await Promise.all(
       kTable.allPeers.map(peer => findValueProxy(peer))
     );
-    await Promise.all(
-      findValueResultResult
-        .map(v => v.offers.map(offer => findValueAnswer(offer, v.peer)))
-        .flatMap(v => v)
-    );
+    if (!result) {
+      await Promise.all(
+        findValueResultResult
+          .map(v => v.offers.map(offer => findValueAnswer(offer, v.proxy)))
+          .flatMap(v => v)
+      );
+    }
   };
 
   if (kvs.get(key)) return kvs.get(key);

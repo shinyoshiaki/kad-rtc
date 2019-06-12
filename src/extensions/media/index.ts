@@ -119,8 +119,9 @@ export class ReceiveVideo extends Media {
             retry++;
             await new Promise(r => setTimeout(r, 100 * retry));
             const res = await kad.findValue(buf);
-            if (res) {
+            if (res && res.msg) {
               item = res;
+              console.log("found msg", { res });
               if (retry > 0) retry--;
             }
             continue;

@@ -58,4 +58,10 @@ export default class Ktable {
           .sort()
       )
     ).toString();
+
+  rmPeer = (kid: string) => {
+    const length = distance(this.kid, kid);
+    const kbucket = this.kbuckets[length];
+    kbucket.rmPeer(kid);
+  };
 }

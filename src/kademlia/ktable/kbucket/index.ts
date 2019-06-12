@@ -1,4 +1,4 @@
-import Peer from "../../modules/peer/base"
+import Peer from "../../modules/peer/base";
 
 export type Option = { kBucketSize: number };
 
@@ -25,8 +25,12 @@ export default class Kbucket {
     }
 
     peer.onDisconnect.subscribe(() => {
-      this.peers = this.peers.filter(find => find.kid !== peer.kid);
+      this.rmPeer(peer.kid);
     });
+  }
+
+  rmPeer(kid: string) {
+    this.peers = this.peers.filter(find => find.kid !== kid);
   }
 
   get length() {
