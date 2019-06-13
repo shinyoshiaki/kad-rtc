@@ -22,7 +22,7 @@ export class SuperStreamVideo {
 
     const mediaRecorder = new MediaRecorder(stream, {
       mimeType,
-      videoBitsPerSecond: 2561_000
+      videoBitsPerSecond: 128_000
     });
 
     mediaRecorder.ondataavailable = async ({ data: blob }) => {
@@ -79,13 +79,19 @@ export class SuperStreamVideo {
         );
         buffer = abs;
       } else {
-        await new Promise(r => setTimeout(r));
+        await new Promise(r => setTimeout(r, 10));
       }
     }
   }
 }
 
 export class SuperReceiveVideo extends Media {
+  torrents: Torrent[] = [];
+
+  constructor(private kad: Kademlia) {
+    super();
+  }
+
   async getVideo(
     headerKey: string,
     onMsReady: (ms: MediaSource) => void,
@@ -95,77 +101,96 @@ export class SuperReceiveVideo extends Media {
     onMsReady(ms);
 
     await waitEvent(ms, "sourceopen", undefined);
-    const sb = ms.addSourceBuffer(mimeType);
+    this.sb = ms.addSourceBuffer(mimeType);
 
     const first = await kad.findValue(headerKey);
     if (!first) return;
 
-    this.update(sb);
-
     const work = async () => {
-      try {
-        for (let item = first, bufMsg = headerKey, retry = 0; retry < 20; ) {
-          if (!item.msg) {
-            console.warn("file format error");
-            break;
-          }
-
-          if (item.msg !== bufMsg) {
-            const torrent: Torrent = JSON.parse(item.value as string);
-            const chunks = (await Promise.all(
-              torrent.map(async item => {
-                const { i, v } = item;
-                let chunk = await kad.findValue(v);
-                if (!chunk)
-                  while (retry < 20) {
-                    retry++;
-                    chunk = await kad.findValue(v);
-                    if (chunk) {
-                      if (retry > 0) retry--;
-                      break;
-                    } else {
-                      await new Promise(r => setTimeout(r, 100 * retry));
-                    }
-                  }
-                if (!chunk) {
-                  console.warn("broken");
-                }
-                return { i, value: chunk!.value };
-              })
-            )).sort((a, b) => a.i - b.i);
-
-            const err = chunks.some(v => v.value === undefined);
-            if (err) {
-              console.warn("broken error");
-              break;
-            }
-
-            for (let item of chunks) {
-              this.chunks.push((item.value as any).buffer);
-            }
-
-            bufMsg = item.msg;
-          }
-
-          const next = await kad.findValue(item.msg);
-          console.log(item.msg, { next });
-          if (!next) {
-            console.log("fail next", { retry });
-            retry++;
-            await new Promise(r => setTimeout(r, 100 * retry));
-            continue;
-          } else {
-            item = next;
-            if (retry > 0) retry--;
-          }
+      for (let item = first, bufMsg = headerKey, retry = 0; retry < 20; ) {
+        if (!item.msg) {
+          console.warn("file format error");
+          break;
         }
-      } catch (error) {
-        console.log(error);
+
+        if (item.msg !== bufMsg) {
+          const torrent: Torrent = JSON.parse(item.value as string);
+          this.torrents.push(torrent);
+          bufMsg = item.msg;
+        }
+
+        const next = await kad.findValue(item.msg);
+        console.log(item.msg, { next });
+        if (!next) {
+          console.log("fail next", { retry });
+          retry++;
+          if (this.torrents.length === 0)
+            await new Promise(r => setTimeout(r, 100));
+          else await new Promise(r => setTimeout(r, 5_000));
+          continue;
+        } else {
+          item = next;
+          if (retry > 0) retry--;
+        }
       }
     };
 
     if (first) {
-      await work().catch(console.error);
+      work().catch(console.error);
+      this.getChunks();
+    }
+  }
+
+  private sb?: SourceBuffer;
+
+  private async getChunks() {
+    const { kad, torrents } = this;
+    let start = false;
+    while (true) {
+      if (this.chunks.length > (1000 / interval) * 10 * 2) {
+        if (!start) {
+          start = true;
+          this.update(this.sb!);
+        }
+      }
+
+      const torrent = torrents.shift();
+      if (!torrent) {
+        await new Promise(r => setTimeout(r, 10));
+        continue;
+      }
+
+      const chunks = (await Promise.all(
+        torrent.map(async item => {
+          const { i, v } = item;
+          let chunk = await kad.findValue(v);
+          if (!chunk) {
+            for (let retry = 0; retry < 20; retry++) {
+              chunk = await kad.findValue(v);
+              if (chunk) {
+                break;
+              } else {
+                console.log("fail chunk", retry);
+                await new Promise(r => setTimeout(r, 100 * retry));
+              }
+            }
+          }
+          if (!chunk) {
+            console.error("broken");
+          }
+          return { i, value: chunk!.value };
+        })
+      )).sort((a, b) => a.i - b.i);
+
+      const err = chunks.some(v => !v.value);
+      if (err) {
+        console.warn("broken error");
+        break;
+      }
+
+      for (let item of chunks) {
+        this.chunks.push((item.value as any).buffer);
+      }
     }
   }
 }

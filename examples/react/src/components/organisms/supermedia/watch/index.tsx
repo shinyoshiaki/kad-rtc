@@ -9,7 +9,7 @@ const SuperMediaWatch: FC = () => {
   const videoRef = useRef<any | undefined>(undefined);
 
   const watch = () => {
-    const receiveVideo = new SuperReceiveVideo();
+    const receiveVideo = new SuperReceiveVideo(kad);
     receiveVideo.getVideo(
       url,
       ms => (videoRef.current.src = URL.createObjectURL(ms)),

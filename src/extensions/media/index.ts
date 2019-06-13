@@ -15,7 +15,7 @@ export class StreamVideo extends Media {
   ) {
     const mediaRecorder = new MediaRecorder(stream, {
       mimeType,
-      videoBitsPerSecond: 2561_000
+      videoBitsPerSecond: 128_000
     });
     const ms = new MediaSource();
     onMsReady(ms);
