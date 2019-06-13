@@ -1,5 +1,6 @@
 import React, { FC, useState, useEffect } from "react";
 import { kad } from "../../services/kademlia";
+import { Content } from "../atoms/styled";
 
 const Peers: FC = () => {
   const [allPeers, setallPeers] = useState<string[][]>([]);
@@ -14,7 +15,7 @@ const Peers: FC = () => {
   }, []);
 
   return (
-    <div>
+    <Content>
       <p>peers</p>
       {allPeers.map(
         (peers, i) =>
@@ -25,7 +26,7 @@ const Peers: FC = () => {
             >{`${i}  ${peers.join(" , ")}`}</div>
           )
       )}
-    </div>
+    </Content>
   );
 };
 

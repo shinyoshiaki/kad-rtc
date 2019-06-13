@@ -4,6 +4,7 @@ import { kad } from "../../services/kademlia";
 import { StreamVideo } from "../../../../../src/extensions/media";
 import useFile from "../../hooks/useFile";
 import { getLocalVideo } from "../../../../../src/webrtc";
+import { Content } from "../atoms/styled";
 
 const Record: FC<{}> = ({}) => {
   const videoRef = useRef<any | undefined>(undefined);
@@ -38,13 +39,13 @@ const Record: FC<{}> = ({}) => {
   };
 
   return (
-    <div>
+    <Content>
       <input type="file" onChange={setfile} />
       <button onClick={webcam}>webcam</button>
       <p>{header}</p>
       <video ref={videoRef} autoPlay={true} style={{ maxWidth: "100%" }} />
       <video ref={ref} autoPlay={true} style={{ width: 0, height: 0 }} />
-    </div>
+    </Content>
   );
 };
 
