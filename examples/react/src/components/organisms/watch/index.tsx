@@ -1,8 +1,8 @@
 import React, { FC, useRef } from "react";
-import useInput from "../../hooks/useInput";
-import { ReceiveVideo } from "../../../../../src";
-import { kad } from "../../services/kademlia";
-import { Content } from "../atoms/styled";
+import useInput from "../../../hooks/useInput";
+import { ReceiveVideo } from "../../../../../../src";
+import { kad } from "../../../services/kademlia";
+import { Content } from "../../atoms/styled";
 
 const Watch: FC = () => {
   const [url, seturl] = useInput();

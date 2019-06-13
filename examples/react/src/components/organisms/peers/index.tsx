@@ -1,6 +1,6 @@
 import React, { FC, useState, useEffect } from "react";
-import { kad } from "../../services/kademlia";
-import { Content } from "../atoms/styled";
+import { kad } from "../../../services/kademlia";
+import { Content } from "../../atoms/styled";
 
 const Peers: FC = () => {
   const [allPeers, setallPeers] = useState<string[][]>([]);

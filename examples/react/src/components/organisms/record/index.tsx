@@ -1,10 +1,10 @@
 import React, { FC, useRef, useState } from "react";
 
-import { kad } from "../../services/kademlia";
-import { StreamVideo } from "../../../../../src/extensions/media";
-import useFile from "../../hooks/useFile";
-import { getLocalVideo } from "../../../../../src/webrtc";
-import { Content } from "../atoms/styled";
+import { kad } from "../../../services/kademlia";
+import { StreamVideo } from "../../../../../../src/extensions/media";
+import useFile from "../../../hooks/useFile";
+import { getLocalVideo } from "../../../../../../src/webrtc";
+import { Content } from "../../atoms/styled";
 
 const Record: FC<{}> = ({}) => {
   const videoRef = useRef<any | undefined>(undefined);

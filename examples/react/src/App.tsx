@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import guest, { kad } from "./services/kademlia";
-import Watch from "./components/watch";
-import Record from "./components/record";
-import Peers from "./components/peers";
+import Watch from "./components/organisms/watch";
+import Record from "./components/organisms/record";
+import Peers from "./components/organisms/peers";
 import FileShare from "./components/file";
-import TextShare from "./components/text";
+import TextShare from "./components/organisms/text";
 import { Content } from "./components/atoms/styled";
 
 const App: React.FC = () => {

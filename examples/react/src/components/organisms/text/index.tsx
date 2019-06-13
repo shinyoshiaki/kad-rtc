@@ -1,9 +1,9 @@
 import React, { FC } from "react";
-import { Content } from "../atoms/styled";
-import { useObject } from "../../hooks/useObject";
-import { useApi } from "../../hooks/useApi";
-import { kad } from "../../services/kademlia";
-import { genKid } from "../../../../../src";
+import { Content } from "../../atoms/styled";
+import { useObject } from "../../../hooks/useObject";
+import { useApi } from "../../../hooks/useApi";
+import { kad } from "../../../services/kademlia";
+import { genKid } from "../../../../../../src";
 
 const TextShare: FC = () => {
   const textobj = useObject({
