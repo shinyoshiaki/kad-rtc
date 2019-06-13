@@ -6,6 +6,7 @@ import Peers from "./components/organisms/peers";
 import FileShare from "./components/file";
 import TextShare from "./components/organisms/text";
 import { Content } from "./components/atoms/styled";
+import SuperMedia from "./components/organisms/supermedia";
 
 const App: React.FC = () => {
   const [kid, setkid] = useState("");
@@ -26,6 +27,7 @@ const App: React.FC = () => {
         <Watch />
         <Record />
       </Content>
+      <SuperMedia />
       <Peers />
     </div>
   );

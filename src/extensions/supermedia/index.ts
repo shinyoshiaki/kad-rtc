@@ -14,7 +14,7 @@ type Torrent = ReturnType<typeof abs2torrent>;
 
 const torrent2hash = (torrent: Torrent) => jsonHash(torrent);
 
-export class StreamVideo {
+export class SuperStreamVideo {
   onChunks = new Event<ArrayBuffer[]>();
 
   private async recordInterval(stream: MediaStream) {
@@ -67,16 +67,16 @@ export class StreamVideo {
         const torrent = abs2torrent(buffer);
 
         const key = torrent2hash(torrent);
-        const data = jsonHash(torrent);
+        const value = JSON.stringify(torrent);
         const msg = torrent2hash(abs2torrent(abs));
 
-        await kad.store(key, data, msg);
+        await kad.store(key, value, msg);
         await Promise.all(
           torrent.map(async item => {
-            await kad.store(item.v, buffer[item.i]);
+            const ab = buffer[item.i];
+            await kad.store(item.v, Buffer.from(ab)); //? bug
           })
         );
-
         buffer = abs;
       } else {
         await new Promise(r => setTimeout(r));
@@ -85,7 +85,7 @@ export class StreamVideo {
   }
 }
 
-export class ReceiveVideo extends Media {
+export class SuperReceiveVideo extends Media {
   async getVideo(
     headerKey: string,
     onMsReady: (ms: MediaSource) => void,
@@ -120,13 +120,12 @@ export class ReceiveVideo extends Media {
                 if (!chunk) {
                   console.warn("broken");
                 }
-                return { i, chunk };
+                return { i, value: chunk!.value };
               })
             )).sort((a, b) => a.i - b.i);
-            console.log({ chunks });
 
             for (let item of chunks) {
-              this.chunks.push((item.chunk as any).buffer);
+              this.chunks.push((item.value as any).buffer);
             }
 
             bufMsg = item.msg;
