@@ -46,7 +46,7 @@ export default async function findValue(key: string, di: DependencyInjection) {
         }
       }
     } else {
-      kTable.rmPeer(proxy.kid);
+      // kTable.rmPeer(proxy.kid);
     }
 
     return { offers: [], proxy };

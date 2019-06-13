@@ -309,7 +309,7 @@ export default class WebRTC {
       sendData();
     } catch (error) {
       console.warn("retry", error);
-      await new Promise(r => r);
+      await new Promise(r => setTimeout(r));
       try {
         sendData();
       } catch (error) {

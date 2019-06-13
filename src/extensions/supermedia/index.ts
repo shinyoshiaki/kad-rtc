@@ -116,13 +116,29 @@ export class SuperReceiveVideo extends Media {
               torrent.map(async item => {
                 const { i, v } = item;
                 let chunk = await kad.findValue(v);
-                if (!chunk) chunk = await kad.findValue(v);
+                if (!chunk)
+                  while (retry < 20) {
+                    retry++;
+                    chunk = await kad.findValue(v);
+                    if (chunk) {
+                      if (retry > 0) retry--;
+                      break;
+                    } else {
+                      await new Promise(r => setTimeout(r, 100 * retry));
+                    }
+                  }
                 if (!chunk) {
                   console.warn("broken");
                 }
                 return { i, value: chunk!.value };
               })
             )).sort((a, b) => a.i - b.i);
+
+            const err = chunks.some(v => v.value === undefined);
+            if (err) {
+              console.warn("broken error");
+              break;
+            }
 
             for (let item of chunks) {
               this.chunks.push((item.value as any).buffer);

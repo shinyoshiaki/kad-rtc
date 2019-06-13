@@ -29,6 +29,7 @@ const SuperMediaRecord: FC = () => {
 
   const webcam = async () => {
     const stream = await getLocalVideo();
+    ref.current = stream;
     await new Promise(r => setTimeout(r, 1000));
     init(stream);
   };
