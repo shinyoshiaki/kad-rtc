@@ -286,21 +286,32 @@ export default class WebRTC {
   async send(data: string | ArrayBuffer | Buffer, label = "datachannel") {
     const { arrayBufferService } = this.services;
 
-    const sendData = async () => {
+    const sendData = () => {
       if (typeof data === "string") {
-        await this.createDatachannel(label);
-        this.dataChannels[label].send(data);
+        this.createDatachannel(label)
+          .then(() => this.dataChannels[label].send(data))
+          .catch(() => {
+            throw "Error";
+          });
       } else {
         if (data.byteLength > 16000) {
-          await this.createDatachannel(arrayBufferService.label);
-          arrayBufferService.send(
-            data,
-            label,
-            this.dataChannels[arrayBufferService.label]
-          );
+          this.createDatachannel(arrayBufferService.label)
+            .then(() =>
+              arrayBufferService.send(
+                data,
+                label,
+                this.dataChannels[arrayBufferService.label]
+              )
+            )
+            .catch(() => {
+              throw "Error";
+            });
         } else {
-          await this.createDatachannel(label);
-          this.dataChannels[label].send(data);
+          this.createDatachannel(label)
+            .then(() => this.dataChannels[label].send(data))
+            .catch(() => {
+              throw "Error";
+            });
         }
       }
     };

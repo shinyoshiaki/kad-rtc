@@ -125,12 +125,12 @@ export class SuperReceiveVideo extends Media {
           console.log("fail next", { retry });
           retry++;
           if (this.torrents.length === 0)
-            await new Promise(r => setTimeout(r, 100));
+            await new Promise(r => setTimeout(r, 100 * retry));
           else await new Promise(r => setTimeout(r, 5_000));
           continue;
         } else {
           item = next;
-          if (retry > 0) retry--;
+          retry = 0;
         }
       }
     };
