@@ -10,8 +10,10 @@ export class Media {
       } else {
         const chunk = this.chunks.shift();
         try {
-          if (chunk) sb.appendBuffer(chunk);
-          await waitEvent(sb, "updateend", undefined);
+          if (chunk) {
+            sb.appendBuffer(chunk);
+            await waitEvent(sb, "updateend", undefined);
+          } else await new Promise(r => setTimeout(r));
         } catch (error) {
           console.warn(error, chunk, sb);
         }

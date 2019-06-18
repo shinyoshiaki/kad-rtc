@@ -145,24 +145,23 @@ export class SuperReceiveVideo extends Media {
 
   private async getChunks() {
     const { kad, torrents } = this;
-    let start = false;
-    while (true) {
-      if (this.chunks.length > (1000 / interval) * 10 * 2) {
-        if (!start) {
-          start = true;
-          this.update(this.sb!);
+
+    const caches: { [hash: string]: ArrayBuffer } = {};
+    const playList: Torrent[] = [];
+
+    this.update(this.sb!);
+
+    const find = async () => {
+      while (true) {
+        const torrent = torrents.shift();
+        if (!torrent) {
+          await new Promise(r => setTimeout(r, 10));
+          continue;
         }
-      }
+        playList.push(torrent);
 
-      const torrent = torrents.shift();
-      if (!torrent) {
-        await new Promise(r => setTimeout(r, 10));
-        continue;
-      }
-
-      const chunks = (await Promise.all(
         torrent.map(async item => {
-          const { i, v } = item;
+          const { v } = item;
           let chunk = await kad.findValue(v);
           if (!chunk) {
             for (let retry = 0; retry < 20; retry++) {
@@ -175,22 +174,40 @@ export class SuperReceiveVideo extends Media {
               }
             }
           }
+          console.log(chunk);
           if (!chunk) {
             console.error("broken");
-          }
-          return { i, value: chunk!.value };
-        })
-      )).sort((a, b) => a.i - b.i);
-
-      const err = chunks.some(v => !v.value);
-      if (err) {
-        console.warn("broken error");
-        break;
+          } else caches[v] = chunk.value as ArrayBuffer;
+        });
       }
+    };
+    find();
 
-      for (let item of chunks) {
-        this.chunks.push((item.value as any).buffer);
+    const seek = async () => {
+      for (let res = true, torrent: Torrent | undefined; ; ) {
+        if (res) torrent = playList.shift();
+        if (!torrent) {
+          await new Promise(r => setTimeout(r, 10));
+          continue;
+        }
+        const unexist = torrent.some(
+          item => !Object.keys(caches).includes(item.v)
+        );
+
+        if (unexist) {
+          await new Promise(r => setTimeout(r, 100));
+          res = false;
+          continue;
+        }
+        console.log(unexist, torrent);
+        const chunks = torrent.map(item => caches[item.v]);
+        console.log("push", chunks);
+        for (let chunk of chunks) {
+          this.chunks.push(chunk);
+        }
+        res = true;
       }
-    }
+    };
+    seek();
   }
 }
