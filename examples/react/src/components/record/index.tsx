@@ -1,4 +1,4 @@
-import React, { FC, useRef, useState, useEffect } from "react";
+import React, { FC, useRef, useState } from "react";
 
 import { kad } from "../../services/kademlia";
 import { StreamVideo } from "../../../../../src/extensions/media";
@@ -9,7 +9,7 @@ const Record: FC<{}> = ({}) => {
   const videoRef = useRef<any | undefined>(undefined);
   const ref = useRef<any | undefined>(undefined);
   const [header, setheader] = useState<string>();
-  const [file, setfile] = useFile();
+  const [_, setfile, onSetfile] = useFile();
 
   const init = async (stream: MediaStream) => {
     new StreamVideo().streamViaKad(
@@ -24,17 +24,12 @@ const Record: FC<{}> = ({}) => {
     );
   };
 
-  useEffect(() => {
-    const start = async () => {
-      ref.current.src = URL.createObjectURL(file);
-      await new Promise(r => setTimeout(r, 1000));
-      const stream = ref.current.captureStream();
-      init(stream);
-    };
-    if (file) {
-      start();
-    }
-  }, [file]);
+  onSetfile(async file => {
+    ref.current.src = URL.createObjectURL(file);
+    await new Promise(r => setTimeout(r, 1000));
+    const stream = ref.current.captureStream();
+    init(stream);
+  });
 
   const webcam = async () => {
     const stream = await getLocalVideo();
