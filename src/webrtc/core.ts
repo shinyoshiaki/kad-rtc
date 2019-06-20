@@ -287,34 +287,41 @@ export default class WebRTC {
     const { arrayBufferService } = this.services;
 
     const sendData = async () => {
-      if (typeof data === "string") {
-        const err = await this.createDatachannel(label).catch(() => "error");
-        if (err) return err;
-        this.dataChannels[label].send(data);
-      } else {
-        if (data.byteLength > 16000) {
-          const err = await this.createDatachannel(
-            arrayBufferService.label
-          ).catch(() => "error");
-          if (err) return err;
-          arrayBufferService.send(
-            data,
-            label,
-            this.dataChannels[arrayBufferService.label]
-          );
-        } else {
+      try {
+        if (typeof data === "string") {
           const err = await this.createDatachannel(label).catch(() => "error");
           if (err) return err;
           this.dataChannels[label].send(data);
+        } else {
+          if (data.byteLength > 16000) {
+            const err = await this.createDatachannel(
+              arrayBufferService.label
+            ).catch(() => "error");
+            if (err) return err;
+            arrayBufferService.send(
+              data,
+              label,
+              this.dataChannels[arrayBufferService.label]
+            );
+          } else {
+            const err = await this.createDatachannel(label).catch(
+              () => "error"
+            );
+            if (err) return err;
+            this.dataChannels[label].send(data);
+          }
         }
+      } catch (error) {
+        return "unhandle datachannel error";
       }
     };
 
     const err = await sendData();
     if (err) {
-      console.warn("retry");
-      await new Promise(r => setTimeout(r));
-      sendData();
+      console.warn("retry send data channel");
+      await new Promise(r => setTimeout(r, 10));
+      const error = await sendData();
+      console.warn(error, (data as Buffer).byteLength);
     }
   }
 

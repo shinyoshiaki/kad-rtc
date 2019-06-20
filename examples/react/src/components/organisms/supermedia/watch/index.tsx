@@ -12,8 +12,7 @@ const SuperMediaWatch: FC = () => {
     const receiveVideo = new SuperReceiveVideo(kad);
     receiveVideo.getVideo(
       url,
-      ms => (videoRef.current.src = URL.createObjectURL(ms)),
-      kad
+      ms => (videoRef.current.src = URL.createObjectURL(ms))
     );
   };
 
