@@ -7,6 +7,7 @@ import FileShare from "./components/file";
 import TextShare from "./components/organisms/text";
 import { Content } from "./components/atoms/styled";
 import SuperMedia from "./components/organisms/supermedia";
+import WasmTest from "./components/organisms/wasm";
 
 const App: React.FC = () => {
   const [kid, setkid] = useState("");
@@ -21,6 +22,7 @@ const App: React.FC = () => {
   return (
     <div>
       <p>{kid}</p>
+      <WasmTest />
       <FileShare />
       <TextShare />
       <Content style={{ display: "flex" }}>

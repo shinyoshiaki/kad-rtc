@@ -36,9 +36,11 @@
   },
   "dependencies": {
     "axios": "^0.19.0",
+    "comlink": "^4.0.1",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "rx.mini": "git+https://git@github.com/shinyoshiaki/rx.mini.git",
-    "styled-components": "^4.2.0"
+    "styled-components": "^4.2.0",
+    "webm-wasm": "^0.4.1"
   }
 }
