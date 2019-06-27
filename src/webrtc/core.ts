@@ -4,7 +4,7 @@ import {
   RTCIceCandidate
 } from "wrtc";
 
-import { Pack } from "rx.mini";
+import { Pack, Wait } from "rx.mini";
 import SetupServices from "./services";
 
 export interface message {
@@ -32,6 +32,8 @@ export default class WebRTC {
   onDisconnect = this.event();
   onData = this.event<message>();
   onAddTrack = this.event<MediaStream>();
+
+  private wait4DC = new Wait<RTCDataChannel | undefined>();
 
   private dataChannels: { [key: string]: RTCDataChannel };
 
@@ -140,7 +142,7 @@ export default class WebRTC {
   hangUp() {
     this.isDisconnected = true;
     this.isConnected = false;
-    this.onDisconnect.execute();
+    this.onDisconnect.executeNull();
     this.disconnect();
   }
 
@@ -235,14 +237,34 @@ export default class WebRTC {
     }
   }
 
+  private isDCOpend = (label: string) => {
+    const dc = this.dataChannels[label];
+    if (dc) {
+      return dc.readyState === "open";
+    }
+    return false;
+  };
+
   private async createDatachannel(label: string) {
-    if (!Object.keys(this.dataChannels).includes(label)) {
+    const wait = async () => {
       try {
         const dc = this.rtc.createDataChannel(label);
-        this.dataChannels[label] = dc;
         await this.dataChannelEvents(dc);
+        if (dc.readyState === "open") return dc;
       } catch (dce) {
         console.error(dce);
+      }
+    };
+
+    if (!this.isDCOpend(label)) {
+      const { exist, result } = await this.wait4DC.create(label, wait);
+
+      if (exist) {
+        const res = await exist.asPromise().catch(() => {});
+        if (res) this.dataChannels[label] = res;
+      }
+      if (result) {
+        this.dataChannels[label] = result;
       }
     }
   }
@@ -252,7 +274,7 @@ export default class WebRTC {
       channel.onopen = () => {
         if (!this.isConnected) {
           this.isConnected = true;
-          this.onConnect.execute();
+          this.onConnect.executeNull();
         }
         resolve();
       };
@@ -285,36 +307,42 @@ export default class WebRTC {
 
   async send(data: string | ArrayBuffer | Buffer, label = "datachannel") {
     const { arrayBufferService } = this.services;
-
     const sendData = async () => {
-      if (typeof data === "string") {
-        await this.createDatachannel(label);
-        this.dataChannels[label].send(data);
-      } else {
-        if (data.byteLength > 16000) {
-          await this.createDatachannel(arrayBufferService.label);
-          arrayBufferService.send(
-            data,
-            label,
-            this.dataChannels[arrayBufferService.label]
-          );
-        } else {
-          await this.createDatachannel(label);
+      try {
+        if (typeof data === "string") {
+          const err = await this.createDatachannel(label).catch(() => "error");
+          if (err) return err;
           this.dataChannels[label].send(data);
+        } else {
+          if (data.byteLength > 16000) {
+            const err = await this.createDatachannel(
+              arrayBufferService.label
+            ).catch(() => "error");
+            if (err) return err;
+            arrayBufferService.send(
+              data,
+              label,
+              this.dataChannels[arrayBufferService.label]
+            );
+          } else {
+            const err = await this.createDatachannel(label).catch(
+              () => "error"
+            );
+            if (err) return err;
+            this.dataChannels[label].send(data);
+          }
         }
+      } catch (error) {
+        return "unhandle datachannel error";
       }
     };
 
-    try {
-      sendData();
-    } catch (error) {
-      console.warn("retry", error);
-      await new Promise(r => r);
-      try {
-        sendData();
-      } catch (error) {
-        console.error("send fail", error);
-      }
+    const err = await sendData();
+    if (err) {
+      console.warn("retry send data channel");
+      await new Promise(r => setTimeout(r, 10));
+      const error = await sendData();
+      console.warn("fail", error, (data as Buffer).length);
     }
   }
 
