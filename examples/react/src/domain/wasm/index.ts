@@ -1,7 +1,4 @@
 const framerate = 30;
-const bitrate = 200;
-const width = 400;
-const height = 400;
 
 function cameraStream(
   stream: MediaStream,
@@ -12,6 +9,7 @@ function cameraStream(
       const cvs = document.createElement("canvas");
       const video = document.createElement("video");
       video.srcObject = stream;
+      video.muted = true;
       video.play();
       await nextEvent(video, "playing");
       [cvs.width, cvs.height] = [width, height];
@@ -26,7 +24,10 @@ function cameraStream(
   });
 }
 
-export default async function wasmTest(stream: MediaStream) {
+export default async function wasmTest(
+  stream: MediaStream,
+  { width, height }: { width: number; height: number }
+) {
   const worker = new Worker("node_modules/webm-wasm/dist/webm-worker.js");
 
   worker.postMessage("./webm-wasm.wasm");
@@ -34,7 +35,8 @@ export default async function wasmTest(stream: MediaStream) {
   worker.postMessage({
     width,
     height,
-    realtime: true
+    realtime: true,
+    bitrate: 20000
   });
   cameraStream(stream, { width, height }).pipeTo(
     new WritableStream({
@@ -53,7 +55,10 @@ export default async function wasmTest(stream: MediaStream) {
       if (!ev.data) {
         return mediaSource.endOfStream();
       }
-      sourceBuffer.appendBuffer(ev.data);
+      try {
+        console.log(ev.data);
+        sourceBuffer.appendBuffer(ev.data);
+      } catch (error) {}
     };
   };
 

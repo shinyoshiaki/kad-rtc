@@ -1,29 +1,46 @@
 import React, { FC, useEffect, useRef } from "react";
 import wasmTest from "../../../domain/wasm";
+import useFile from "../../../hooks/useFile";
 
 const WasmTest: FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const localRef = useRef<any>(null);
+  const [_, setfile, onSetfile] = useFile();
 
-  useEffect(() => {
+  onSetfile(async file => {
+    localRef.current.src = URL.createObjectURL(file);
+    const stream = localRef.current.captureStream(30);
+
     const video = videoRef.current;
     if (video) {
-      (async () => {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            width: { ideal: 400 },
-            height: { ideal: 400 }
-          },
-          audio: false
+      localRef.current.onloadedmetadata = async ev => {
+        const { videoHeight, videoWidth } = ev.target;
+        console.log(ev);
+        const ms = await wasmTest(stream, {
+          width: videoWidth,
+          height: videoHeight
         });
-        const ms = await wasmTest(stream);
         video.src = URL.createObjectURL(ms);
-      })();
+      };
     }
-  }, [videoRef]);
+  });
 
   return (
     <div>
-      <video ref={videoRef} autoPlay={true} />
+      <input type="file" onChange={setfile} />
+      <div style={{ display: "flex" }}>
+        <video
+          ref={localRef}
+          autoPlay={true}
+          style={{ width: 400, height: 400 }}
+          muted
+        />
+        <video
+          ref={videoRef}
+          autoPlay={true}
+          style={{ width: 400, height: 400 }}
+        />
+      </div>
     </div>
   );
 };
