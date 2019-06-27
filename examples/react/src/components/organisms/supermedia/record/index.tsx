@@ -1,24 +1,20 @@
 import React, { FC, useRef, useState } from "react";
+import { Content } from "../../../atoms/styled";
+import useFile from "../../../../hooks/useFile";
+import { SuperStreamVideo } from "../../../../../../../src";
+import { kad } from "../../../../services/kademlia";
+import { getLocalVideo } from "../../../../../../../src/webrtc";
 
-import { kad } from "../../services/kademlia";
-import { StreamVideo } from "../../../../../src/extensions/media";
-import useFile from "../../hooks/useFile";
-import { getLocalVideo } from "../../../../../src/webrtc";
-
-const Record: FC<{}> = ({}) => {
-  const videoRef = useRef<any | undefined>(undefined);
+const SuperMediaRecord: FC = () => {
   const ref = useRef<any | undefined>(undefined);
   const [header, setheader] = useState<string>();
   const [_, setfile, onSetfile] = useFile();
 
   const init = async (stream: MediaStream) => {
-    new StreamVideo().streamViaKad(
+    new SuperStreamVideo().streamViaKad(
       stream,
       s => {
         setheader(s);
-      },
-      ms => {
-        videoRef.current.src = URL.createObjectURL(ms);
       },
       kad
     );
@@ -33,19 +29,19 @@ const Record: FC<{}> = ({}) => {
 
   const webcam = async () => {
     const stream = await getLocalVideo();
+    ref.current = stream;
     await new Promise(r => setTimeout(r, 1000));
     init(stream);
   };
 
   return (
-    <div>
+    <Content>
       <input type="file" onChange={setfile} />
       <button onClick={webcam}>webcam</button>
       <p>{header}</p>
-      <video ref={videoRef} autoPlay={true} style={{ maxWidth: "100%" }} />
-      <video ref={ref} autoPlay={true} style={{ width: 0, height: 0 }} />
-    </div>
+      <video ref={ref} autoPlay={true} style={{ maxWidth: "100%" }} />
+    </Content>
   );
 };
 
-export default Record;
+export default SuperMediaRecord;

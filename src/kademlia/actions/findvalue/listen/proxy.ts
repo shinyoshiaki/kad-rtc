@@ -56,7 +56,6 @@ export default class FindValueProxy {
     const item = kvs.get(key);
 
     if (item) {
-      if (!item.msg) console.warn(item);
       this.listen.rpc({ ...FindValueResult({ item }), id });
     } else {
       const peers = kTable.findNode(key);

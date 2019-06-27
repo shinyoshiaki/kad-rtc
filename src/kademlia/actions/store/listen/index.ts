@@ -31,8 +31,6 @@ class ListenStore {
     const { kvs } = this.di.modules;
     const { key, value, id, msg } = data;
 
-    if (!msg) console.warn(data);
-
     kvs.set(key, value, msg as any);
 
     this.listen.rpc({ ...OnStore(), id });

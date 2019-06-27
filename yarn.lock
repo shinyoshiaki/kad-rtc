@@ -3241,6 +3241,11 @@ rsvp@^4.8.4:
   resolved "https://registry.yarnpkg.com/rsvp/-/rsvp-4.8.4.tgz#b50e6b34583f3dd89329a2f23a8a2be072845911"
   integrity sha512-6FomvYPfs+Jy9TfXmBpBuMWNH94SgCsZmJKcanySzgNNP6LjWxBvyLTa9KaMfDDM5oxRfrKDB0r/qeRsLwnBfA==
 
+rx.mini@^0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/rx.mini/-/rx.mini-0.0.7.tgz#7f032a2eee0d92d177a64b46ae6da041468c7317"
+  integrity sha512-hvUcNk57BUzS4Y6cEWZH4T6m1O21qnVUhK+z3tWOYc8Uhol7hUCyf5BzvqRANvucQqM6hhy/AQqipMxA2aKqtA==
+
 "rx.mini@git+https://git@github.com/shinyoshiaki/rx.mini.git":
   version "0.0.3"
   resolved "git+https://git@github.com/shinyoshiaki/rx.mini.git#f1de7bed238e3973065b0de11696b56e12114acb"

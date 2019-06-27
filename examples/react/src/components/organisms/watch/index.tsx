@@ -1,7 +1,8 @@
 import React, { FC, useRef } from "react";
-import useInput from "../../hooks/useInput";
-import { ReceiveVideo } from "../../../../../src";
-import { kad } from "../../services/kademlia";
+import useInput from "../../../hooks/useInput";
+import { ReceiveVideo } from "../../../../../../src";
+import { kad } from "../../../services/kademlia";
+import { Content } from "../../atoms/styled";
 
 const Watch: FC = () => {
   const [url, seturl] = useInput();
@@ -17,11 +18,11 @@ const Watch: FC = () => {
   };
 
   return (
-    <div>
+    <Content>
       <input value={url} onChange={seturl} />
       <button onClick={watch}>watch</button>
       <video ref={videoRef} autoPlay={true} style={{ maxWidth: "100%" }} />
-    </div>
+    </Content>
   );
 };
 

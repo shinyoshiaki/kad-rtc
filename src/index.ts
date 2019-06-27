@@ -6,6 +6,8 @@ import genKid from "./utill/kid";
 import { updateTimeout } from "./kademlia/const";
 import { storeFile, findFile } from "./extensions/file";
 import { StreamVideo, ReceiveVideo } from "./extensions/media";
+import SuperStreamVideo from "./extensions/supermedia/streamer";
+import SuperReceiveVideo from "./extensions/supermedia/renderer";
 
 export {
   PeerModule,
@@ -17,5 +19,7 @@ export {
   storeFile,
   findFile,
   StreamVideo,
-  ReceiveVideo
+  ReceiveVideo,
+  SuperStreamVideo,
+  SuperReceiveVideo
 };
