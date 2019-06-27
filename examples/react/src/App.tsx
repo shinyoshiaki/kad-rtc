@@ -7,7 +7,8 @@ import FileShare from "./components/file";
 import TextShare from "./components/organisms/text";
 import { Content } from "./components/atoms/styled";
 import SuperMedia from "./components/organisms/supermedia";
-import WasmTest from "./components/organisms/wasm";
+import WasmTest from "./components/organisms/webm";
+import LibvpxTest from "./components/organisms/libvpx";
 
 const App: React.FC = () => {
   const [kid, setkid] = useState("");
@@ -22,6 +23,7 @@ const App: React.FC = () => {
   return (
     <div>
       <p>{kid}</p>
+      <LibvpxTest />
       <WasmTest />
       <FileShare />
       <TextShare />

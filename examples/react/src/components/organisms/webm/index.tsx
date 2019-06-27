@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useRef } from "react";
-import wasmTest from "../../../domain/wasm";
+import wasmTest from "../../../domain/webm";
 import useFile from "../../../hooks/useFile";
 
 const WasmTest: FC = () => {
