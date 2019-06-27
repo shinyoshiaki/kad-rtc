@@ -142,7 +142,7 @@ export default class WebRTC {
   hangUp() {
     this.isDisconnected = true;
     this.isConnected = false;
-    this.onDisconnect.execute({});
+    this.onDisconnect.executeNull();
     this.disconnect();
   }
 
