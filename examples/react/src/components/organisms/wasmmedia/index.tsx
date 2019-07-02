@@ -6,7 +6,7 @@ import SuperMediaWatch from "./watch";
 const WasmMedia: FC = () => {
   return (
     <Content>
-      <p>super media</p>
+      <p>wasm media</p>
       <div style={{ display: "flex" }}>
         <SuperMediaWatch />
         <SuperMediaRecord />

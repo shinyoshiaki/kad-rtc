@@ -2,11 +2,22 @@ import Event from "rx.mini";
 
 const framerate = 30;
 
-export function stream2ab(
+export async function stream2ab(
   stream: MediaStream,
   { width, height }: { width: number; height: number }
 ) {
   const observer = new Event<ArrayBuffer>();
+  const worker = new Worker("node_modules/webm-wasm/dist/webm-worker.js");
+
+  worker.postMessage("./webm-wasm.wasm");
+  await nextEvent(worker, "message");
+  worker.postMessage({
+    width,
+    height,
+    realtime: true,
+    bitrate: 20000
+  });
+
   new ReadableStream({
     async start(controller) {
       const cvs = document.createElement("canvas");
@@ -27,54 +38,53 @@ export function stream2ab(
   }).pipeTo(
     new WritableStream({
       write(image) {
-        observer.execute(image.data.buffer);
+        const ab = image.data.buffer;
+        worker.postMessage(ab, [ab]);
       }
     })
   );
+
+  worker.onmessage = ev => {
+    if (ev.data) {
+      observer.execute(ev.data);
+    }
+  };
   return observer;
 }
 
-export async function createAbDecorder(
-  {
-    width,
-    height
-  }: {
-    width: number;
-    height: number;
-  },
-  onMs: (ms: MediaSource) => void
-) {
-  const worker = new Worker("node_modules/webm-wasm/dist/webm-worker.js");
-
-  worker.postMessage("./webm-wasm.wasm");
-  await nextEvent(worker, "message");
-  worker.postMessage({
-    width,
-    height,
-    realtime: true,
-    bitrate: 20000
-  });
-
+export async function createAbDecorder(onMs: (ms: MediaSource) => void) {
   const mediaSource = new MediaSource();
-  mediaSource.onsourceopen = () => {
-    const sourceBuffer = mediaSource.addSourceBuffer(
-      `video/webm; codecs="vp8"`
-    );
-    worker.onmessage = ev => {
-      if (!ev.data) {
-        return mediaSource.endOfStream();
-      }
+  const chunks: ArrayBuffer[] = [];
+  const action = new Event<ArrayBuffer>();
+  mediaSource.onsourceopen = async () => {
+    const sb = mediaSource.addSourceBuffer(`video/webm; codecs="vp8"`);
+    action.subscribe((ab: any) => {
+      console.log({ ab });
       try {
-        console.log(ev.data);
-        sourceBuffer.appendBuffer(ev.data);
-      } catch (error) {}
-    };
+        chunks.push(ab);
+      } catch (error) {
+        console.warn(error);
+      }
+    });
+
+    while (true) {
+      if (sb.updating || chunks.length === 0) {
+        await new Promise(r => setTimeout(r, 10));
+      } else {
+        const chunk: any = chunks.shift();
+        try {
+          if (chunk) {
+            sb.appendBuffer(chunk.buffer);
+            await waitEvent(sb, "updateend", undefined);
+          } else await new Promise(r => setTimeout(r));
+        } catch (error) {
+          console.warn(error, chunk, sb);
+        }
+      }
+    }
   };
 
   onMs(mediaSource);
-
-  const action = new Event<ArrayBuffer>();
-  action.subscribe(ab => worker.postMessage(ab, [ab]));
 
   return action;
 }
@@ -93,24 +103,38 @@ export default async function webmTest(
     realtime: true,
     bitrate: 20000
   });
-  stream2ab(stream, { width, height }).subscribe(ab =>
-    worker.postMessage(ab, [ab])
-  );
 
   const mediaSource = new MediaSource();
-  mediaSource.onsourceopen = () => {
-    const sourceBuffer = mediaSource.addSourceBuffer(
-      `video/webm; codecs="vp8"`
-    );
-    worker.onmessage = ev => {
-      if (!ev.data) {
-        return mediaSource.endOfStream();
-      }
+  const chunks: ArrayBuffer[] = [];
+  mediaSource.onsourceopen = async () => {
+    const sb = mediaSource.addSourceBuffer(`video/webm; codecs="vp8"`);
+
+    let test = 0;
+    const observer = await stream2ab(stream, { width, height });
+    observer.subscribe((ab: any) => {
       try {
-        console.log(ev.data);
-        sourceBuffer.appendBuffer(ev.data);
-      } catch (error) {}
-    };
+        test++;
+        if (test > 20) chunks.push(ab);
+      } catch (error) {
+        console.warn(error);
+      }
+    });
+
+    while (true) {
+      if (sb.updating || chunks.length === 0) {
+        await new Promise(r => setTimeout(r, 10));
+      } else {
+        const chunk = chunks.shift();
+        try {
+          if (chunk) {
+            sb.appendBuffer(chunk);
+            await waitEvent(sb, "updateend", undefined);
+          } else await new Promise(r => setTimeout(r));
+        } catch (error) {
+          console.warn(error, chunk, sb);
+        }
+      }
+    }
   };
 
   return mediaSource;
@@ -119,5 +143,32 @@ export default async function webmTest(
 function nextEvent(target, name) {
   return new Promise(resolve => {
     target.addEventListener(name, resolve, { once: true });
+  });
+}
+
+function waitEvent(
+  target: MediaSource | FileReader | SourceBuffer,
+  event: string,
+  error: any
+) {
+  return new Promise((resolve, reject) => {
+    target.addEventListener(event, _resolve);
+    if (typeof error === "string") {
+      target.addEventListener(error, _reject);
+    }
+    function _removeListener() {
+      target.removeEventListener(event, _resolve);
+      if (typeof error === "string") {
+        target.removeEventListener(error, _reject);
+      }
+    }
+    function _resolve(ev: any) {
+      _removeListener();
+      resolve(ev);
+    }
+    function _reject(ev: any) {
+      _removeListener();
+      reject(ev);
+    }
   });
 }

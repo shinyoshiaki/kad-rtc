@@ -6,15 +6,15 @@ export default class StreamArraybuffer {
   private chunks: ArrayBuffer[] = [];
   private onChunks = new Event<ArrayBuffer[]>();
 
-  addAb(ab: ArrayBuffer) {
+  addAb = (ab: ArrayBuffer) => {
     this.chunks.push(ab);
     if (this.chunks.length > 10) {
       this.onChunks.execute(this.chunks);
       this.chunks = [];
     }
-  }
+  };
 
-  async streamViaKad(kad: Kademlia, onHeader: (s: string) => void) {
+  streamViaKad = async (kad: Kademlia, onHeader: (s: string) => void) => {
     let buffer = await this.onChunks.asPromise();
 
     onHeader(torrent2hash(abs2torrent(buffer)));
@@ -34,5 +34,5 @@ export default class StreamArraybuffer {
 
       buffer = abs;
     });
-  }
+  };
 }

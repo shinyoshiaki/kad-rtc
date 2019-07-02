@@ -12,11 +12,10 @@ const SuperMediaWatch: FC = () => {
   const watch = async () => {
     const renderVideo = new RenderArraybuffer(kad);
     const abDecoder = await createAbDecorder(
-      { width: 640, height: 360 },
       ms => (videoRef.current.src = URL.createObjectURL(ms))
     );
+    renderVideo.observer.subscribe(ab => abDecoder.execute(ab));
     renderVideo.getVideo(url);
-    renderVideo.observer.subscribe(abDecoder.execute);
   };
 
   return (

@@ -12,32 +12,40 @@ const SuperMediaRecord: FC = () => {
   const [_, setfile, onSetfile] = useFile();
 
   onSetfile(async file => {
+    let width: number, height: number;
+    localRef.current.onloadedmetadata = async (ev: any) => {
+      const { videoHeight, videoWidth } = ev.target;
+      width = videoWidth;
+      height = videoHeight;
+    };
     localRef.current.src = URL.createObjectURL(file);
+    const stream = localRef.current.captureStream(30);
     await new Promise(r => setTimeout(r, 1000));
-    const stream = localRef.current.captureStream();
-    startStreamer(stream);
+    startStreamer(stream, { width, height });
   });
 
   const webcam = async () => {
     const stream = await getLocalVideo();
+
+    localRef.current.onloadedmetadata = async (ev: any) => {
+      const { videoHeight, videoWidth } = ev.target;
+      startStreamer(stream, { width: videoWidth, height: videoHeight });
+    };
+
     localRef.current = stream;
-    startStreamer(stream);
   };
 
-  const startStreamer = (stream: MediaStream) => {
-    const video = localRef.current;
+  const startStreamer = async (
+    stream: MediaStream,
+    { width, height }: { width: number; height: number }
+  ) => {
+    console.log("start streamer");
 
     const streamer = new StreamArraybuffer();
     streamer.streamViaKad(kad, s => setheader(s));
 
-    if (video) {
-      localRef.current.onloadedmetadata = async (ev: any) => {
-        const { videoHeight, videoWidth } = ev.target;
-        stream2ab(stream, { width: videoWidth, height: videoHeight }).subscribe(
-          ab => streamer.addAb(ab)
-        );
-      };
-    }
+    const observer = await stream2ab(stream, { width, height });
+    observer.subscribe(streamer.addAb);
   };
 
   return (

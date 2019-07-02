@@ -7,6 +7,7 @@ import FileShare from "./components/organisms/file";
 import TextShare from "./components/organisms/text";
 import { Content } from "./components/atoms/styled";
 import SuperMedia from "./components/organisms/supermedia";
+import WasmMedia from "./components/organisms/wasmmedia";
 import WebmTest from "./components/organisms/webm";
 
 const App: React.FC = () => {
@@ -23,6 +24,7 @@ const App: React.FC = () => {
     <div>
       <p>{kid}</p>
       <WebmTest />
+      <WasmMedia />
       <FileShare />
       <TextShare />
       <Content style={{ display: "flex" }}>

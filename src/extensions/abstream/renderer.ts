@@ -1,5 +1,5 @@
 import { Kademlia } from "../..";
-import { Torrent, mimeType, interval } from "./const";
+import { Torrent } from "./const";
 import Event from "rx.mini";
 
 export default class RenderArraybuffer {
@@ -8,7 +8,7 @@ export default class RenderArraybuffer {
 
   constructor(private kad: Kademlia) {}
 
-  async getVideo(headerKey: string) {
+  getVideo = (headerKey: string) => {
     const { kad } = this;
 
     const getTorrent = async () => {
@@ -42,12 +42,10 @@ export default class RenderArraybuffer {
     };
     getTorrent();
     this.getChunks();
-  }
+  };
 
-  private async getChunks() {
+  private getChunks = () => {
     const { kad, torrents } = this;
-
-    let start = false;
 
     const caches: { [hash: string]: ArrayBuffer } = {};
     const playList: Torrent[] = [];
@@ -100,6 +98,7 @@ export default class RenderArraybuffer {
         if (unexist) {
           continue;
         } else {
+          console.log({ torrent });
           torrent
             .sort((a, b) => a.i - b.i)
             .forEach(item => {
@@ -112,5 +111,5 @@ export default class RenderArraybuffer {
       }
     };
     seek();
-  }
+  };
 }
