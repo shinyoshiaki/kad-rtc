@@ -8,6 +8,8 @@ import { storeFile, findFile } from "./extensions/file";
 import { StreamVideo, ReceiveVideo } from "./extensions/media";
 import SuperStreamVideo from "./extensions/supermedia/streamer";
 import SuperReceiveVideo from "./extensions/supermedia/renderer";
+import StreamArraybuffer from "./extensions/abstream/streamer";
+import RenderArraybuffer from "./extensions/abstream/renderer";
 
 export {
   PeerModule,
@@ -21,5 +23,9 @@ export {
   StreamVideo,
   ReceiveVideo,
   SuperStreamVideo,
-  SuperReceiveVideo
+  SuperReceiveVideo,
+  StreamArraybuffer,
+  RenderArraybuffer
 };
+
+export default Kademlia;

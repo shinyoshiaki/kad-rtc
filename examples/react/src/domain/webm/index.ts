@@ -1,10 +1,13 @@
+import Event from "rx.mini";
+
 const framerate = 30;
 
-function cameraStream(
+export function stream2ab(
   stream: MediaStream,
   { width, height }: { width: number; height: number }
 ) {
-  return new ReadableStream({
+  const observer = new Event<ArrayBuffer>();
+  new ReadableStream({
     async start(controller) {
       const cvs = document.createElement("canvas");
       const video = document.createElement("video");
@@ -21,10 +24,62 @@ function cameraStream(
         setTimeout(f, frameTimeout);
       }, frameTimeout);
     }
-  });
+  }).pipeTo(
+    new WritableStream({
+      write(image) {
+        observer.execute(image.data.buffer);
+      }
+    })
+  );
+  return observer;
 }
 
-export default async function wasmTest(
+export async function createAbDecorder(
+  {
+    width,
+    height
+  }: {
+    width: number;
+    height: number;
+  },
+  onMs: (ms: MediaSource) => void
+) {
+  const worker = new Worker("node_modules/webm-wasm/dist/webm-worker.js");
+
+  worker.postMessage("./webm-wasm.wasm");
+  await nextEvent(worker, "message");
+  worker.postMessage({
+    width,
+    height,
+    realtime: true,
+    bitrate: 20000
+  });
+
+  const mediaSource = new MediaSource();
+  mediaSource.onsourceopen = () => {
+    const sourceBuffer = mediaSource.addSourceBuffer(
+      `video/webm; codecs="vp8"`
+    );
+    worker.onmessage = ev => {
+      if (!ev.data) {
+        return mediaSource.endOfStream();
+      }
+      try {
+        console.log(ev.data);
+        sourceBuffer.appendBuffer(ev.data);
+      } catch (error) {}
+    };
+  };
+
+  onMs(mediaSource);
+
+  const action = new Event<ArrayBuffer>();
+  action.subscribe(ab => worker.postMessage(ab, [ab]));
+
+  return action;
+}
+
+export default async function webmTest(
   stream: MediaStream,
   { width, height }: { width: number; height: number }
 ) {
@@ -38,12 +93,8 @@ export default async function wasmTest(
     realtime: true,
     bitrate: 20000
   });
-  cameraStream(stream, { width, height }).pipeTo(
-    new WritableStream({
-      write(image) {
-        worker.postMessage(image.data.buffer, [image.data.buffer]);
-      }
-    })
+  stream2ab(stream, { width, height }).subscribe(ab =>
+    worker.postMessage(ab, [ab])
   );
 
   const mediaSource = new MediaSource();
