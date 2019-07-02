@@ -1,8 +1,8 @@
-import React, { FC, useEffect, useRef } from "react";
+import React, { FC, useRef } from "react";
 import wasmTest from "../../../domain/webm";
 import useFile from "../../../hooks/useFile";
 
-const WasmTest: FC = () => {
+const WebmTest: FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const localRef = useRef<any>(null);
   const [_, setfile, onSetfile] = useFile();
@@ -45,4 +45,4 @@ const WasmTest: FC = () => {
   );
 };
 
-export default WasmTest;
+export default WebmTest;

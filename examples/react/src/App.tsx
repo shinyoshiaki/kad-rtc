@@ -23,7 +23,6 @@ const App: React.FC = () => {
   return (
     <div>
       <p>{kid}</p>
-      <LibvpxTest />
       <WasmTest />
       <FileShare />
       <TextShare />
