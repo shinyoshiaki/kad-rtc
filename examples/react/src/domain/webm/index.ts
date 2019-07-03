@@ -109,16 +109,16 @@ export default async function webmTest(
   mediaSource.onsourceopen = async () => {
     const sb = mediaSource.addSourceBuffer(`video/webm; codecs="vp8"`);
 
-    let test = 0;
     const observer = await stream2ab(stream, { width, height });
     observer.subscribe((ab: any) => {
       try {
-        test++;
-        if (test > 20) chunks.push(ab);
+        chunks.push(ab);
       } catch (error) {
         console.warn(error);
       }
     });
+
+    let test = 0;
 
     while (true) {
       if (sb.updating || chunks.length === 0) {
@@ -127,8 +127,11 @@ export default async function webmTest(
         const chunk = chunks.shift();
         try {
           if (chunk) {
-            sb.appendBuffer(chunk);
-            await waitEvent(sb, "updateend", undefined);
+            test++;
+            if (test > 20) {
+              sb.appendBuffer(chunk);
+              await waitEvent(sb, "updateend", undefined);
+            }
           } else await new Promise(r => setTimeout(r));
         } catch (error) {
           console.warn(error, chunk, sb);
