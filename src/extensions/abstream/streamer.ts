@@ -3,11 +3,11 @@ import { torrent2hash, abs2torrent } from "./const";
 import { Kademlia } from "../..";
 
 export default class StreamArraybuffer {
-  private chunks: ArrayBuffer[] = [];
-  private onChunks = new Event<ArrayBuffer[]>();
+  private chunks: Uint8Array[] = [];
+  private onChunks = new Event<Uint8Array[]>();
 
-  addAb = (ab: ArrayBuffer) => {
-    this.chunks.push(ab);
+  addAb = (uint8: Uint8Array) => {
+    this.chunks.push(uint8);
     if (this.chunks.length > 10) {
       this.onChunks.execute(this.chunks);
       this.chunks = [];
@@ -28,8 +28,8 @@ export default class StreamArraybuffer {
 
       kad.store(key, value, msg);
       torrent.map(item => {
-        const ab = buffer[item.i];
-        kad.store(item.v, Buffer.from(ab));
+        const uint8 = buffer[item.i];
+        kad.store(item.v, uint8);
       });
 
       buffer = abs;

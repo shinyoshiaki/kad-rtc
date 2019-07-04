@@ -119,7 +119,7 @@ export default class SuperReceiveVideo extends Media {
             .sort((a, b) => a.i - b.i)
             .forEach(item => {
               const chunk = caches[item.v];
-              this.chunks.push((chunk as any).buffer);
+              this.chunks.push(chunk);
             });
 
           torrent = undefined;

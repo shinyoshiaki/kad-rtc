@@ -57,11 +57,11 @@ export default class GuestNode {
   private async answer(socket: SocketIOClient.Socket, data: Offer) {
     const peer = this.peers[data.serverKid];
 
-    const sdp = await peer.setOffer(data.sdp);
-    socket.emit("rpc", Answer(sdp, this.kademlia.kid));
+    const sdp = await peer.setOffer(JSON.parse(data.sdp));
+    socket.emit("rpc", Answer(JSON.stringify(sdp), this.kademlia.kid));
     await peer.onConnect.asPromise();
 
     await this.kademlia.add(peer);
-    this.onConnect.execute();
+    this.onConnect.execute({});
   }
 }

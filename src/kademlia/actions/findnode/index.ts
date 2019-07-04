@@ -10,9 +10,11 @@ const FindNode = (searchkid: string, except: string[]) => {
 
 export type FindNode = ReturnType<typeof FindNode>;
 
-const FindNodeAnswer = (sdp: any, peerkid: string) => {
-  return { rpc: "FindNodeAnswer" as const, sdp, peerkid };
-};
+const FindNodeAnswer = (sdp: string, peerkid: string) => ({
+  rpc: "FindNodeAnswer" as const,
+  sdp,
+  peerkid
+});
 
 export type FindNodeAnswer = ReturnType<typeof FindNodeAnswer>;
 
@@ -47,9 +49,9 @@ export default async function findNode(
     const { peerkid, sdp } = offer;
     const { peer, candidate } = signaling.create(peerkid);
     if (peer) {
-      const answer = await peer.setOffer(sdp);
+      const answer = await peer.setOffer(JSON.parse(sdp));
 
-      rpcManager.run(proxy, FindNodeAnswer(answer, peerkid));
+      rpcManager.run(proxy, FindNodeAnswer(JSON.stringify(answer), peerkid));
       const res = await peer.onConnect.asPromise(timeout).catch(() => {
         signaling.delete(peerkid);
       });

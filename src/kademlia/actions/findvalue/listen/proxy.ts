@@ -6,11 +6,12 @@ import { timeout } from "../../../const";
 import { Item } from "../../../modules/kvs/base";
 import { ID } from "../../../services/rpcmanager";
 
-const FindValueResult = (data: Partial<{ item: Item; offers: Offer[] }>) => {
-  return { rpc: "FindValueResult" as const, data };
-};
+const FindValueResult = (data: Partial<{ item: Item; offers: Offer[] }>) => ({
+  rpc: "FindValueResult" as const,
+  data
+});
 
-export type Offer = { peerkid: string; sdp: any };
+export type Offer = { peerkid: string; sdp: string };
 
 export type FindValueResult = ReturnType<typeof FindValueResult>;
 
@@ -21,7 +22,7 @@ const FindValueProxyOpen = (finderkid: string) => ({
 
 export type FindValueProxyOpen = ReturnType<typeof FindValueProxyOpen>;
 
-const FindValueProxyAnswer = (sdp: any, finderkid: string) => ({
+const FindValueProxyAnswer = (sdp: string, finderkid: string) => ({
   rpc: "FindValueProxyAnswer" as const,
   sdp,
   finderkid
@@ -59,7 +60,7 @@ export default class FindValueProxy {
       this.listen.rpc({ ...FindValueResult({ item }), id });
     } else {
       const peers = kTable.findNode(key);
-      const offers: { peerkid: string; sdp: object }[] = [];
+      const offers: { peerkid: string; sdp: string }[] = [];
 
       const findValuePeerOffer = async (peer: Peer) => {
         if (!(peer.kid === this.listen.kid || except.includes(peer.kid))) {

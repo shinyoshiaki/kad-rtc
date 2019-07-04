@@ -4,7 +4,7 @@ import Event from "rx.mini";
 
 export default class RenderArraybuffer {
   private torrents: Torrent[] = [];
-  observer = new Event<ArrayBuffer>();
+  observer = new Event<Uint8Array>();
 
   constructor(private kad: Kademlia) {}
 
@@ -47,7 +47,7 @@ export default class RenderArraybuffer {
   private getChunks = () => {
     const { kad, torrents } = this;
 
-    const caches: { [hash: string]: ArrayBuffer } = {};
+    const caches: { [hash: string]: Uint8Array } = {};
     const playList: Torrent[] = [];
 
     const find = async () => {
@@ -98,14 +98,12 @@ export default class RenderArraybuffer {
         if (unexist) {
           continue;
         } else {
-          console.log({ torrent });
           torrent
             .sort((a, b) => a.i - b.i)
             .forEach(item => {
               const chunk = caches[item.v];
               this.observer.execute(chunk);
             });
-
           torrent = undefined;
         }
       }

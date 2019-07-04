@@ -3,8 +3,8 @@ import { Content } from "../../../atoms/styled";
 import useFile from "../../../../hooks/useFile";
 import { kad } from "../../../../services/kademlia";
 import { getLocalVideo } from "../../../../../../../src/webrtc";
-import { stream2ab } from "../../../../domain/webm";
 import { StreamArraybuffer } from "../../../../../../../src";
+import { libvpxEnc } from "../../../../domain/libvpx";
 
 const SuperMediaRecord: FC = () => {
   const localRef = useRef<any>();
@@ -12,40 +12,40 @@ const SuperMediaRecord: FC = () => {
   const [_, setfile, onSetfile] = useFile();
 
   onSetfile(async file => {
-    let width: number, height: number;
-    localRef.current.onloadedmetadata = async (ev: any) => {
-      const { videoHeight, videoWidth } = ev.target;
-      width = videoWidth;
-      height = videoHeight;
-    };
     localRef.current.src = URL.createObjectURL(file);
     const stream = localRef.current.captureStream(30);
-    await new Promise(r => setTimeout(r, 1000));
-    startStreamer(stream, { width, height });
+    console.log("stream");
+    startStreamer(stream);
   });
 
   const webcam = async () => {
     const stream = await getLocalVideo();
-
-    localRef.current.onloadedmetadata = async (ev: any) => {
-      const { videoHeight, videoWidth } = ev.target;
-      startStreamer(stream, { width: videoWidth, height: videoHeight });
-    };
-
     localRef.current = stream;
+    startStreamer(stream);
   };
 
-  const startStreamer = async (
-    stream: MediaStream,
-    { width, height }: { width: number; height: number }
-  ) => {
-    console.log("start streamer");
+  const startStreamer = (stream: MediaStream) => {
+    const video = localRef.current;
 
     const streamer = new StreamArraybuffer();
     streamer.streamViaKad(kad, s => setheader(s));
 
-    const observer = await stream2ab(stream, { width, height });
-    observer.subscribe(ab => streamer.addAb(ab));
+    if (video) {
+      localRef.current.onloadedmetadata = async (ev: any) => {
+        const { videoHeight, videoWidth } = ev.target;
+        const { listener } = await libvpxEnc(stream, {
+          codec: "VP8",
+          width: 400,
+          height: 400,
+          fps: 30,
+          bitrate: 10000,
+          packetSize: 1
+        });
+        listener.subscribe(uint8 => {
+          streamer.addAb(uint8);
+        });
+      };
+    }
   };
 
   return (

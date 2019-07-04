@@ -4,9 +4,11 @@ import { DependencyInjection } from "../../../di";
 import { listeners } from "../../../listeners";
 import { ID } from "../../../services/rpcmanager";
 
-const FindNodePeerOffer = (peerkid: string, sdp?: object) => {
-  return { rpc: "FindNodePeerOffer" as const, sdp, peerkid };
-};
+const FindNodePeerOffer = (peerkid: string, sdp?: string) => ({
+  rpc: "FindNodePeerOffer" as const,
+  sdp,
+  peerkid
+});
 
 export type FindNodePeerOffer = ReturnType<typeof FindNodePeerOffer>;
 
@@ -41,7 +43,10 @@ export default class FindNodePeer {
 
       const offer = await peer.createOffer();
 
-      this.listen.rpc({ ...FindNodePeerOffer(kTable.kid, offer), id });
+      this.listen.rpc({
+        ...FindNodePeerOffer(kTable.kid, JSON.stringify(offer)),
+        id
+      });
     } else {
       this.listen.rpc({ ...FindNodePeerOffer(kTable.kid), id });
     }
@@ -52,7 +57,7 @@ export default class FindNodePeer {
 
     const peer = this.candidates[finderkid];
     if (!peer) return;
-    await peer.setAnswer(sdp);
+    await peer.setAnswer(JSON.parse(sdp));
 
     listeners(peer, this.di);
   }

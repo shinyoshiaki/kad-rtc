@@ -306,6 +306,7 @@ export default class WebRTC {
   }
 
   async send(data: string | ArrayBuffer | Buffer, label = "datachannel") {
+    if (!this.rtc) return;
     const { arrayBufferService } = this.services;
     const sendData = async () => {
       try {
