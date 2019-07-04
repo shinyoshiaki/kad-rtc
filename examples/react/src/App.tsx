@@ -3,10 +3,14 @@ import guest, { kad } from "./services/kademlia";
 import Watch from "./components/organisms/watch";
 import Record from "./components/organisms/record";
 import Peers from "./components/organisms/peers";
-import FileShare from "./components/file";
+import FileShare from "./components/organisms/file";
 import TextShare from "./components/organisms/text";
 import { Content } from "./components/atoms/styled";
 import SuperMedia from "./components/organisms/supermedia";
+import WasmMedia from "./components/organisms/wasmmedia";
+import WasmMedia2 from "./components/organisms/wasmmedia2";
+import WebmTest from "./components/organisms/webm";
+import LibvpxTest from "./components/organisms/libvpx";
 
 const App: React.FC = () => {
   const [kid, setkid] = useState("");
@@ -21,13 +25,7 @@ const App: React.FC = () => {
   return (
     <div>
       <p>{kid}</p>
-      <FileShare />
-      <TextShare />
-      <Content style={{ display: "flex" }}>
-        <Watch />
-        <Record />
-      </Content>
-      <SuperMedia />
+      <WasmMedia2 />
       <Peers />
     </div>
   );

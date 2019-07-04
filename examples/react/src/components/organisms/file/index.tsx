@@ -1,10 +1,10 @@
 import React, { FC } from "react";
-import { Content } from "../atoms/styled";
-import { useObject } from "../../hooks/useObject";
-import { useApi } from "../../hooks/useApi";
-import { getSliceArrayBuffer } from "../../util/file";
-import { storeFile, findFile } from "../../../../../src";
-import { kad } from "../../services/kademlia";
+import { Content } from "../../atoms/styled";
+import { useObject } from "../../../hooks/useObject";
+import { useApi } from "../../../hooks/useApi";
+import { getSliceArrayBuffer } from "../../../util/file";
+import { storeFile, findFile } from "../../../../../../src";
+import { kad } from "../../../services/kademlia";
 
 const FileShare: FC = () => {
   const fileobj = useObject({ storedkey: "", findkey: "" });

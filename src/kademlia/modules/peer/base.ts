@@ -20,11 +20,11 @@ export default class Peer {
   eventRpc = <T extends { rpc: string }>(rpc: T["rpc"], id: string) =>
     new Event<T>();
 
-  createOffer = async (): Promise<any> => {};
+  createOffer = async (): Promise<object> => null as any;
 
-  setOffer = async (sdp: any): Promise<any> => {};
+  setOffer = async (sdp: object): Promise<object> => null as any;
 
-  setAnswer = async (sdp: any): Promise<any> => {};
+  setAnswer = async (sdp: object): Promise<any> => {};
 
   disconnect = () => {};
 }

@@ -5,15 +5,19 @@ import Peer from "../../modules/peer/base";
 import { timeout } from "../../const";
 import { Item } from "../../modules/kvs/base";
 
-const FindValue = (key: string, except: string[]) => {
-  return { rpc: "FindValue" as const, key, except };
-};
+const FindValue = (key: string, except: string[]) => ({
+  rpc: "FindValue" as const,
+  key,
+  except
+});
 
 export type FindValue = ReturnType<typeof FindValue>;
 
-const FindValueAnswer = (sdp: any, peerkid: string) => {
-  return { rpc: "FindValueAnswer" as const, sdp, peerkid };
-};
+const FindValueAnswer = (sdp: string, peerkid: string) => ({
+  rpc: "FindValueAnswer" as const,
+  sdp,
+  peerkid
+});
 
 export type FindValueAnswer = ReturnType<typeof FindValueAnswer>;
 
@@ -58,9 +62,9 @@ export default async function findValue(key: string, di: DependencyInjection) {
     const { peer, candidate } = signaling.create(peerkid);
 
     if (peer) {
-      const answer = await peer.setOffer(sdp);
+      const answer = await peer.setOffer(JSON.parse(sdp));
 
-      rpcManager.run(proxy, FindValueAnswer(answer, peerkid));
+      rpcManager.run(proxy, FindValueAnswer(JSON.stringify(answer), peerkid));
 
       const res = await peer.onConnect.asPromise(timeout).catch(() => {
         signaling.delete(peerkid);

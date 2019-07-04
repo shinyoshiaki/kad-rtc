@@ -1,7 +1,7 @@
 import Base, { RPC } from "./base";
 import Event from "rx.mini";
 import WebRTC from "../../../webrtc";
-import * as bson from "bson";
+import { decode, encode } from "@msgpack/msgpack";
 
 export const PeerModule = (kid: string) => new Peer(kid);
 
@@ -35,7 +35,7 @@ export default class Peer implements Base {
   parseRPC = (data: ArrayBuffer) => {
     const buffer = Buffer.from(data);
     try {
-      const data: RPC = bson.deserialize(buffer);
+      const data: RPC = decode(buffer) as any;
       if (data.rpc) {
         return data;
       }
@@ -46,7 +46,7 @@ export default class Peer implements Base {
   };
 
   rpc = (send: RPC) => {
-    const packet = bson.serialize(send);
+    const packet = encode(send);
     this.peer.send(packet);
   };
 

@@ -4,9 +4,11 @@ import { listeners } from "../../../listeners";
 import { FindValueProxyOpen, FindValueProxyAnswer } from "./proxy";
 import { ID } from "../../../services/rpcmanager";
 
-const FindValuePeerOffer = (peerkid: string, sdp?: object) => {
-  return { rpc: "FindValuePeerOffer" as const, sdp, peerkid };
-};
+const FindValuePeerOffer = (peerkid: string, sdp?: string) => ({
+  rpc: "FindValuePeerOffer" as const,
+  sdp,
+  peerkid
+});
 
 export type FindValuePeerOffer = ReturnType<typeof FindValuePeerOffer>;
 
@@ -42,7 +44,10 @@ export default class FindValuePeer {
 
       const offer = await peer.createOffer();
 
-      this.listen.rpc({ ...FindValuePeerOffer(kTable.kid, offer), id });
+      this.listen.rpc({
+        ...FindValuePeerOffer(kTable.kid, JSON.stringify(offer)),
+        id
+      });
     } else {
       this.listen.rpc({ ...FindValuePeerOffer(kTable.kid), id });
     }
@@ -53,7 +58,7 @@ export default class FindValuePeer {
 
     const peer = this.candidates[finderkid];
     if (!peer) return;
-    await peer.setAnswer(sdp);
+    await peer.setAnswer(JSON.parse(sdp));
 
     listeners(peer, this.di);
   }

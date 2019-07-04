@@ -1,23 +1,15 @@
 import { Kademlia } from "../..";
-import { waitEvent, Media } from "../media/media";
-import { Torrent, mimeType, interval } from "./const";
+import { Torrent } from "./const";
+import Event from "rx.mini";
 
-export default class SuperReceiveVideo extends Media {
-  torrents: Torrent[] = [];
-  sb?: SourceBuffer;
+export default class RenderArraybuffer {
+  private torrents: Torrent[] = [];
+  observer = new Event<Uint8Array>();
 
-  constructor(private kad: Kademlia) {
-    super();
-  }
+  constructor(private kad: Kademlia) {}
 
-  async getVideo(headerKey: string, onMsReady: (ms: MediaSource) => void) {
+  getVideo = (headerKey: string) => {
     const { kad } = this;
-
-    const ms = new MediaSource();
-    onMsReady(ms);
-
-    await waitEvent(ms, "sourceopen", undefined);
-    this.sb = ms.addSourceBuffer(mimeType);
 
     const getTorrent = async () => {
       const first = await kad.findValue(headerKey);
@@ -50,25 +42,16 @@ export default class SuperReceiveVideo extends Media {
     };
     getTorrent();
     this.getChunks();
-  }
+  };
 
-  private async getChunks() {
+  private getChunks = () => {
     const { kad, torrents } = this;
 
-    let start = false;
-
-    const caches: { [hash: string]: ArrayBuffer } = {};
+    const caches: { [hash: string]: Uint8Array } = {};
     const playList: Torrent[] = [];
 
     const find = async () => {
       findloop: while (true) {
-        if (this.chunks.length > (1000 / interval) * 10) {
-          if (!start) {
-            start = true;
-            this.update(this.sb!);
-          }
-        }
-
         const torrent = torrents.shift();
         if (!torrent) {
           await new Promise(r => setTimeout(r, 10));
@@ -119,13 +102,12 @@ export default class SuperReceiveVideo extends Media {
             .sort((a, b) => a.i - b.i)
             .forEach(item => {
               const chunk = caches[item.v];
-              this.chunks.push(chunk);
+              this.observer.execute(chunk);
             });
-
           torrent = undefined;
         }
       }
     };
     seek();
-  }
+  };
 }
