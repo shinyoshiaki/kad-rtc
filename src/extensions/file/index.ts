@@ -1,22 +1,22 @@
 import { Kademlia } from "../..";
-import bson from "bson";
 import sha1 from "sha1";
 import JobSystem from "../../kademlia/services/jobsystem";
+import { decode, encode } from "@msgpack/msgpack";
 
 export async function storeFile(file: ArrayBuffer[], kad: Kademlia) {
   if (file.length > 0) {
     const jobs: {
       key: string;
-      value: Buffer;
+      value: Uint8Array;
     }[] = [];
 
     {
       const last: ArrayBuffer = file.pop()!;
       console.log({ last });
-      const item = { value: Buffer.from(last), next: undefined };
+      const item = { value: new Uint8Array(last), next: undefined };
       console.log({ item });
-      const value = bson.serialize(item);
-      const key = sha1(value).toString();
+      const value = encode(item);
+      const key = sha1(Buffer.from(value.buffer)).toString();
       jobs.push({ key, value });
     }
     console.log({ file });
@@ -24,9 +24,9 @@ export async function storeFile(file: ArrayBuffer[], kad: Kademlia) {
     const reverse = file.reverse();
     reverse.forEach(ab => {
       const pre = jobs.slice(-1)[0];
-      const item = { value: Buffer.from(ab), next: pre.key };
-      const value = bson.serialize(item);
-      const key = sha1(value).toString();
+      const item = { value: new Uint8Array(ab), next: pre.key };
+      const value = encode(item);
+      const key = sha1(Buffer.from(value)).toString();
       jobs.push({ key, value });
     });
 
@@ -44,12 +44,13 @@ export async function storeFile(file: ArrayBuffer[], kad: Kademlia) {
 }
 
 export async function findFile(headerKey: string, kad: Kademlia) {
-  const chunks: Buffer[] = [];
+  const chunks: Uint8Array[] = [];
   const firstItem = await kad.findValue(headerKey);
   if (!firstItem) return;
-  const firstJson: { value: Buffer; next: string } = bson.deserialize(
-    (firstItem.value as any).buffer
-  );
+  const firstJson = decode(new Uint8Array(firstItem.value as ArrayBuffer)) as {
+    value: Uint8Array;
+    next: string;
+  };
   console.log({ firstJson });
 
   const work = () =>
@@ -66,7 +67,7 @@ export async function findFile(headerKey: string, kad: Kademlia) {
             reject(false);
             break;
           }
-          json = bson.deserialize((value.value as any).buffer);
+          json = decode(new Uint8Array(value.value as ArrayBuffer)) as any;
           console.log({ json });
         }
       } catch (error) {}

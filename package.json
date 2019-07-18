@@ -28,7 +28,7 @@
     "buffer-to-arraybuffer": "^0.0.5",
     "kad-distance": "git+https://git@github.com/shinyoshiaki/kad-distance.git",
     "keypair": "^1.0.1",
-    "rx.mini": "^0.0.7",
+    "rx.mini": "^0.0.9",
     "sha1": "^1.1.1",
     "webrtc4me": "^0.5.8",
     "wrtc": "^0.4.0"
