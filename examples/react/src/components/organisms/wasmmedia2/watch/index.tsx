@@ -5,7 +5,7 @@ import { RenderArraybuffer } from "../../../../../../../src";
 import { kad } from "../../../../services/kademlia";
 import { libvpxDec } from "../../../../domain/libvpx";
 import { VideoCanvas } from "../../../atoms/videocanvas";
-import { decode, encode } from "@msgpack/msgpack";
+import { decode } from "@msgpack/msgpack";
 
 const framesPerPacket = 2048;
 
@@ -28,11 +28,9 @@ const SuperMediaWatch: FC = () => {
       bitrate: 10000,
       packetSize: 1
     });
-    renderVideo.observer.subscribe(uint8 => {
-      const chunk: { video: Uint8Array; audio: Uint8Array[] } = decode(
-        uint8
-      ) as any;
-      console.log({ chunk });
+    renderVideo.buffer.subscribe(async uint8 => {
+      await new Promise(r => setTimeout(r, 1 / 3));
+      const chunk = decode(uint8) as { video: Uint8Array; audio: Uint8Array[] };
       const video = new Uint8Array(Object.values(chunk.video)).buffer;
       chunk.audio.forEach(audio => {
         const uint8 = new Uint8Array(Object.values(audio));
