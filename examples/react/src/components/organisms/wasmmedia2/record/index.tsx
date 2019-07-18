@@ -43,7 +43,7 @@ const SuperMediaRecord: FC = () => {
         const destinationNode = audioCtx.createMediaStreamDestination();
         processor.onaudioprocess = e => {
           const channelData = e.inputBuffer.getChannelData(0);
-          audioChunks.push(float32toInt8(channelData));
+          audioChunks.push(new Uint8Array(channelData.buffer));
         };
         processor.connect(destinationNode);
 
@@ -57,12 +57,10 @@ const SuperMediaRecord: FC = () => {
           packetSize: 1
         });
         listener.subscribe(uint8 => {
-          console.log({ audioChunks });
           const chunk = {
             video: uint8,
             audio: audioChunks
           };
-          console.log("send", chunk, encode(chunk), decode(encode(chunk)));
           streamer.addAb(encode(chunk));
           audioChunks = [];
         });
@@ -86,11 +84,3 @@ const SuperMediaRecord: FC = () => {
 };
 
 export default SuperMediaRecord;
-
-const float32toInt8 = (f32: Float32Array): Uint8Array => {
-  const buffer = new Buffer(f32.length * 4);
-  for (var i = 0; i < f32.length; i++) {
-    buffer.writeFloatLE(f32[i], i * 4);
-  }
-  return buffer;
-};
