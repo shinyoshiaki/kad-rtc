@@ -1,8 +1,22 @@
-import Peer from "../../../modules/peer/base";
+import { Peer } from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
-import { FindValue, FindValueAnswer } from "..";
 import { Item } from "../../../modules/kvs/base";
 import { ID } from "../../../services/rpcmanager";
+export default class FindValueProxy {
+    private listen;
+    private di;
+    constructor(listen: Peer, di: DependencyInjection);
+    findvalue: (data: {
+        rpc: "FindValue";
+        key: string;
+        except: string[];
+    } & ID) => Promise<void>;
+    findValueAnswer: (data: {
+        rpc: "FindValueAnswer";
+        sdp: string;
+        peerkid: string;
+    } & ID) => void;
+}
 declare const FindValueResult: (data: Partial<{
     item: Item;
     offers: Offer[];
@@ -15,7 +29,7 @@ declare const FindValueResult: (data: Partial<{
 };
 export declare type Offer = {
     peerkid: string;
-    sdp: any;
+    sdp: string;
 };
 export declare type FindValueResult = ReturnType<typeof FindValueResult>;
 declare const FindValueProxyOpen: (finderkid: string) => {
@@ -23,17 +37,10 @@ declare const FindValueProxyOpen: (finderkid: string) => {
     finderkid: string;
 };
 export declare type FindValueProxyOpen = ReturnType<typeof FindValueProxyOpen>;
-declare const FindValueProxyAnswer: (sdp: any, finderkid: string) => {
+declare const FindValueProxyAnswer: (sdp: string, finderkid: string) => {
     rpc: "FindValueProxyAnswer";
-    sdp: any;
+    sdp: string;
     finderkid: string;
 };
 export declare type FindValueProxyAnswer = ReturnType<typeof FindValueProxyAnswer>;
-export default class FindValueProxy {
-    private listen;
-    private di;
-    constructor(listen: Peer, di: DependencyInjection);
-    findvalue(data: FindValue & ID): Promise<void>;
-    findValueAnswer(data: FindValueAnswer & ID): Promise<void>;
-}
 export {};

@@ -1,5 +1,5 @@
 import Kbucket, { Option as OptBucket } from "./kbucket";
-import Peer from "../modules/peer/base";
+import { Peer } from "../modules/peer/base";
 export declare type Option = OptBucket;
 export default class Ktable {
     kid: string;

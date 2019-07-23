@@ -1,4 +1,5 @@
-import Peer from "../../modules/peer/base";
+import { Peer } from "../../modules/peer/base";
+import Event from "rx.mini";
 export declare type ID = {
     id: string;
 };
@@ -15,4 +16,7 @@ export default class RpcManager {
         rpc: string;
         [key: string]: any;
     }): void;
+    asObservable<T extends {
+        rpc: string;
+    }>(rpc: T["rpc"], listen: Peer): Event<T & ID>;
 }
