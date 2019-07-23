@@ -72,6 +72,6 @@ export default class PortalNode {
     await peer.onConnect.asPromise();
 
     await this.kademlia.add(peer);
-    this.onConnect.execute();
+    this.onConnect.execute(null);
   }
 }
