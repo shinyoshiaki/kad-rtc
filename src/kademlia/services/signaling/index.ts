@@ -1,5 +1,5 @@
 import Event from "rx.mini";
-import Peer from "../../modules/peer/base";
+import { Peer } from "../../modules/peer/base";
 
 export default class Signaling {
   private candidates: { [kid: string]: Event<Peer> } = {};

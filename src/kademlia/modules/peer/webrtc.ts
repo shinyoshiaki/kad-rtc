@@ -1,23 +1,23 @@
-import Base, { RPC } from "./base";
+import { RPC, Peer } from "./base";
 import Event from "rx.mini";
-import WebRTC from "webrtc4me";
+import WebRTC, { Signal } from "webrtc4me";
 import { decode, encode } from "@msgpack/msgpack";
+import { timeout } from "../../const";
 const wrtc = require("wrtc");
 
-export const PeerModule = (kid: string) => new Peer(kid);
+export const PeerModule = (kid: string) => new PeerWebRTC(kid);
 
-export default class Peer implements Base {
-  private type = "webrtc";
-  private peer: WebRTC = new WebRTC({ disable_stun: true, wrtc });
+export default class PeerWebRTC implements Peer {
+  type = "webrtc";
+  peer: WebRTC = new WebRTC({ disable_stun: true, wrtc });
   onRpc = new Event<RPC>();
-  onDisconnect = this.peer.onDisconnect as any;
-  onConnect = new Event<boolean>();
+  onDisconnect = new Event();
+  onConnect = new Event();
 
   constructor(public kid: string) {
     this.peer.nodeId = kid;
-    this.peer.onConnect.once(() => {
-      this.onConnect.execute(true);
-    });
+    this.peer.onConnect.once(() => this.onConnect.execute(null));
+    this.peer.onDisconnect.once(() => this.onDisconnect.execute(null));
     const onData = this.peer.onData.subscribe(msg => {
       try {
         const { label, data } = msg;
@@ -29,9 +29,7 @@ export default class Peer implements Base {
         console.error(error);
       }
     });
-    this.peer.onDisconnect.once(() => {
-      onData.unSubscribe();
-    });
+    this.onDisconnect.once(onData.unSubscribe);
   }
 
   parseRPC = (data: ArrayBuffer) => {
@@ -76,17 +74,20 @@ export default class Peer implements Base {
     return offer;
   };
 
-  setOffer = async (offer: any) => {
+  setOffer = async (offer: Signal) => {
     this.peer.setSdp(offer);
     const answer = await this.peer.onSignal.asPromise();
     await new Promise(r => setTimeout(r, 0));
     return answer;
   };
 
-  setAnswer = async (answer: any) => {
+  setAnswer = async (answer: Signal) => {
     this.peer.setSdp(answer);
-    await this.peer.onConnect.asPromise();
-    return true;
+    const err = await this.peer.onConnect
+      .asPromise(timeout)
+      .catch(e => new Error(e));
+    if (err) this.onConnect.error(err);
+    return err;
   };
 
   disconnect = () => {

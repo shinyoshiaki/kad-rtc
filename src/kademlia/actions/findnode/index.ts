@@ -1,7 +1,11 @@
-import { FindNodeProxyOffer, Offer } from "./listen/proxy";
+import {
+  FindNodeProxyOffer,
+  Offer,
+  FindNodeProxyAnswerError
+} from "./listen/proxy";
 import { DependencyInjection } from "../../di";
 import { listeners } from "../../listeners";
-import Peer from "../../modules/peer/base";
+import { Peer } from "../../modules/peer/base";
 import { timeout } from "../../const";
 
 const FindNode = (searchkid: string, except: string[]) => ({
@@ -51,12 +55,22 @@ export default async function findNode(
     if (peer) {
       const answer = await peer.setOffer(JSON.parse(sdp));
 
-      rpcManager.run(proxy, FindNodeAnswer(JSON.stringify(answer), peerkid));
-      const res = await peer.onConnect.asPromise(timeout).catch(() => {
-        signaling.delete(peerkid);
-      });
+      rpcManager
+        .asObservable<FindNodeProxyAnswerError>(
+          "FindNodeProxyAnswerError",
+          proxy
+        )
+        .once(() => {
+          peer.onConnect.error("FindNodeProxyAnswerError");
+        });
 
-      if (res) listeners(peer, di);
+      rpcManager.run(proxy, FindNodeAnswer(JSON.stringify(answer), peerkid));
+      const err = await peer.onConnect.asPromise(timeout).catch(() => "err");
+      if (err) {
+        signaling.delete(peerkid);
+      } else {
+        listeners(peer, di);
+      }
     } else if (candidate) {
       const peer = await candidate.asPromise(timeout).catch(() => {});
       if (peer) listeners(peer, di);

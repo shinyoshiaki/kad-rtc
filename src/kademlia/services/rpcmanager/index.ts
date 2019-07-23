@@ -1,4 +1,4 @@
-import Peer from "../../modules/peer/base";
+import { Peer } from "../../modules/peer/base";
 import Uuid from "../../../utill/uuid";
 import Event from "rx.mini";
 
@@ -32,5 +32,16 @@ export default class RpcManager {
     this.uuid.setPrefix(peer.kid);
     const id = this.uuid.get();
     peer.rpc({ ...rpc, id });
+  }
+
+  asObservable<T extends { rpc: string }>(rpc: T["rpc"], listen: Peer) {
+    const event = new Event<T & ID>();
+    const onRpc = listen.onRpc.subscribe(data => {
+      if (data.rpc === rpc) {
+        event.execute(data);
+      }
+    });
+    listen.onDisconnect.once(onRpc.unSubscribe);
+    return event;
   }
 }

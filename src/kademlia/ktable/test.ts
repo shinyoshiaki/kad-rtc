@@ -3,9 +3,9 @@ import sha1 from "sha1";
 import Kbucket from "./kbucket";
 
 import { distance } from "kad-distance";
-import Peer from "../modules/peer/base";
+import { PeerMock } from "../modules/peer/base";
 
-class PeerTest extends Peer {}
+class PeerTest extends PeerMock {}
 
 describe("ktable", () => {
   const kBucketSize = 20;
