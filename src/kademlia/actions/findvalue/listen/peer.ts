@@ -30,8 +30,7 @@ export default class FindValuePeer {
   }
 
   findValueProxyOpen = async (data: FindValueProxyOpen & ID) => {
-    const { finderkid } = data;
-    const id = data.id;
+    const { finderkid, id } = data;
     const { kTable, signaling } = this.di;
 
     const { peer } = signaling.create(finderkid);
