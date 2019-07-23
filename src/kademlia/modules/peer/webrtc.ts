@@ -1,13 +1,14 @@
 import Base, { RPC } from "./base";
 import Event from "rx.mini";
-import WebRTC from "../../../webrtc";
+import WebRTC from "webrtc4me";
 import { decode, encode } from "@msgpack/msgpack";
+const wrtc = require("wrtc");
 
 export const PeerModule = (kid: string) => new Peer(kid);
 
 export default class Peer implements Base {
   private type = "webrtc";
-  private peer: WebRTC = new WebRTC({ disable_stun: true });
+  private peer: WebRTC = new WebRTC({ disable_stun: true, wrtc });
   onRpc = new Event<RPC>();
   onDisconnect = this.peer.onDisconnect as any;
   onConnect = new Event<boolean>();
@@ -17,11 +18,12 @@ export default class Peer implements Base {
     this.peer.onConnect.once(() => {
       this.onConnect.execute(true);
     });
-    const onData = this.peer.onData.subscribe(raw => {
+    const onData = this.peer.onData.subscribe(msg => {
       try {
-        if (raw.label == "datachannel") {
-          const data = this.parseRPC(raw.data);
-          if (data) this.onRpc.execute(data);
+        const { label, data } = msg;
+        if (label == "datachannel" && typeof data !== "string") {
+          const obj = this.parseRPC(data);
+          if (obj) this.onRpc.execute(obj);
         }
       } catch (error) {
         console.error(error);
@@ -52,12 +54,15 @@ export default class Peer implements Base {
 
   eventRpc = (rpc: string, id: string) => {
     const observer = new Event<any>();
-    const onData = this.peer.onData.subscribe(raw => {
-      const data = this.parseRPC(raw.data);
-      if (data && data.rpc === rpc) {
-        if (data.id === id) {
-          observer.execute(data);
-          onData.unSubscribe();
+    const onData = this.peer.onData.subscribe(msg => {
+      const { data } = msg;
+      if (typeof data !== "string") {
+        const obj = this.parseRPC(data);
+        if (obj && obj.rpc === rpc) {
+          if (obj.id === id) {
+            observer.execute(data);
+            onData.unSubscribe();
+          }
         }
       }
     });
