@@ -4,16 +4,6 @@ import { listeners } from "../../../listeners";
 import { FindValueProxyOpen, FindValueProxyAnswer } from "./proxy";
 import { ID } from "../../../services/rpcmanager";
 
-const FindValuePeerOffer = (peerkid: string, sdp?: string) => ({
-  rpc: "FindValuePeerOffer" as const,
-  sdp,
-  peerkid
-});
-
-export type FindValuePeerOffer = ReturnType<typeof FindValuePeerOffer>;
-
-type actions = (FindValueProxyOpen | FindValueProxyAnswer) & ID;
-
 export default class FindValuePeer {
   candidates: { [key: string]: Peer } = {};
 
@@ -54,9 +44,15 @@ export default class FindValuePeer {
 
     const peer = this.candidates[finderkid];
     if (!peer) return;
-    // TODO
-    await peer.setAnswer(JSON.parse(sdp));
-
-    listeners(peer, this.di);
+    const err = await peer.setAnswer(JSON.parse(sdp));
+    if (!err) listeners(peer, this.di);
   };
 }
+
+const FindValuePeerOffer = (peerkid: string, sdp?: string) => ({
+  rpc: "FindValuePeerOffer" as const,
+  sdp,
+  peerkid
+});
+
+export type FindValuePeerOffer = ReturnType<typeof FindValuePeerOffer>;

@@ -3,36 +3,28 @@ import { Peer } from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
 import { ID } from "../../../services/rpcmanager";
 
-const OnStore = () => {
-  return { rpc: "OnStore" as const };
-};
-
-export type OnStore = ReturnType<typeof OnStore>;
-
-type actions = Store & ID;
-
 export default function listenStore(peer: Peer, di: DependencyInjection) {
   return new ListenStore(peer, di);
 }
 
 class ListenStore {
   constructor(private listen: Peer, private di: DependencyInjection) {
-    const onRpc = listen.onRpc.subscribe((data: actions) => {
-      switch (data.rpc) {
-        case "store":
-          this.store(data);
-          break;
-      }
-    });
-    listen.onDisconnect.once(() => onRpc.unSubscribe());
+    const { rpcManager } = di;
+    rpcManager.asObservable<Store>("Store", listen).subscribe(this.store);
   }
 
-  store(data: Store & ID) {
+  store = (data: Store & ID) => {
     const { kvs } = this.di.modules;
     const { key, value, id, msg } = data;
 
     kvs.set(key, value, msg as any);
 
     this.listen.rpc({ ...OnStore(), id });
-  }
+  };
 }
+
+const OnStore = () => {
+  return { rpc: "OnStore" as const };
+};
+
+export type OnStore = ReturnType<typeof OnStore>;
