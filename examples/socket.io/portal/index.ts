@@ -19,7 +19,7 @@ const Offer = (sdp: string, serverKid: string) => {
 
 type Offer = ReturnType<typeof Offer>;
 
-const Answer = (sdp: string, clientKid: string) => {
+const Answer = (sdp: any, clientKid: string) => {
   return { rpc: "Answer" as const, sdp, clientKid };
 };
 
