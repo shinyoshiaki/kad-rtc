@@ -18,21 +18,18 @@ export default class FindValuePeer {
   candidates: { [key: string]: Peer } = {};
 
   constructor(private listen: Peer, private di: DependencyInjection) {
-    const onRpc = listen.onRpc.subscribe((data: actions) => {
-      switch (data.rpc) {
-        case "FindValueProxyOpen":
-          this.findValueProxyOpen(data);
-          break;
-        case "FindValueProxyAnswer":
-          this.findValueProxyAnswer(data);
-          break;
-      }
-    });
+    const { rpcManager } = di;
 
-    listen.onDisconnect.once(() => onRpc.unSubscribe());
+    rpcManager
+      .asObservable<FindValueProxyOpen>("FindValueProxyOpen", listen)
+      .subscribe(this.findValueProxyOpen);
+
+    rpcManager
+      .asObservable<FindValueProxyAnswer>("FindValueProxyAnswer", listen)
+      .subscribe(this.findValueProxyAnswer);
   }
 
-  async findValueProxyOpen(data: FindValueProxyOpen & ID) {
+  findValueProxyOpen = async (data: FindValueProxyOpen & ID) => {
     const { finderkid } = data;
     const id = data.id;
     const { kTable, signaling } = this.di;
@@ -51,15 +48,16 @@ export default class FindValuePeer {
     } else {
       this.listen.rpc({ ...FindValuePeerOffer(kTable.kid), id });
     }
-  }
+  };
 
-  async findValueProxyAnswer(data: FindValueProxyAnswer) {
+  findValueProxyAnswer = async (data: FindValueProxyAnswer) => {
     const { finderkid, sdp } = data;
 
     const peer = this.candidates[finderkid];
     if (!peer) return;
+    // TODO
     await peer.setAnswer(JSON.parse(sdp));
 
     listeners(peer, this.di);
-  }
+  };
 }

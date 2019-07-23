@@ -4,35 +4,22 @@ import { DependencyInjection } from "../../../di";
 import { listeners } from "../../../listeners";
 import { ID } from "../../../services/rpcmanager";
 
-const FindNodePeerOffer = (peerkid: string, sdp?: string) => ({
-  rpc: "FindNodePeerOffer" as const,
-  sdp,
-  peerkid
-});
-
-export type FindNodePeerOffer = ReturnType<typeof FindNodePeerOffer>;
-
-type actions = (FindNodeProxyOpen | FindNodeProxyAnswer) & ID;
-
 export default class FindNodePeer {
   candidates: { [key: string]: Peer } = {};
 
   constructor(private listen: Peer, private di: DependencyInjection) {
-    const onRpc = listen.onRpc.subscribe((data: actions) => {
-      switch (data.rpc) {
-        case "FindNodeProxyOpen":
-          this.findNodeProxyOpen(data);
-          break;
-        case "FindNodeProxyAnswer":
-          this.findNodeProxyAnswer(data);
-          break;
-      }
-    });
+    const { rpcManager } = di;
 
-    listen.onDisconnect.once(() => onRpc.unSubscribe());
+    rpcManager
+      .asObservable<FindNodeProxyOpen>("FindNodeProxyOpen", listen)
+      .subscribe(this.findNodeProxyOpen);
+
+    rpcManager
+      .asObservable<FindNodeProxyAnswer>("FindNodeProxyAnswer", listen)
+      .subscribe(this.findNodeProxyAnswer);
   }
 
-  async findNodeProxyOpen(data: FindNodeProxyOpen & ID) {
+  findNodeProxyOpen = async (data: FindNodeProxyOpen & ID) => {
     const { kTable, signaling } = this.di;
     const { finderkid, id } = data;
 
@@ -50,9 +37,9 @@ export default class FindNodePeer {
     } else {
       this.listen.rpc({ ...FindNodePeerOffer(kTable.kid), id });
     }
-  }
+  };
 
-  async findNodeProxyAnswer(data: FindNodeProxyAnswer) {
+  findNodeProxyAnswer = async (data: FindNodeProxyAnswer) => {
     const { finderkid, sdp } = data;
 
     const peer = this.candidates[finderkid];
@@ -60,5 +47,13 @@ export default class FindNodePeer {
     await peer.setAnswer(JSON.parse(sdp));
 
     listeners(peer, this.di);
-  }
+  };
 }
+
+const FindNodePeerOffer = (peerkid: string, sdp?: string) => ({
+  rpc: "FindNodePeerOffer" as const,
+  sdp,
+  peerkid
+});
+
+export type FindNodePeerOffer = ReturnType<typeof FindNodePeerOffer>;
