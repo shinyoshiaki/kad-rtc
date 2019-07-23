@@ -1,4 +1,4 @@
-import Peer from "./peer/base";
+import { Peer } from "./peer/base";
 import KevValueStore from "./kvs/base";
 
 export default interface Modules {

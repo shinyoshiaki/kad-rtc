@@ -1,5 +1,5 @@
 import { Store } from "..";
-import Peer from "../../../modules/peer/base";
+import { Peer } from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
 import { ID } from "../../../services/rpcmanager";
 

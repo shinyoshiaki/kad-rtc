@@ -1,4 +1,4 @@
-import Peer from "../../modules/peer/base";
+import { Peer } from "../../modules/peer/base";
 import findNode from ".";
 import { testSetupNodes } from "../../../utill/testtools";
 

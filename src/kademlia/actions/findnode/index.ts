@@ -5,7 +5,7 @@ import {
 } from "./listen/proxy";
 import { DependencyInjection } from "../../di";
 import { listeners } from "../../listeners";
-import Peer from "../../modules/peer/base";
+import { Peer } from "../../modules/peer/base";
 import { timeout } from "../../const";
 
 const FindNode = (searchkid: string, except: string[]) => ({

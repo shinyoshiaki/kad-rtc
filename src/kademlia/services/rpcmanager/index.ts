@@ -1,4 +1,4 @@
-import Peer from "../../modules/peer/base";
+import { Peer } from "../../modules/peer/base";
 import Uuid from "../../../utill/uuid";
 import Event from "rx.mini";
 

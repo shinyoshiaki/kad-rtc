@@ -1,12 +1,12 @@
-import { RPC, PeerBase } from "./base";
+import { RPC, Peer } from "./base";
 import Event from "rx.mini";
 import WebRTC, { Signal } from "webrtc4me";
 import { decode, encode } from "@msgpack/msgpack";
 const wrtc = require("wrtc");
 
-export const PeerModule = (kid: string) => new Peer(kid);
+export const PeerModule = (kid: string) => new PeerWebRTC(kid);
 
-export default class Peer implements PeerBase {
+export default class PeerWebRTC implements Peer {
   type = "webrtc";
   peer: WebRTC = new WebRTC({ disable_stun: true, wrtc });
   onRpc = new Event<RPC>();

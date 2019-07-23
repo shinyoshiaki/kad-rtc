@@ -1,6 +1,6 @@
 import findNode from "../findnode";
 import { DependencyInjection } from "../../di";
-import Peer from "../../modules/peer/base";
+import { Peer } from "../../modules/peer/base";
 import { timeout } from "../../const";
 
 const Store = (key: string, value: string | ArrayBuffer, msg?: string) => ({

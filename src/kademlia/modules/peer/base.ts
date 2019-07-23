@@ -7,7 +7,7 @@ export type RPC = {
   id: string;
 };
 
-export type PeerBase = PeerClass & PeerProps;
+export type Peer = PeerClass & PeerProps;
 
 class PeerClass {
   constructor(public kid: string) {}
@@ -27,7 +27,7 @@ type PeerProps = {
   disconnect: () => void;
 };
 
-export default class Peer implements PeerBase {
+export class PeerMock implements Peer {
   type = "mock";
   onRpc = new Event<any>();
   onDisconnect = new Event();

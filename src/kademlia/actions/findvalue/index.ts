@@ -1,7 +1,7 @@
 import { DependencyInjection } from "../../di";
 import { FindValueResult, Offer } from "./listen/proxy";
 import { listeners } from "../../listeners";
-import Peer from "../../modules/peer/base";
+import { Peer } from "../../modules/peer/base";
 import { timeout } from "../../const";
 import { Item } from "../../modules/kvs/base";
 
