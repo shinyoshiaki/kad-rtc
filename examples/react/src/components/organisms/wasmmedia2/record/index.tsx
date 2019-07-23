@@ -3,7 +3,7 @@ import { decode, encode } from "@msgpack/msgpack";
 import { Content } from "../../../atoms/styled";
 import useFile from "../../../../hooks/useFile";
 import { kad } from "../../../../services/kademlia";
-import { getLocalVideo } from "../../../../../../../src/webrtc";
+import { getLocalVideo } from "webrtc4me";
 import { StreamArraybuffer } from "../../../../../../../src";
 import { libvpxEnc } from "../../../../domain/libvpx";
 

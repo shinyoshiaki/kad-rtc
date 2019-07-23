@@ -3,7 +3,7 @@ import React, { FC, useRef, useState } from "react";
 import { kad } from "../../../services/kademlia";
 import { StreamVideo } from "../../../../../../src/extensions/media";
 import useFile from "../../../hooks/useFile";
-import { getLocalVideo } from "../../../../../../src/webrtc";
+import { getLocalVideo } from "webrtc4me";
 import { Content } from "../../atoms/styled";
 
 const Record: FC<{}> = ({}) => {

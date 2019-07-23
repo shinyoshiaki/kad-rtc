@@ -3,7 +3,7 @@ import { Content } from "../../../atoms/styled";
 import useFile from "../../../../hooks/useFile";
 import { SuperStreamVideo } from "../../../../../../../src";
 import { kad } from "../../../../services/kademlia";
-import { getLocalVideo } from "../../../../../../../src/webrtc";
+import { getLocalVideo } from "webrtc4me";
 
 const SuperMediaRecord: FC = () => {
   const ref = useRef<any | undefined>(undefined);
