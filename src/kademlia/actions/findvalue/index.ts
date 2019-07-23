@@ -66,10 +66,12 @@ export default async function findValue(key: string, di: DependencyInjection) {
 
       rpcManager.run(proxy, FindValueAnswer(JSON.stringify(answer), peerkid));
 
-      const res = await peer.onConnect.asPromise(timeout).catch(() => {
+      const err = await peer.onConnect.asPromise(timeout);
+      if (err) {
         signaling.delete(peerkid);
-      });
-      if (res) listeners(peer, di);
+      } else {
+        listeners(peer, di);
+      }
     } else if (candidate) {
       const peer = await candidate.asPromise(timeout).catch(() => {});
       if (peer) listeners(peer, di);

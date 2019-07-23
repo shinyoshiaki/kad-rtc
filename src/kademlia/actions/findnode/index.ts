@@ -65,12 +65,12 @@ export default async function findNode(
         });
 
       rpcManager.run(proxy, FindNodeAnswer(JSON.stringify(answer), peerkid));
-      const res = await peer.onConnect.asPromise(timeout).catch(() => {
+      const err = await peer.onConnect.asPromise(timeout);
+      if (err) {
         signaling.delete(peerkid);
-      });
-
-      if (res) listeners(peer, di);
-
+      } else {
+        listeners(peer, di);
+      }
       rpcObserver.unSubscribe();
     } else if (candidate) {
       const peer = await candidate.asPromise(timeout).catch(() => {});
