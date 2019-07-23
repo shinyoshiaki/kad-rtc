@@ -5,12 +5,12 @@ import { DependencyInjection } from "../../../di";
 import { timeout } from "../../../const";
 import { ID } from "../../../services/rpcmanager";
 
+export type Offer = { peerkid: string; sdp: string };
+
 const FindNodeProxyOffer = (peers: Offer[]) => ({
   rpc: "FindNodeProxyOffer" as const,
   peers
 });
-
-export type Offer = { peerkid: string; sdp: string };
 
 export type FindNodeProxyOffer = ReturnType<typeof FindNodeProxyOffer>;
 
@@ -61,7 +61,6 @@ export default class FindNodeProxy {
           FindNodeProxyOpen(this.listen.kid)
         );
         const res = await wait(timeout).catch(() => {});
-
         if (res) {
           const { peerkid, sdp } = res;
           if (sdp) offers.push({ peerkid, sdp });

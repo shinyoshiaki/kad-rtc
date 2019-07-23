@@ -4,9 +4,11 @@ import { listeners } from "../../listeners";
 import Peer from "../../modules/peer/base";
 import { timeout } from "../../const";
 
-const FindNode = (searchkid: string, except: string[]) => {
-  return { rpc: "FindNode" as const, searchkid, except };
-};
+const FindNode = (searchkid: string, except: string[]) => ({
+  rpc: "FindNode" as const,
+  searchkid,
+  except
+});
 
 export type FindNode = ReturnType<typeof FindNode>;
 
@@ -38,9 +40,7 @@ export default async function findNode(
 
     if (res) {
       const { peers } = res;
-      if (peers.length > 0) {
-        return { peers, peer };
-      }
+      if (peers.length > 0) return { peers, peer };
     }
     return { peers: [], peer };
   };
@@ -56,9 +56,7 @@ export default async function findNode(
         signaling.delete(peerkid);
       });
 
-      if (res) {
-        listeners(peer, di);
-      }
+      if (res) listeners(peer, di);
     } else if (candidate) {
       const peer = await candidate.asPromise(timeout).catch(() => {});
       if (peer) listeners(peer, di);

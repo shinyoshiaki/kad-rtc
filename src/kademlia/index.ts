@@ -1,4 +1,4 @@
-import Ktable, { Option as OptTable } from "./ktable";
+import { Option as OptTable } from "./ktable";
 import findNode from "./actions/findnode";
 import Peer from "./modules/peer/base";
 import { DependencyInjection, dependencyInjection } from "./di";
