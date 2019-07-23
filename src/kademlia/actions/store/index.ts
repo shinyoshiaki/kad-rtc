@@ -1,16 +1,7 @@
 import findNode from "../findnode";
 import { DependencyInjection } from "../../di";
-import Peer from "../../modules/peer/base";
+import { Peer } from "../../modules/peer/base";
 import { timeout } from "../../const";
-
-const Store = (key: string, value: string | ArrayBuffer, msg?: string) => ({
-  rpc: "store" as const,
-  key,
-  value,
-  msg
-});
-
-export type Store = ReturnType<typeof Store>;
 
 export default async function store(
   di: DependencyInjection,
@@ -38,6 +29,7 @@ export default async function store(
   const onStore = async (peer: Peer) => {
     const wait = rpcManager.getWait(peer, item);
     await wait(timeout).catch(() => {});
+    // TODO error handling
   };
 
   await Promise.all(
@@ -46,3 +38,12 @@ export default async function store(
 
   return item;
 }
+
+const Store = (key: string, value: string | ArrayBuffer, msg?: string) => ({
+  rpc: "Store" as const,
+  key,
+  value,
+  msg
+});
+
+export type Store = ReturnType<typeof Store>;

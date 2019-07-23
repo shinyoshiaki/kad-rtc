@@ -1,18 +1,26 @@
-import { FindNodeProxyOffer, Offer } from "./listen/proxy";
+import {
+  FindNodeProxyOffer,
+  Offer,
+  FindNodeProxyAnswerError
+} from "./listen/proxy";
 import { DependencyInjection } from "../../di";
 import { listeners } from "../../listeners";
-import Peer from "../../modules/peer/base";
+import { Peer } from "../../modules/peer/base";
 import { timeout } from "../../const";
 
-const FindNode = (searchkid: string, except: string[]) => {
-  return { rpc: "FindNode" as const, searchkid, except };
-};
+const FindNode = (searchkid: string, except: string[]) => ({
+  rpc: "FindNode" as const,
+  searchkid,
+  except
+});
 
 export type FindNode = ReturnType<typeof FindNode>;
 
-const FindNodeAnswer = (sdp: any, peerkid: string) => {
-  return { rpc: "FindNodeAnswer" as const, sdp, peerkid };
-};
+const FindNodeAnswer = (sdp: string, peerkid: string) => ({
+  rpc: "FindNodeAnswer" as const,
+  sdp,
+  peerkid
+});
 
 export type FindNodeAnswer = ReturnType<typeof FindNodeAnswer>;
 
@@ -36,9 +44,7 @@ export default async function findNode(
 
     if (res) {
       const { peers } = res;
-      if (peers.length > 0) {
-        return { peers, peer };
-      }
+      if (peers.length > 0) return { peers, peer };
     }
     return { peers: [], peer };
   };
@@ -47,14 +53,22 @@ export default async function findNode(
     const { peerkid, sdp } = offer;
     const { peer, candidate } = signaling.create(peerkid);
     if (peer) {
-      const answer = await peer.setOffer(sdp);
+      const answer = await peer.setOffer(JSON.parse(sdp));
 
-      rpcManager.run(proxy, FindNodeAnswer(answer, peerkid));
-      const res = await peer.onConnect.asPromise(timeout).catch(() => {
+      rpcManager
+        .asObservable<FindNodeProxyAnswerError>(
+          "FindNodeProxyAnswerError",
+          proxy
+        )
+        .once(() => {
+          peer.onConnect.error("FindNodeProxyAnswerError");
+        });
+
+      rpcManager.run(proxy, FindNodeAnswer(JSON.stringify(answer), peerkid));
+      const err = await peer.onConnect.asPromise(timeout).catch(() => "err");
+      if (err) {
         signaling.delete(peerkid);
-      });
-
-      if (res) {
+      } else {
         listeners(peer, di);
       }
     } else if (candidate) {

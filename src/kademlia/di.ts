@@ -20,8 +20,8 @@ export const dependencyInjection = (
   opt: Partial<Options> = {}
 ): DependencyInjection => {
   return {
-    kTable: new Ktable(kid, opt),
     modules,
+    kTable: new Ktable(kid, opt),
     rpcManager: new RpcManager(),
     signaling: new Signaling(modules.peerCreate),
     jobSystem: new JobSystem()
