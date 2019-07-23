@@ -1,10 +1,11 @@
 import { Kademlia } from "../..";
 import { Torrent } from "./const";
-import Event from "rx.mini";
+import Event, { Buffer } from "rx.mini";
 
 export default class RenderArraybuffer {
   private torrents: Torrent[] = [];
   observer = new Event<Uint8Array>();
+  buffer = Buffer(10, this.observer);
 
   constructor(private kad: Kademlia) {}
 
@@ -86,7 +87,7 @@ export default class RenderArraybuffer {
 
     const seek = async () => {
       for (let torrent: Torrent | undefined; ; ) {
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise(r => setTimeout(r, 10));
 
         if (!torrent) torrent = playList.shift();
         if (!torrent) continue;
