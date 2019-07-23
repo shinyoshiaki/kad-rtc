@@ -7,7 +7,6 @@ import FileShare from "./components/organisms/file";
 import TextShare from "./components/organisms/text";
 import { Content } from "./components/atoms/styled";
 import SuperMedia from "./components/organisms/supermedia";
-import WasmMedia from "./components/organisms/wasmmedia";
 import WasmMedia2 from "./components/organisms/wasmmedia2";
 import WebmTest from "./components/organisms/webm";
 import LibvpxTest from "./components/organisms/libvpx";
