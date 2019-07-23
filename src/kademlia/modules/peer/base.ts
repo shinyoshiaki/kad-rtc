@@ -17,13 +17,13 @@ type PeerProps = {
   type: string;
   onRpc: Event<any>;
   onDisconnect: Event;
-  onConnect: Event<undefined | Error>;
+  onConnect: Event;
   parseRPC: (data: ArrayBuffer) => RPC | undefined;
   rpc: (data: { rpc: string; id: string }) => void;
   eventRpc: <T extends { rpc: string }>(rpc: T["rpc"], id: string) => Event<T>;
   createOffer: () => Promise<Signal>;
   setOffer: (sdp: Signal) => Promise<Signal>;
-  setAnswer: (sdp: Signal) => Promise<string | null>;
+  setAnswer: (sdp: Signal) => Promise<Error | undefined>;
   disconnect: () => void;
 };
 
@@ -31,7 +31,7 @@ export class PeerMock implements Peer {
   type = "mock";
   onRpc = new Event<any>();
   onDisconnect = new Event();
-  onConnect = new Event<undefined | Error>();
+  onConnect = new Event();
 
   constructor(public kid: string) {}
 

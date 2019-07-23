@@ -44,9 +44,8 @@ export default class FindNodePeer {
 
     const peer = this.candidates[finderkid];
     if (!peer) return;
-    await peer.setAnswer(JSON.parse(sdp));
-
-    listeners(peer, this.di);
+    const err = await peer.setAnswer(JSON.parse(sdp));
+    if (!err) listeners(peer, this.di);
   };
 }
 

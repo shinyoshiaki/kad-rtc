@@ -55,23 +55,22 @@ export default async function findNode(
     if (peer) {
       const answer = await peer.setOffer(JSON.parse(sdp));
 
-      const rpcObserver = rpcManager
+      rpcManager
         .asObservable<FindNodeProxyAnswerError>(
           "FindNodeProxyAnswerError",
           proxy
         )
-        .subscribe(() => {
+        .once(() => {
           peer.onConnect.error("FindNodeProxyAnswerError");
         });
 
       rpcManager.run(proxy, FindNodeAnswer(JSON.stringify(answer), peerkid));
-      const err = await peer.onConnect.asPromise(timeout);
+      const err = await peer.onConnect.asPromise(timeout).catch(() => "err");
       if (err) {
         signaling.delete(peerkid);
       } else {
         listeners(peer, di);
       }
-      rpcObserver.unSubscribe();
     } else if (candidate) {
       const peer = await candidate.asPromise(timeout).catch(() => {});
       if (peer) listeners(peer, di);

@@ -2,6 +2,7 @@ import { RPC, Peer } from "./base";
 import Event from "rx.mini";
 import WebRTC, { Signal } from "webrtc4me";
 import { decode, encode } from "@msgpack/msgpack";
+import { timeout } from "../../const";
 const wrtc = require("wrtc");
 
 export const PeerModule = (kid: string) => new PeerWebRTC(kid);
@@ -11,15 +12,11 @@ export default class PeerWebRTC implements Peer {
   peer: WebRTC = new WebRTC({ disable_stun: true, wrtc });
   onRpc = new Event<RPC>();
   onDisconnect = new Event();
-  onConnect = new Event<undefined | Error>();
+  onConnect = new Event();
 
   constructor(public kid: string) {
     this.peer.nodeId = kid;
-    this.peer.onConnect.once(
-      () => this.onConnect.execute(undefined),
-      () => {},
-      e => this.onConnect.execute(new Error(e))
-    );
+    this.peer.onConnect.once(() => this.onConnect.execute(null));
     this.peer.onDisconnect.once(() => this.onDisconnect.execute(null));
     const onData = this.peer.onData.subscribe(msg => {
       try {
@@ -84,11 +81,13 @@ export default class PeerWebRTC implements Peer {
     return answer;
   };
 
-  /** return ? error : success */
-  setAnswer = async (answer: Signal): Promise<any> => {
+  setAnswer = async (answer: Signal) => {
     this.peer.setSdp(answer);
-    await this.peer.onConnect.asPromise();
-    return true;
+    const err = await this.peer.onConnect
+      .asPromise(timeout)
+      .catch(e => new Error(e));
+    if (err) this.onConnect.error(err);
+    return err;
   };
 
   disconnect = () => {
