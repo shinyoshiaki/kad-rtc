@@ -18,18 +18,19 @@ export default class PeerWebRTC implements Peer {
     this.peer.nodeId = kid;
     this.peer.onConnect.once(() => this.onConnect.execute(null));
     this.peer.onDisconnect.once(() => this.onDisconnect.execute(null));
-    const onData = this.peer.onData.subscribe(msg => {
-      try {
-        const { label, data } = msg;
-        if (label == "datachannel" && typeof data !== "string") {
-          const obj = this.parseRPC(data);
-          if (obj) this.onRpc.execute(obj);
+    const { unSubscribe } = this.peer.onData.subscribe(
+      ({ label, data, dataType }) => {
+        try {
+          if (label == "datachannel" && dataType === "ArrayBuffer") {
+            const obj = this.parseRPC(data as ArrayBuffer);
+            if (obj) this.onRpc.execute(obj);
+          }
+        } catch (error) {
+          console.error(error);
         }
-      } catch (error) {
-        console.error(error);
       }
-    });
-    this.onDisconnect.once(onData.unSubscribe);
+    );
+    this.onDisconnect.once(unSubscribe);
   }
 
   parseRPC = (data: ArrayBuffer) => {
@@ -52,18 +53,19 @@ export default class PeerWebRTC implements Peer {
 
   eventRpc = (rpc: string, id: string) => {
     const observer = new Event<any>();
-    const onData = this.peer.onData.subscribe(msg => {
-      const { data } = msg;
-      if (typeof data !== "string") {
-        const obj = this.parseRPC(data);
-        if (obj && obj.rpc === rpc) {
-          if (obj.id === id) {
-            observer.execute(data);
-            onData.unSubscribe();
+    const { unSubscribe } = this.peer.onData.subscribe(
+      ({ label, data, dataType }) => {
+        if (label == "datachannel" && dataType === "ArrayBuffer") {
+          const obj = this.parseRPC(data as ArrayBuffer);
+          if (obj && obj.rpc === rpc) {
+            if (obj.id === id) {
+              observer.execute(data);
+              unSubscribe();
+            }
           }
         }
       }
-    });
+    );
     return observer;
   };
 
