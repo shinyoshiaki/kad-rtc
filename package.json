@@ -27,7 +27,7 @@
     "kad-distance": "git+https://git@github.com/shinyoshiaki/kad-distance.git",
     "rx.mini": "^0.1.0",
     "sha1": "^1.1.1",
-    "webrtc4me": "^0.6.4",
+    "webrtc4me": "^0.7.0",
     "wrtc": "^0.4.0"
   },
   "devDependencies": {

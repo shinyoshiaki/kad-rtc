@@ -33,22 +33,22 @@ export default class FindValueProxy {
       const peers = kTable.findNode(key);
       const offers: { peerkid: string; sdp: string }[] = [];
 
-      const findValuePeerOffer = async (peer: Peer) => {
-        if (!(peer.kid === this.listen.kid || except.includes(peer.kid))) {
-          const wait = rpcManager.getWait<FindValuePeerOffer>(
-            peer,
-            FindValueProxyOpen(this.listen.kid)
-          );
-          const res = await wait(timeout).catch(() => {});
+      await Promise.all(
+        peers.map(async peer => {
+          if (!(peer.kid === this.listen.kid || except.includes(peer.kid))) {
+            const wait = rpcManager.getWait<FindValuePeerOffer>(
+              peer,
+              FindValueProxyOpen(this.listen.kid)
+            );
+            const res = await wait(timeout).catch(() => {});
 
-          if (res) {
-            const { peerkid, sdp } = res;
-            if (sdp) offers.push({ peerkid, sdp });
+            if (res) {
+              const { peerkid, sdp } = res;
+              if (sdp) offers.push({ peerkid, sdp });
+            }
           }
-        }
-      };
-
-      await Promise.all(peers.map(peer => findValuePeerOffer(peer)));
+        })
+      );
 
       this.listen.rpc({ ...FindValueResult({ offers }), id });
     }

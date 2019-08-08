@@ -3,10 +3,6 @@ import { Peer } from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
 import { ID } from "../../../services/rpcmanager";
 
-export default function listenStore(peer: Peer, di: DependencyInjection) {
-  return new ListenStore(peer, di);
-}
-
 class ListenStore {
   constructor(private listen: Peer, private di: DependencyInjection) {
     const { rpcManager } = di;
@@ -28,3 +24,7 @@ const OnStore = () => {
 };
 
 export type OnStore = ReturnType<typeof OnStore>;
+
+export default function listenStore(peer: Peer, di: DependencyInjection) {
+  return new ListenStore(peer, di);
+}
