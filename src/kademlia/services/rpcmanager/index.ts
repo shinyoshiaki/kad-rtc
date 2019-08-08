@@ -16,10 +16,10 @@ export default class RpcManager {
 
     const event = new Event<T>();
 
-    const onRpc = peer.onRpc.subscribe((v: T) => {
+    const { unSubscribe } = peer.onRpc.subscribe((v: T) => {
       if (v.id === id) {
         event.execute(v);
-        onRpc.unSubscribe();
+        unSubscribe();
       }
     });
 
@@ -36,12 +36,12 @@ export default class RpcManager {
 
   asObservable<T extends { rpc: string }>(rpc: T["rpc"], listen: Peer) {
     const event = new Event<T & ID>();
-    const onRpc = listen.onRpc.subscribe(data => {
+    const { unSubscribe } = listen.onRpc.subscribe(data => {
       if (data.rpc === rpc) {
         event.execute(data);
       }
     });
-    listen.onDisconnect.once(onRpc.unSubscribe);
+    listen.onDisconnect.once(unSubscribe);
     return event;
   }
 }

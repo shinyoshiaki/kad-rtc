@@ -7,6 +7,33 @@ type ThenArg<T> = T extends Promise<infer U> ? U : T;
 
 type Job = { func: any; args: any[]; event: Event<any> };
 
+export default class JobSystem {
+  jobs: Job[] = [];
+  workers: Worker[] = [];
+
+  constructor(private opt: Option = { a: 5 }) {
+    const { a } = opt;
+    this.workers = [...Array(a)].map(() => new Worker(this.jobs));
+  }
+
+  async add<T extends (...args: any[]) => Promise<any>>(
+    func: T,
+    args: AA<typeof func>
+  ) {
+    const { a } = this.opt;
+
+    const event = new Event<ThenArg<ReturnType<T>>>();
+
+    this.jobs.push({ func, args, event });
+
+    if (this.jobs.length < a) {
+      this.workers.forEach(worker => worker.wakeup());
+    }
+
+    return event.asPromise();
+  }
+}
+
 class Worker {
   running = false;
 
@@ -32,32 +59,5 @@ class Worker {
     if (!this.running) {
       this.execute();
     }
-  }
-}
-
-export default class JobSystem {
-  jobs: Job[] = [];
-  workers: Worker[] = [];
-
-  constructor(private opt: Option = { a: 5 }) {
-    const { a } = opt;
-    this.workers = [...Array(a)].map(() => new Worker(this.jobs));
-  }
-
-  async add<T extends (...args: any[]) => Promise<any>>(
-    func: T,
-    args: AA<typeof func>
-  ) {
-    const { a } = this.opt;
-
-    const event = new Event<ThenArg<ReturnType<T>>>();
-
-    this.jobs.push({ func, args, event });
-
-    if (this.jobs.length < a) {
-      this.workers.forEach(worker => worker.wakeup());
-    }
-
-    return event.asPromise();
   }
 }

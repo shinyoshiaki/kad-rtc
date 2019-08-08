@@ -8,22 +8,6 @@ import { listeners } from "../../listeners";
 import { Peer } from "../../modules/peer/base";
 import { timeout } from "../../const";
 
-const FindNode = (searchkid: string, except: string[]) => ({
-  rpc: "FindNode" as const,
-  searchkid,
-  except
-});
-
-export type FindNode = ReturnType<typeof FindNode>;
-
-const FindNodeAnswer = (sdp: string, peerkid: string) => ({
-  rpc: "FindNodeAnswer" as const,
-  sdp,
-  peerkid
-});
-
-export type FindNodeAnswer = ReturnType<typeof FindNodeAnswer>;
-
 export default async function findNode(
   searchkid: string,
   di: DependencyInjection
@@ -32,22 +16,24 @@ export default async function findNode(
 
   if (kTable.getPeer(searchkid)) return kTable.getPeer(searchkid);
 
-  const findNodeProxy = async (peer: Peer) => {
-    const except = kTable.allPeers.map(item => item.kid);
+  const findNodeProxyOfferResult = await Promise.all(
+    kTable.findNode(searchkid).map(async peer => {
+      const except = kTable.allPeers.map(item => item.kid);
 
-    const wait = rpcManager.getWait<FindNodeProxyOffer>(
-      peer,
-      FindNode(searchkid, except)
-    );
+      const wait = rpcManager.getWait<FindNodeProxyOffer>(
+        peer,
+        FindNode(searchkid, except)
+      );
 
-    const res = await wait(timeout).catch(() => {});
+      const res = await wait(timeout).catch(() => {});
 
-    if (res) {
-      const { peers } = res;
-      if (peers.length > 0) return { peers, peer };
-    }
-    return { peers: [], peer };
-  };
+      if (res) {
+        const { peers } = res;
+        if (peers.length > 0) return { peers, peer };
+      }
+      return { peers: [], peer };
+    })
+  );
 
   const findNodeAnswer = async (proxy: Peer, offer: Offer) => {
     const { peerkid, sdp } = offer;
@@ -77,10 +63,6 @@ export default async function findNode(
     }
   };
 
-  const findNodeProxyOfferResult = await Promise.all(
-    kTable.findNode(searchkid).map(peer => findNodeProxy(peer))
-  );
-
   await Promise.all(
     findNodeProxyOfferResult
       .map(item => item.peers.map(offer => findNodeAnswer(item.peer, offer)))
@@ -89,3 +71,19 @@ export default async function findNode(
 
   return kTable.getPeer(searchkid);
 }
+
+const FindNode = (searchkid: string, except: string[]) => ({
+  rpc: "FindNode" as const,
+  searchkid,
+  except
+});
+
+export type FindNode = ReturnType<typeof FindNode>;
+
+const FindNodeAnswer = (sdp: string, peerkid: string) => ({
+  rpc: "FindNodeAnswer" as const,
+  sdp,
+  peerkid
+});
+
+export type FindNodeAnswer = ReturnType<typeof FindNodeAnswer>;

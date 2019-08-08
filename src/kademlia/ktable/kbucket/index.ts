@@ -24,7 +24,7 @@ export default class Kbucket {
       this.peers.shift();
     }
 
-    peer.onDisconnect.subscribe(() => {
+    peer.onDisconnect.once(() => {
       this.rmPeer(peer.kid);
     });
   }
