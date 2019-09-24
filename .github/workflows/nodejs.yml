@@ -22,7 +22,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: yarn install, build, and test
         run: |
-          yarn        
+          yarn       
+          cd examples/react && yarn && cd ../..
           yarn deploy
         env:
           CI: true
