@@ -1,6 +1,7 @@
+import Event, { Buffer } from "rx.mini";
+
 import { Kademlia } from "../..";
 import { Torrent } from "./const";
-import Event, { Buffer } from "rx.mini";
 
 export default class RenderArraybuffer {
   private torrents: Torrent[] = [];
@@ -16,7 +17,7 @@ export default class RenderArraybuffer {
       const first = await kad.findValue(headerKey);
       if (!first) return;
 
-      for (let item = first, bufMsg = headerKey, retry = 0; retry < 20; ) {
+      for (let { item } = first, bufMsg = headerKey, retry = 0; retry < 20; ) {
         if (!item.msg) break;
 
         if (item.msg !== bufMsg) {
@@ -36,7 +37,7 @@ export default class RenderArraybuffer {
           else await new Promise(r => setTimeout(r, 4_000));
           continue;
         } else {
-          item = next;
+          item = next.item;
           retry = 0;
         }
       }
@@ -53,20 +54,20 @@ export default class RenderArraybuffer {
 
     const find = async () => {
       findloop: while (true) {
-        const torrent = torrents.shift();
-        if (!torrent) {
+        const torrentBlocks = torrents.shift();
+        if (!torrentBlocks) {
           await new Promise(r => setTimeout(r, 10));
           continue;
         }
-        playList.push(torrent);
+        playList.push(torrentBlocks);
 
-        for (let item of torrent) {
-          const { v } = item;
-          let chunk = await kad.findValue(v);
-          if (!chunk) {
+        for (let torrent of torrentBlocks) {
+          const { v } = torrent;
+          let { item } = (await kad.findValue(v))!;
+          if (!item) {
             for (let retry = 0; retry < 20; retry++) {
-              chunk = await kad.findValue(v);
-              if (chunk) {
+              item = (await kad.findValue(v))!.item;
+              if (item) {
                 break;
               } else {
                 console.log("fail chunk", retry);
@@ -74,11 +75,11 @@ export default class RenderArraybuffer {
               }
             }
           }
-          if (!chunk) {
+          if (!item) {
             console.error("broken");
             break findloop;
           } else {
-            caches[v] = chunk.value as any;
+            caches[v] = item.value as any;
           }
         }
       }

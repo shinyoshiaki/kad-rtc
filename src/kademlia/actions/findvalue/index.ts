@@ -1,15 +1,18 @@
-import { DependencyInjection } from "../../di";
 import { FindValueResult, Offer } from "./listen/proxy";
-import { listeners } from "../../listeners";
-import { Peer } from "../../modules/peer/base";
-import { timeout } from "../../const";
+
+import { DependencyInjection } from "../../di";
 import { Item } from "../../modules/kvs/base";
+import { Peer } from "../../modules/peer/base";
+import { listeners } from "../../listeners";
+import { timeout } from "../../const";
 
-export default async function findValue(key: string, di: DependencyInjection) {
-  const { kTable, rpcManager, signaling, modules } = di;
-  const { kvs } = modules;
+export default async function findValue(
+  key: string,
+  di: DependencyInjection
+): Promise<{ item: Item; peer: Peer } | undefined> {
+  const { kTable, rpcManager, signaling } = di;
 
-  let result: Item | undefined;
+  let result: { item: Item; peer: Peer } | undefined;
 
   const job = async () => {
     const findValueResultResult = await Promise.all(
@@ -26,7 +29,7 @@ export default async function findValue(key: string, di: DependencyInjection) {
           const { item, offers } = res.data;
 
           if (item && !result) {
-            result = item;
+            result = { item, peer: proxy };
             return { offers: [], proxy };
           } else if (offers) {
             if (offers.length > 0) {
@@ -73,8 +76,6 @@ export default async function findValue(key: string, di: DependencyInjection) {
       );
     }
   };
-
-  if (kvs.get(key)) return kvs.get(key);
 
   for (
     let preHash = "";
