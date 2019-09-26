@@ -1,6 +1,6 @@
-import { Kademlia } from "../..";
 import { Media } from "../media/media";
 import { Torrent } from "./const";
+import { Kademlia } from "../..";
 export default class SuperReceiveVideo extends Media {
     private kad;
     torrents: Torrent[];

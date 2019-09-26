@@ -1,6 +1,7 @@
-import { Kademlia } from "../..";
-import { waitEvent, readAsArrayBuffer, Media } from "./media";
+import { Media, readAsArrayBuffer, waitEvent } from "./media";
+
 import Event from "rx.mini";
+import { Kademlia } from "../..";
 import sha1 from "sha1";
 
 const interval = 500;
@@ -98,13 +99,12 @@ export class ReceiveVideo extends Media {
     const sb = ms.addSourceBuffer(mimeType);
 
     const first = await kad.findValue(headerKey);
-    console.log({ first });
     if (!first) return;
 
     const work = async () => {
       try {
         for (
-          let item = first, buf = headerKey, start = false, retry = 0;
+          let { item } = first, buf = headerKey, start = false, retry = 0;
           retry < 20;
 
         ) {
@@ -133,7 +133,7 @@ export class ReceiveVideo extends Media {
             await new Promise(r => setTimeout(r, 100 * retry));
             continue;
           } else {
-            item = next;
+            item = next.item;
             if (retry > 0) retry--;
           }
         }

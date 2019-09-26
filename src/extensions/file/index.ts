@@ -1,7 +1,8 @@
+import { decode, encode } from "@msgpack/msgpack";
+
+import JobSystem from "../../kademlia/services/jobsystem";
 import { Kademlia } from "../..";
 import sha1 from "sha1";
-import JobSystem from "../../kademlia/services/jobsystem";
-import { decode, encode } from "@msgpack/msgpack";
 
 export async function storeFile(file: ArrayBuffer[], kad: Kademlia) {
   if (file.length > 0) {
@@ -45,9 +46,9 @@ export async function storeFile(file: ArrayBuffer[], kad: Kademlia) {
 
 export async function findFile(headerKey: string, kad: Kademlia) {
   const chunks: Uint8Array[] = [];
-  const firstItem = await kad.findValue(headerKey);
-  if (!firstItem) return;
-  const firstJson = decode(new Uint8Array(firstItem.value as ArrayBuffer)) as {
+  const { item } = (await kad.findValue(headerKey))!;
+  if (!item) return;
+  const firstJson = decode(new Uint8Array(item.value as ArrayBuffer)) as {
     value: Uint8Array;
     next: string;
   };
@@ -62,18 +63,18 @@ export async function findFile(headerKey: string, kad: Kademlia) {
             resolve(true);
             break;
           }
-          const value = await kad.findValue(json.next);
-          if (!value) {
+          const { item } = (await kad.findValue(json.next))!;
+          if (!item) {
             reject(false);
             break;
           }
-          json = decode(new Uint8Array(value.value as ArrayBuffer)) as any;
+          json = decode(new Uint8Array(item.value as ArrayBuffer)) as any;
           console.log({ json });
         }
       } catch (error) {}
     });
 
-  if (firstItem) {
+  if (item) {
     const res = await work().catch(console.error);
     if (res) {
       return chunks.map(buffer => buffer.buffer);

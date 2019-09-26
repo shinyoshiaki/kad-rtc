@@ -1,13 +1,13 @@
 {
   "name": "kad-rtc",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=11"
   },
   "scripts": {
     "build": "tsc",
-    "type": "tsc --noEmit",
+    "type": "tsc --noEmit --project ./tsconfig.json",
     "update": "rm -rf ./lib && npm run build",
     "publish": "npm publish --access=public",
     "test": "npm run type && jest --forceExit",
@@ -27,7 +27,7 @@
     "kad-distance": "git+https://git@github.com/shinyoshiaki/kad-distance.git",
     "rx.mini": "^0.1.0",
     "sha1": "^1.1.1",
-    "webrtc4me": "^0.6.4",
+    "webrtc4me": "^0.7.0",
     "wrtc": "^0.4.0"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
-import { Kademlia } from "../..";
 import Event from "rx.mini";
+import { Kademlia } from "../..";
 export default class RenderArraybuffer {
     private kad;
     private torrents;

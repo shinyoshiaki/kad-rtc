@@ -15,7 +15,10 @@ export default class Kademlia {
         value: string | ArrayBuffer;
         msg: string | undefined;
     }>;
-    findValue(key: string): Promise<import("./modules/kvs/base").Item | undefined>;
+    findValue(key: string): Promise<{
+        item: import("./modules/kvs/base").Item;
+        peer: Peer;
+    } | undefined>;
     add(connect: Peer, opt?: Partial<{
         notfind: boolean;
     }>): Promise<void>;

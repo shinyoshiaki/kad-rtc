@@ -1,6 +1,10 @@
 import { DependencyInjection } from "../../di";
 import { Item } from "../../modules/kvs/base";
-export default function findValue(key: string, di: DependencyInjection): Promise<Item | undefined>;
+import { Peer } from "../../modules/peer/base";
+export default function findValue(key: string, di: DependencyInjection): Promise<{
+    item: Item;
+    peer: Peer;
+} | undefined>;
 declare const FindValue: (key: string, except: string[]) => {
     rpc: "FindValue";
     key: string;

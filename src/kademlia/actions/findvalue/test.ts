@@ -1,6 +1,6 @@
-import store from "../store";
-import sha1 from "sha1";
 import findValue from ".";
+import sha1 from "sha1";
+import store from "../store";
 import { testSetupNodes } from "../../../utill/testtools";
 
 const kBucketSize = 8;
@@ -28,8 +28,8 @@ describe("findvalue", () => {
       const testFindValue = async (value: string) => {
         const key = sha1(value).toString();
         const node = nodes[getRandomInt(0, nodes.length - 1)];
-        const res = await findValue(key, node);
-        expect(res!.value).toBe(value);
+        const { item } = (await findValue(key, node))!;
+        expect(item!.value).toBe(value);
       };
 
       for (let _ in [...Array(kBucketSize)]) {

@@ -1,9 +1,10 @@
 import React, { FC } from "react";
+
 import { Content } from "../../atoms/styled";
-import { useObject } from "../../../hooks/useObject";
-import { useApi } from "../../../hooks/useApi";
-import { kad } from "../../../services/kademlia";
 import { genKid } from "../../../../../../src";
+import { kad } from "../../../services/kademlia";
+import { useApi } from "../../../hooks/useApi";
+import { useObject } from "../../../hooks/useObject";
 
 const TextShare: FC = () => {
   const textobj = useObject({
@@ -19,8 +20,8 @@ const TextShare: FC = () => {
   });
 
   const findText = useApi(async (key: string) => {
-    const res = await kad.findValue(key);
-    return res.value;
+    const { item } = await kad.findValue(key);
+    return item.value;
   });
 
   return (
