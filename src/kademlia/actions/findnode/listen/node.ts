@@ -1,9 +1,10 @@
-import { Peer } from "../../../modules/peer/base";
 import { FindNode, FindNodeAnswer } from "..";
-import { FindNodePeerOffer } from "./peer";
+
 import { DependencyInjection } from "../../../di";
-import { timeout } from "../../../const";
+import { FindNodePeerOffer } from "./signaling";
 import { ID } from "../../../services/rpcmanager";
+import { Peer } from "../../../modules/peer/base";
+import { timeout } from "../../../const";
 
 export default class FindNodeProxy {
   constructor(private listen: Peer, private di: DependencyInjection) {

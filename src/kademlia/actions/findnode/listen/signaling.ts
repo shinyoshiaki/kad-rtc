@@ -1,8 +1,9 @@
-import { Peer } from "../../../modules/peer/base";
-import { FindNodeProxyOpen, FindNodeProxyAnswer } from "./proxy";
+import { FindNodeProxyAnswer, FindNodeProxyOpen } from "./node";
+
 import { DependencyInjection } from "../../../di";
-import { listeners } from "../../../listeners";
 import { ID } from "../../../services/rpcmanager";
+import { Peer } from "../../../modules/peer/base";
+import { listeners } from "../../../listeners";
 
 export default class FindNodePeer {
   candidates: { [key: string]: Peer } = {};

@@ -1,10 +1,11 @@
-import { Peer } from "../../../modules/peer/base";
-import { FindValuePeerOffer } from "./peer";
-import { DependencyInjection } from "../../../di";
 import { FindValue, FindValueAnswer } from "..";
-import { timeout } from "../../../const";
-import { Item } from "../../../modules/kvs/base";
+
+import { DependencyInjection } from "../../../di";
+import { FindValuePeerOffer } from "./signaling";
 import { ID } from "../../../services/rpcmanager";
+import { Item } from "../../../modules/kvs/base";
+import { Peer } from "../../../modules/peer/base";
+import { timeout } from "../../../const";
 
 export default class FindValueProxy {
   constructor(private listen: Peer, private di: DependencyInjection) {

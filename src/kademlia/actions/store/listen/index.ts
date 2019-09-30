@@ -6,7 +6,7 @@ import { Store } from "..";
 class ListenStore {
   constructor(private listen: Peer, private di: DependencyInjection) {
     const { eventManager } = di;
-    eventManager.store.subscribe(this.store);
+    eventManager.store.subscribe(({ res }) => this.store(res));
   }
 
   store = (data: Store & ID) => {
