@@ -1,5 +1,6 @@
+import { Kademlia, KvsModule, PeerModule, genKid } from "../../../src";
+
 import guest from "./guest";
-import { Kademlia, genKid, KvsModule, PeerModule } from "../../../src";
 import { updateTimeout } from "../../../src/kademlia/const";
 
 const kad = new Kademlia(genKid(), { kvs: KvsModule, peerCreate: PeerModule });
