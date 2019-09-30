@@ -1,12 +1,12 @@
-import { Store } from "..";
-import { Peer } from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
 import { ID } from "../../../services/rpcmanager";
+import { Peer } from "../../../modules/peer/base";
+import { Store } from "..";
 
 class ListenStore {
   constructor(private listen: Peer, private di: DependencyInjection) {
-    const { rpcManager } = di;
-    rpcManager.asObservable<Store>("Store", listen).subscribe(this.store);
+    const { eventManager } = di;
+    eventManager.store.subscribe(this.store);
   }
 
   store = (data: Store & ID) => {
