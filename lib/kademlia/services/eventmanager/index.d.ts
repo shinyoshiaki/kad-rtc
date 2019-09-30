@@ -1,26 +1,26 @@
-import { Peer, RPC } from "../../modules/peer/base";
-import RpcManager, { ID } from "../rpcmanager";
+import { ID, Peer, RPC } from "../../modules/peer/base";
 import Event from "rx.mini";
+import RpcManager from "../rpcmanager";
 declare type Execute<T> = {
-    res: T;
+    rpc: T;
     peer: Peer;
 };
 export default class EventManager {
     rpcManager: RpcManager;
-    event: Event<RPC>;
+    event: Event<Execute<RPC>>;
     store: Event<Execute<{
-        rpc: "Store";
+        type: "Store";
         key: string;
         value: string | ArrayBuffer;
         msg: string | undefined;
     } & ID>>;
     findnode: Event<Execute<{
-        rpc: "FindNode";
+        type: "FindNode";
         searchkid: string;
         except: string[];
     } & ID>>;
     findvalue: Event<Execute<{
-        rpc: "FindValue";
+        type: "FindValue";
         key: string;
         except: string[];
     } & ID>>;
@@ -29,6 +29,6 @@ export default class EventManager {
     private listenStore;
     private listenFindnode;
     private listenFindvalue;
-    selectListen<T extends RPC>(rpcCode: T["rpc"]): Event<T>;
+    selectListen<T extends RPC>(rpcCode: T["type"]): Event<Execute<T>>;
 }
 export {};

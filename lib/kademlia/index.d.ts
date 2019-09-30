@@ -10,7 +10,7 @@ export default class Kademlia {
     constructor(kid: string, modules: Modules, opt?: Partial<Options>);
     findNode(searchkid: string): Promise<Peer | undefined>;
     store(key: string, value: string | ArrayBuffer, msg?: string): Promise<{
-        rpc: "Store";
+        type: "Store";
         key: string;
         value: string | ArrayBuffer;
         msg: string | undefined;

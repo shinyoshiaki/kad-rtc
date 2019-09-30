@@ -1,6 +1,5 @@
+import { ID, Peer } from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
-import { ID } from "../../../services/rpcmanager";
-import { Peer } from "../../../modules/peer/base";
 export default class FindValuePeer {
     private listen;
     private di;
@@ -9,17 +8,17 @@ export default class FindValuePeer {
     };
     constructor(listen: Peer, di: DependencyInjection);
     findValueProxyOpen: (data: {
-        rpc: "FindValueProxyOpen";
+        type: "FindValueProxyOpen";
         finderkid: string;
     } & ID) => Promise<void>;
     findValueProxyAnswer: (data: {
-        rpc: "FindValueProxyAnswer";
+        type: "FindValueProxyAnswer";
         sdp: string;
         finderkid: string;
     }) => Promise<void>;
 }
 declare const FindValuePeerOffer: (peerkid: string, sdp?: string | undefined) => {
-    rpc: "FindValuePeerOffer";
+    type: "FindValuePeerOffer";
     sdp: string | undefined;
     peerkid: string;
 };

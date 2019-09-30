@@ -1,22 +1,11 @@
-import { Peer } from "../../modules/peer/base";
+import { ID, Peer, RPCBase } from "../../modules/peer/base";
 import Event from "rx.mini";
-export declare type ID = {
-    id: string;
-};
 export default class RpcManager {
     private uuid;
-    getWait<T extends {
-        rpc: string;
-        [key: string]: unknown;
-    }>(peer: Peer, rpc: {
-        rpc: string;
-        [key: string]: any;
-    }): (timelimit?: number | undefined) => Promise<T>;
+    getWait<T extends RPCBase>(peer: Peer, rpc: RPCBase): (timelimit?: number | undefined) => Promise<T>;
     run(peer: Peer, rpc: {
-        rpc: string;
+        type: string;
         [key: string]: any;
     }): void;
-    asObservable<T extends {
-        rpc: string;
-    }>(rpc: T["rpc"], listen: Peer): Event<T & ID>;
+    asObservable<T extends RPCBase>(type: T["type"], listen: Peer): Event<T & ID>;
 }

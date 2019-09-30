@@ -1,8 +1,14 @@
 /// <reference types="node" />
 import Event from "rx.mini";
 import { Signal } from "webrtc4me";
+export declare type ID = {
+    id: string;
+};
+export declare type RPCBase = {
+    type: string;
+};
 export declare type RPC = {
-    rpc: string;
+    type: string;
     [key: string]: string | Buffer | ArrayBuffer;
     id: string;
 };
@@ -13,17 +19,16 @@ declare class PeerClass {
 }
 declare type PeerProps = {
     type: string;
-    onRpc: Event<any>;
+    onRpc: Event<RPCBase & ID>;
     onDisconnect: Event;
     onConnect: Event;
     parseRPC: (data: ArrayBuffer) => RPC | undefined;
-    rpc: (data: {
-        rpc: string;
-        id: string;
+    rpc: (data: RPCBase & ID & {
+        [key: string]: unknown;
     }) => void;
     eventRpc: <T extends {
-        rpc: string;
-    }>(rpc: T["rpc"], id: string) => Event<T>;
+        type: string;
+    }>(rpc: T["type"], id: string) => Event<T>;
     createOffer: () => Promise<Signal>;
     setOffer: (sdp: Signal) => Promise<Signal>;
     setAnswer: (sdp: Signal) => Promise<Error | undefined>;
@@ -37,13 +42,13 @@ export declare class PeerMock implements Peer {
     onConnect: Event<null>;
     constructor(kid: string);
     rpc: (data: {
-        rpc: string;
+        type: string;
         id: string;
     }) => void;
     parseRPC: (data: ArrayBuffer) => any;
     eventRpc: <T extends {
-        rpc: string;
-    }>(rpc: T["rpc"], id: string) => Event<T>;
+        type: string;
+    }>(rpc: T["type"], id: string) => Event<T>;
     createOffer: () => Promise<any>;
     setOffer: (sdp: Signal) => Promise<any>;
     setAnswer: (sdp: Signal) => Promise<any>;

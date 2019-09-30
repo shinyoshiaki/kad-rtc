@@ -6,13 +6,13 @@ export default function findValue(key: string, di: DependencyInjection): Promise
     peer: Peer;
 } | undefined>;
 declare const FindValue: (key: string, except: string[]) => {
-    rpc: "FindValue";
+    type: "FindValue";
     key: string;
     except: string[];
 };
 export declare type FindValue = ReturnType<typeof FindValue>;
 declare const FindValueAnswer: (sdp: string, peerkid: string) => {
-    rpc: "FindValueAnswer";
+    type: "FindValueAnswer";
     sdp: string;
     peerkid: string;
 };
