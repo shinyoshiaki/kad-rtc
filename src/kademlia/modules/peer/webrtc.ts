@@ -1,8 +1,10 @@
-import { RPC, Peer } from "./base";
-import Event from "rx.mini";
+import { ID, Peer, RPC, RPCBase } from "./base";
 import WebRTC, { Signal } from "webrtc4me";
 import { decode, encode } from "@msgpack/msgpack";
+
+import Event from "rx.mini";
 import { timeout } from "../../const";
+
 const wrtc = require("wrtc");
 
 export const PeerModule = (kid: string) => new PeerWebRTC(kid);
@@ -10,7 +12,7 @@ export const PeerModule = (kid: string) => new PeerWebRTC(kid);
 export default class PeerWebRTC implements Peer {
   type = "webrtc";
   peer: WebRTC = new WebRTC({ disable_stun: true, wrtc });
-  onRpc = new Event<RPC>();
+  onRpc = new Event<RPCBase & ID>();
   onDisconnect = new Event();
   onConnect = new Event();
 
@@ -37,7 +39,7 @@ export default class PeerWebRTC implements Peer {
     const buffer = Buffer.from(data);
     try {
       const data: RPC = decode(buffer) as any;
-      if (data.rpc) {
+      if (data.type) {
         return data;
       }
     } catch (error) {
@@ -46,18 +48,18 @@ export default class PeerWebRTC implements Peer {
     return undefined;
   };
 
-  rpc = (send: RPC) => {
+  rpc = (send: RPCBase & ID & { [key: string]: unknown }) => {
     const packet = encode(send);
     this.peer.send(packet);
   };
 
-  eventRpc = (rpc: string, id: string) => {
+  eventRpc = (type: string, id: string) => {
     const observer = new Event<any>();
     const { unSubscribe } = this.peer.onData.subscribe(
       ({ label, data, dataType }) => {
         if (label == "datachannel" && dataType === "ArrayBuffer") {
           const obj = this.parseRPC(data as ArrayBuffer);
-          if (obj && obj.rpc === rpc) {
+          if (obj && obj.type === type) {
             if (obj.id === id) {
               observer.execute(data);
               unSubscribe();

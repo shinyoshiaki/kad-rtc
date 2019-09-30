@@ -1,5 +1,5 @@
-import { PeerModule } from "./webrtc";
 import { Count } from "../../../utill/testtools";
+import { PeerModule } from "./webrtc";
 import Uuid from "../../../utill/uuid";
 
 describe("webrtc", () => {
@@ -23,21 +23,23 @@ describe("webrtc", () => {
           a.setAnswer(answer);
 
           a.onConnect.once(async () => {
-            const data = { rpc: "a", msg: "a", id: uuid.get() };
+            const data = { type: "a", msg: "a", id: uuid.get() };
             a.rpc(data);
             a.onRpc.once(v => {
-              if (v.rpc === "b") {
-                expect(v.msg).toBe("b");
+              const { msg } = v as any;
+              if (v.type === "b") {
+                expect(msg).toBe("b");
                 count.check();
               }
             });
           });
           b.onConnect.once(async () => {
-            const data = { rpc: "b", msg: "b", id: uuid.get() };
+            const data = { type: "b", msg: "b", id: uuid.get() };
             b.rpc(data);
             b.onRpc.once(v => {
-              if (v.rpc === "a") {
-                expect(v.msg).toBe("a");
+              const { msg } = v as any;
+              if (v.type === "a") {
+                expect(msg).toBe("a");
                 count.check();
               }
             });

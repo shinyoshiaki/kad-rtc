@@ -1,24 +1,20 @@
-import { Peer } from "../../modules/peer/base";
-import Uuid from "../../../utill/uuid";
-import Event from "rx.mini";
+import { ID, Peer, RPCBase } from "../../modules/peer/base";
 
-export type ID = { id: string };
+import Event from "rx.mini";
+import Uuid from "../../../utill/uuid";
 
 export default class RpcManager {
   private uuid = new Uuid();
 
-  getWait<T extends { rpc: string; [key: string]: unknown }>(
-    peer: Peer,
-    rpc: { rpc: string; [key: string]: any }
-  ) {
+  getWait<T extends RPCBase>(peer: Peer, rpc: RPCBase) {
     this.uuid.setPrefix(peer.kid);
-    const id = this.uuid.get() + rpc.rpc;
+    const id = this.uuid.get() + rpc.type;
 
     const event = new Event<T>();
 
-    const { unSubscribe } = peer.onRpc.subscribe((v: T) => {
+    const { unSubscribe } = peer.onRpc.subscribe(v => {
       if (v.id === id) {
-        event.execute(v);
+        event.execute(v as T & ID);
         unSubscribe();
       }
     });
@@ -28,17 +24,17 @@ export default class RpcManager {
     return event.asPromise;
   }
 
-  run(peer: Peer, rpc: { rpc: string; [key: string]: any }) {
+  run(peer: Peer, rpc: { type: string; [key: string]: any }) {
     this.uuid.setPrefix(peer.kid);
     const id = this.uuid.get();
     peer.rpc({ ...rpc, id });
   }
 
-  asObservable<T extends { rpc: string }>(rpc: T["rpc"], listen: Peer) {
+  asObservable<T extends RPCBase>(type: T["type"], listen: Peer) {
     const event = new Event<T & ID>();
     const { unSubscribe } = listen.onRpc.subscribe(data => {
-      if (data.rpc === rpc) {
-        event.execute(data);
+      if (data.type === type) {
+        event.execute(data as T & ID);
       }
     });
     listen.onDisconnect.once(unSubscribe);
