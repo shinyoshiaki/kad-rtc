@@ -45,11 +45,11 @@ export default class EventManager {
       .subscribe(res => this.findvalue.execute({ res, peer }));
   }
 
-  selectListen<T extends RPC>(listenRPC: T) {
+  selectListen<T extends RPC>(rpcCode: T["rpc"]) {
     const event = new Event<T>();
     this.event.subscribe(data => {
       const { rpc } = data;
-      if (listenRPC.rpc === rpc) {
+      if (rpcCode === rpc) {
         event.execute(data as T);
       }
     });
