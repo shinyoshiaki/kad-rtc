@@ -1,11 +1,12 @@
 import {
+  FindNodeProxyAnswerError,
   FindNodeProxyOffer,
-  Offer,
-  FindNodeProxyAnswerError
-} from "./listen/proxy";
+  Offer
+} from "./listen/node";
+
 import { DependencyInjection } from "../../di";
-import { listeners } from "../../listeners";
 import { Peer } from "../../modules/peer/base";
+import { listeners } from "../../listeners";
 import { timeout } from "../../const";
 
 export default async function findNode(

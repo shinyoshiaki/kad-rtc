@@ -1,8 +1,9 @@
-import { Peer } from "../../../modules/peer/base";
+import { FindValueProxyAnswer, FindValueProxyOpen } from "./node";
+
 import { DependencyInjection } from "../../../di";
-import { listeners } from "../../../listeners";
-import { FindValueProxyOpen, FindValueProxyAnswer } from "./proxy";
 import { ID } from "../../../services/rpcmanager";
+import { Peer } from "../../../modules/peer/base";
+import { listeners } from "../../../listeners";
 
 export default class FindValuePeer {
   candidates: { [key: string]: Peer } = {};

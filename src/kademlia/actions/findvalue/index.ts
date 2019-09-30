@@ -1,4 +1,4 @@
-import { FindValueResult, Offer } from "./listen/proxy";
+import { FindValueResult, Offer } from "./listen/node";
 
 import { DependencyInjection } from "../../di";
 import { Item } from "../../modules/kvs/base";
