@@ -1,6 +1,6 @@
-import findNode from "../findnode";
 import { DependencyInjection } from "../../di";
 import { Peer } from "../../modules/peer/base";
+import findNode from "../findnode";
 import { timeout } from "../../const";
 
 export default async function store(
@@ -40,7 +40,7 @@ export default async function store(
 }
 
 const Store = (key: string, value: string | ArrayBuffer, msg?: string) => ({
-  rpc: "Store" as const,
+  type: "Store" as const,
   key,
   value,
   msg

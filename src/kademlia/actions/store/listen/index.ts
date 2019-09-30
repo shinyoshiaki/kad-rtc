@@ -1,12 +1,12 @@
+import { ID, Peer } from "../../../modules/peer/base";
+
 import { DependencyInjection } from "../../../di";
-import { ID } from "../../../services/rpcmanager";
-import { Peer } from "../../../modules/peer/base";
 import { Store } from "..";
 
 class ListenStore {
   constructor(private listen: Peer, private di: DependencyInjection) {
     const { eventManager } = di;
-    eventManager.store.subscribe(({ res }) => this.store(res));
+    eventManager.store.subscribe(({ rpc: res }) => this.store(res));
   }
 
   store = (data: Store & ID) => {
@@ -20,7 +20,7 @@ class ListenStore {
 }
 
 const OnStore = () => {
-  return { rpc: "OnStore" as const };
+  return { type: "OnStore" as const };
 };
 
 export type OnStore = ReturnType<typeof OnStore>;

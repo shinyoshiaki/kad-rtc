@@ -1,15 +1,15 @@
-import { Peer, RPC } from "../../modules/peer/base";
-import RpcManager, { ID } from "../rpcmanager";
+import { ID, Peer, RPC } from "../../modules/peer/base";
 
 import Event from "rx.mini";
 import { FindNode } from "../../actions/findnode";
 import { FindValue } from "../../actions/findvalue";
+import RpcManager from "../rpcmanager";
 import { Store } from "../../actions/store";
 
-type Execute<T> = { res: T; peer: Peer };
+type Execute<T> = { rpc: T; peer: Peer };
 
 export default class EventManager {
-  event = new Event<RPC>();
+  event = new Event<Execute<RPC>>();
   store = new Event<Execute<Store & ID>>();
   findnode = new Event<Execute<FindNode & ID>>();
   findvalue = new Event<Execute<FindValue & ID>>();
@@ -22,7 +22,9 @@ export default class EventManager {
     this.listenFindvalue(peer);
 
     {
-      const { unSubscribe } = peer.onRpc.subscribe(this.event.execute);
+      const { unSubscribe } = peer.onRpc.subscribe(rpc => {
+        this.event.execute({ rpc: rpc as RPC, peer });
+      });
       peer.onDisconnect.once(unSubscribe);
     }
   }
@@ -30,27 +32,30 @@ export default class EventManager {
   private listenStore(peer: Peer) {
     this.rpcManager
       .asObservable<Store>("Store", peer)
-      .subscribe(res => this.store.execute({ res, peer }));
+      .subscribe(rpc => this.store.execute({ rpc: rpc as Store & ID, peer }));
   }
 
   private listenFindnode(peer: Peer) {
     this.rpcManager
       .asObservable<FindNode>("FindNode", peer)
-      .subscribe(res => this.findnode.execute({ res, peer }));
+      .subscribe(rpc =>
+        this.findnode.execute({ rpc: rpc as FindNode & ID, peer })
+      );
   }
 
   private listenFindvalue(peer: Peer) {
     this.rpcManager
       .asObservable<FindValue>("FindValue", peer)
-      .subscribe(res => this.findvalue.execute({ res, peer }));
+      .subscribe(rpc =>
+        this.findvalue.execute({ rpc: rpc as FindValue & ID, peer })
+      );
   }
 
-  selectListen<T extends RPC>(rpcCode: T["rpc"]) {
-    const event = new Event<T>();
-    this.event.subscribe(data => {
-      const { rpc } = data;
-      if (rpcCode === rpc) {
-        event.execute(data as T);
+  selectListen<T extends RPC>(rpcCode: T["type"]) {
+    const event = new Event<Execute<T>>();
+    this.event.subscribe(({ rpc, peer }) => {
+      if (rpcCode === rpc.type) {
+        event.execute({ rpc: rpc as T, peer });
       }
     });
     return event;

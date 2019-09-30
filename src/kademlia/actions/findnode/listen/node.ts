@@ -1,9 +1,8 @@
 import { FindNode, FindNodeAnswer } from "..";
+import { ID, Peer, RPCBase } from "../../../modules/peer/base";
 
 import { DependencyInjection } from "../../../di";
 import { FindNodePeerOffer } from "./signaling";
-import { ID } from "../../../services/rpcmanager";
-import { Peer } from "../../../modules/peer/base";
 import { timeout } from "../../../const";
 
 export default class FindNodeProxy {
@@ -61,21 +60,21 @@ export default class FindNodeProxy {
 export type Offer = { peerkid: string; sdp: string };
 
 const FindNodeProxyOffer = (peers: Offer[]) => ({
-  rpc: "FindNodeProxyOffer" as const,
+  type: "FindNodeProxyOffer" as const,
   peers
 });
 
 export type FindNodeProxyOffer = ReturnType<typeof FindNodeProxyOffer>;
 
 const FindNodeProxyOpen = (finderkid: string) => ({
-  rpc: "FindNodeProxyOpen" as const,
+  type: "FindNodeProxyOpen" as const,
   finderkid
 });
 
 export type FindNodeProxyOpen = ReturnType<typeof FindNodeProxyOpen>;
 
 const FindNodeProxyAnswer = (sdp: string, finderkid: string) => ({
-  rpc: "FindNodeProxyAnswer" as const,
+  type: "FindNodeProxyAnswer" as const,
   sdp,
   finderkid
 });
@@ -83,7 +82,7 @@ const FindNodeProxyAnswer = (sdp: string, finderkid: string) => ({
 export type FindNodeProxyAnswer = ReturnType<typeof FindNodeProxyAnswer>;
 
 const FindNodeProxyAnswerError = () => ({
-  rpc: "FindNodeProxyAnswerError" as const
+  type: "FindNodeProxyAnswerError" as const
 });
 
 export type FindNodeProxyAnswerError = ReturnType<

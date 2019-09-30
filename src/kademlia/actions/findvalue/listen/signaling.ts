@@ -1,8 +1,7 @@
 import { FindValueProxyAnswer, FindValueProxyOpen } from "./node";
+import { ID, Peer } from "../../../modules/peer/base";
 
 import { DependencyInjection } from "../../../di";
-import { ID } from "../../../services/rpcmanager";
-import { Peer } from "../../../modules/peer/base";
 import { listeners } from "../../../listeners";
 
 export default class FindValuePeer {
@@ -51,7 +50,7 @@ export default class FindValuePeer {
 }
 
 const FindValuePeerOffer = (peerkid: string, sdp?: string) => ({
-  rpc: "FindValuePeerOffer" as const,
+  type: "FindValuePeerOffer" as const,
   sdp,
   peerkid
 });

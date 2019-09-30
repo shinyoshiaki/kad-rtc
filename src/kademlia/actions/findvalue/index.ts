@@ -90,7 +90,7 @@ export default async function findValue(
 }
 
 const FindValue = (key: string, except: string[]) => ({
-  rpc: "FindValue" as const,
+  type: "FindValue" as const,
   key,
   except
 });
@@ -98,7 +98,7 @@ const FindValue = (key: string, except: string[]) => ({
 export type FindValue = ReturnType<typeof FindValue>;
 
 const FindValueAnswer = (sdp: string, peerkid: string) => ({
-  rpc: "FindValueAnswer" as const,
+  type: "FindValueAnswer" as const,
   sdp,
   peerkid
 });

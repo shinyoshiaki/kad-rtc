@@ -74,7 +74,7 @@ export default async function findNode(
 }
 
 const FindNode = (searchkid: string, except: string[]) => ({
-  rpc: "FindNode" as const,
+  type: "FindNode" as const,
   searchkid,
   except
 });
@@ -82,7 +82,7 @@ const FindNode = (searchkid: string, except: string[]) => ({
 export type FindNode = ReturnType<typeof FindNode>;
 
 const FindNodeAnswer = (sdp: string, peerkid: string) => ({
-  rpc: "FindNodeAnswer" as const,
+  type: "FindNodeAnswer" as const,
   sdp,
   peerkid
 });
