@@ -29,6 +29,6 @@ export default class EventManager {
     private listenStore;
     private listenFindnode;
     private listenFindvalue;
-    selectListen<T extends RPC>(listenRPC: T): Event<T>;
+    selectListen<T extends RPC>(rpcCode: T["rpc"]): Event<T>;
 }
 export {};

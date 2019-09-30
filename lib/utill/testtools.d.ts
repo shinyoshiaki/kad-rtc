@@ -11,5 +11,5 @@ export declare function testSetupNodes(kBucketSize: number, num: number): Promis
     rpcManager: import("../kademlia/services/rpcmanager").default;
     signaling: import("../kademlia/services/signaling").default;
     jobSystem: import("../kademlia/services/jobsystem").default;
-    eventManager: import("../kademlia/services/eventmanager").default;
+    eventManager: import("..").EventManager;
 }[]>;
