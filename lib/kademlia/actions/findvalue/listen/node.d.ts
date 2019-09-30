@@ -1,7 +1,7 @@
-import { Peer } from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
-import { Item } from "../../../modules/kvs/base";
 import { ID } from "../../../services/rpcmanager";
+import { Item } from "../../../modules/kvs/base";
+import { Peer } from "../../../modules/peer/base";
 export default class FindValueProxy {
     private listen;
     private di;

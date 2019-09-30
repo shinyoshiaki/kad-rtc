@@ -1,27 +1,27 @@
-import { Peer } from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
 import { ID } from "../../../services/rpcmanager";
-export default class FindNodePeer {
+import { Peer } from "../../../modules/peer/base";
+export default class FindValuePeer {
     private listen;
     private di;
     candidates: {
         [key: string]: Peer;
     };
     constructor(listen: Peer, di: DependencyInjection);
-    findNodeProxyOpen: (data: {
-        rpc: "FindNodeProxyOpen";
+    findValueProxyOpen: (data: {
+        rpc: "FindValueProxyOpen";
         finderkid: string;
     } & ID) => Promise<void>;
-    findNodeProxyAnswer: (data: {
-        rpc: "FindNodeProxyAnswer";
+    findValueProxyAnswer: (data: {
+        rpc: "FindValueProxyAnswer";
         sdp: string;
         finderkid: string;
     }) => Promise<void>;
 }
-declare const FindNodePeerOffer: (peerkid: string, sdp?: string | undefined) => {
-    rpc: "FindNodePeerOffer";
+declare const FindValuePeerOffer: (peerkid: string, sdp?: string | undefined) => {
+    rpc: "FindValuePeerOffer";
     sdp: string | undefined;
     peerkid: string;
 };
-export declare type FindNodePeerOffer = ReturnType<typeof FindNodePeerOffer>;
+export declare type FindValuePeerOffer = ReturnType<typeof FindValuePeerOffer>;
 export {};

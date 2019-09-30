@@ -1,6 +1,6 @@
-import { Peer } from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
 import { ID } from "../../../services/rpcmanager";
+import { Peer } from "../../../modules/peer/base";
 export default class FindNodeProxy {
     private listen;
     private di;
