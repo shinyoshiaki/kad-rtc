@@ -1,7 +1,7 @@
 import { ID, Peer, RPCBase } from "../../modules/peer/base";
 
 import Event from "rx.mini";
-import Uuid from "../../../utill/uuid";
+import Uuid from "../../util/uuid";
 
 export default class RpcManager {
   private uuid = new Uuid();

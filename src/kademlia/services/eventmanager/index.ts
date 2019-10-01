@@ -6,13 +6,13 @@ import { FindValue } from "../../actions/findvalue";
 import RpcManager from "../rpcmanager";
 import { Store } from "../../actions/store";
 
-type Execute<T> = { rpc: T; peer: Peer };
+type WithPeer<T> = { rpc: T; peer: Peer };
 
 export default class EventManager {
-  event = new Event<Execute<RPC>>();
-  store = new Event<Execute<Store & ID>>();
-  findnode = new Event<Execute<FindNode & ID>>();
-  findvalue = new Event<Execute<FindValue & ID>>();
+  event = new Event<WithPeer<RPC>>();
+  store = new Event<WithPeer<Store & ID>>();
+  findnode = new Event<WithPeer<FindNode & ID>>();
+  findvalue = new Event<WithPeer<FindValue & ID>>();
 
   constructor(public rpcManager: RpcManager) {}
 
@@ -52,7 +52,7 @@ export default class EventManager {
   }
 
   selectListen<T extends RPC>(rpcCode: T["type"]) {
-    const event = new Event<Execute<T>>();
+    const event = new Event<WithPeer<T>>();
     this.event.subscribe(({ rpc, peer }) => {
       if (rpcCode === rpc.type) {
         event.execute({ rpc: rpc as T, peer });

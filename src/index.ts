@@ -1,16 +1,16 @@
+import { Item, KvsModule } from "./kademlia/modules/kvs/base";
 import { ReceiveVideo, StreamVideo } from "./extensions/media";
 import { findFile, storeFile } from "./extensions/file";
 
 import EventManager from "./kademlia/services/eventmanager";
 import Kademlia from "./kademlia";
-import { KvsModule } from "./kademlia/modules/kvs/base";
 import { Peer } from "./kademlia/modules/peer/base";
 import { PeerModule } from "./kademlia/modules/peer/webrtc";
 import RenderArraybuffer from "./extensions/abstream/renderer";
 import StreamArraybuffer from "./extensions/abstream/streamer";
 import SuperReceiveVideo from "./extensions/supermedia/renderer";
 import SuperStreamVideo from "./extensions/supermedia/streamer";
-import genKid from "./utill/kid";
+import genKid from "./kademlia/util/kid";
 import { updateTimeout } from "./kademlia/const";
 
 export {
@@ -28,7 +28,8 @@ export {
   SuperReceiveVideo,
   StreamArraybuffer,
   RenderArraybuffer,
-  EventManager
+  EventManager,
+  Item
 };
 
 export default Kademlia;

@@ -27,7 +27,7 @@
         "--runInBand",
         "--forceExit",
         "--detectOpenHandles",
-        "${workspaceRoot}/src/kademlia/modules/peer/webrtc.test.ts"
+        "${workspaceRoot}/src/utill/testtools.test.ts"
       ],
       "windows": {
         "program": "${workspaceRoot}/node_modules/jest/bin/jest.js"

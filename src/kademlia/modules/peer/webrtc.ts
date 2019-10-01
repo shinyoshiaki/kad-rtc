@@ -53,14 +53,14 @@ export default class PeerWebRTC implements Peer {
     this.peer.send(packet);
   };
 
-  eventRpc = (type: string, id: string) => {
+  eventRpc = (type: string, transactionId: string) => {
     const observer = new Event<any>();
     const { unSubscribe } = this.peer.onData.subscribe(
       ({ label, data, dataType }) => {
         if (label == "datachannel" && dataType === "ArrayBuffer") {
           const obj = this.parseRPC(data as ArrayBuffer);
           if (obj && obj.type === type) {
-            if (obj.id === id) {
+            if (obj.id === transactionId) {
               observer.execute(data);
               unSubscribe();
             }

@@ -1,6 +1,6 @@
-import { Peer } from "../../modules/peer/base";
-import findNode from ".";
-import { testSetupNodes } from "../../../utill/testtools";
+import { Peer } from "../modules/peer/base";
+import findNode from "../actions/findnode";
+import { testSetupNodes } from "../util/testtools";
 
 const kBucketSize = 8;
 const num = 10;

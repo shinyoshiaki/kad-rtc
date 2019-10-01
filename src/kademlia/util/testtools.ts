@@ -1,8 +1,9 @@
+import { DependencyInjection, dependencyInjection } from "../di";
+import { KvsModule, PeerModule } from "../..";
+
+import findNode from "../actions/findnode";
+import { listeners } from "../listeners";
 import sha1 from "sha1";
-import { DependencyInjection, dependencyInjection } from "../kademlia/di";
-import { PeerModule, KvsModule } from "..";
-import { listeners } from "../kademlia/listeners";
-import findNode from "../kademlia/actions/findnode";
 
 export class Count {
   private count = 0;
