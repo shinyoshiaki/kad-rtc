@@ -36,9 +36,9 @@ const TextShare: FC = () => {
           <button
             onClick={async () => {
               if (!storeText.loading) {
-                const res = await storeText.fetch(textobj.value);
+                const { item } = await storeText.fetch(textobj.value);
                 textobj.setState({ value: "" });
-                textobj.setState({ storedkey: res.key });
+                textobj.setState({ storedkey: item.key });
               }
             }}
           >
