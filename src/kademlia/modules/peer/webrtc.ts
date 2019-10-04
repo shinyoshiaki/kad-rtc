@@ -28,7 +28,7 @@ export default class PeerWebRTC implements Peer {
             if (obj) this.onRpc.execute(obj);
           }
         } catch (error) {
-          console.error(error);
+          // console.error(error);
         }
       }
     );
@@ -43,7 +43,7 @@ export default class PeerWebRTC implements Peer {
         return data;
       }
     } catch (error) {
-      console.error(error, buffer);
+      // console.error(error, buffer);
     }
     return undefined;
   };
@@ -53,15 +53,15 @@ export default class PeerWebRTC implements Peer {
     this.peer.send(packet);
   };
 
-  eventRpc = (type: string, id: string) => {
+  eventRpc = (type: string, transactionId: string) => {
     const observer = new Event<any>();
     const { unSubscribe } = this.peer.onData.subscribe(
       ({ label, data, dataType }) => {
         if (label == "datachannel" && dataType === "ArrayBuffer") {
           const obj = this.parseRPC(data as ArrayBuffer);
           if (obj && obj.type === type) {
-            if (obj.id === id) {
-              observer.execute(data);
+            if (obj.id === transactionId) {
+              observer.execute(decode(data as ArrayBuffer));
               unSubscribe();
             }
           }

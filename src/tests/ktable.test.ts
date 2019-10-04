@@ -1,9 +1,8 @@
-import Ktable from ".";
-import sha1 from "sha1";
-import Kbucket from "./kbucket";
-
+import Kbucket from "../kademlia/ktable/kbucket";
+import Ktable from "../kademlia/ktable";
+import { PeerMock } from "../kademlia/modules/peer/base";
 import { distance } from "kad-distance";
-import { PeerMock } from "../modules/peer/base";
+import sha1 from "sha1";
 
 class PeerTest extends PeerMock {}
 

@@ -1,4 +1,4 @@
-import { abHash, jsonHash } from "../../utill/crypto";
+import { abHash, jsonHash } from "../../kademlia/util/crypto";
 
 export const interval = 500;
 

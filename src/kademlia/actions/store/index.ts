@@ -36,7 +36,7 @@ export default async function store(
     peers.map(async peer => await jobSystem.add(onStore, [peer]))
   );
 
-  return item;
+  return { item, peers };
 }
 
 const Store = (key: string, value: string | ArrayBuffer, msg?: string) => ({

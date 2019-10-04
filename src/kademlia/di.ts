@@ -8,8 +8,6 @@ import Signaling from "./services/signaling";
 
 type Options = Option;
 
-export type DependencyInjection = ReturnType<typeof dependencyInjection>;
-
 export const dependencyInjection = (
   kid: string,
   modules: Modules,
@@ -25,3 +23,5 @@ export const dependencyInjection = (
     eventManager: new EventManager(rpcManager)
   };
 };
+
+export type DependencyInjection = ReturnType<typeof dependencyInjection>;

@@ -1,8 +1,10 @@
-import sha1 from "sha1";
 import { DependencyInjection, dependencyInjection } from "../kademlia/di";
-import { PeerModule, KvsModule } from "..";
-import { listeners } from "../kademlia/listeners";
+
+import KeyValueStore from "../kademlia/modules/kvs/base";
+import PeerModule from "../kademlia/modules/peer";
 import findNode from "../kademlia/actions/findnode";
+import { listeners } from "../kademlia/listeners";
+import sha1 from "sha1";
 
 export class Count {
   private count = 0;
@@ -21,7 +23,7 @@ export async function testSetupNodes(kBucketSize: number, num: number) {
     if (nodes.length === 0) {
       const node = dependencyInjection(
         sha1(i.toString()).toString(),
-        { peerCreate: PeerModule, kvs: KvsModule },
+        { peerCreate: PeerModule, kvs: new KeyValueStore() },
         {
           kBucketSize
         }
@@ -31,7 +33,7 @@ export async function testSetupNodes(kBucketSize: number, num: number) {
       const pre = nodes.slice(-1)[0];
       const push = dependencyInjection(
         sha1(i.toString()).toString(),
-        { peerCreate: PeerModule, kvs: KvsModule },
+        { peerCreate: PeerModule, kvs: new KeyValueStore() },
         {
           kBucketSize
         }
