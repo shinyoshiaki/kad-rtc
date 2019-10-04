@@ -1,8 +1,9 @@
 import Kbucket, { Option as OptBucket } from "./kbucket";
-import { distance } from "kad-distance";
-import { Peer } from "../modules/peer/base";
-import sha1 from "sha1";
+
 import { Pack } from "rx.mini";
+import { Peer } from "../modules/peer/base";
+import { distance } from "kad-distance";
+import sha1 from "sha1";
 
 export type Option = OptBucket;
 
@@ -36,7 +37,7 @@ export default class Ktable {
   get allPeers() {
     return this.kbuckets
       .map(kbucket => kbucket.peers.map(bucket => bucket.peer))
-      .flatMap(item => item);
+      .flatMap(peer => peer);
   }
 
   get allKids() {

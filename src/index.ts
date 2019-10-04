@@ -1,4 +1,4 @@
-import { Item, KvsModule } from "./kademlia/modules/kvs/base";
+import KeyValueStore, { Item } from "./kademlia/modules/kvs/base";
 import { ReceiveVideo, StreamVideo } from "./extensions/media";
 import { findFile, storeFile } from "./extensions/file";
 
@@ -16,7 +16,7 @@ import { updateTimeout } from "./kademlia/const";
 export {
   PeerModule,
   Kademlia,
-  KvsModule,
+  KeyValueStore,
   Peer,
   genKid,
   updateTimeout,
