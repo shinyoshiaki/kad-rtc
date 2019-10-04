@@ -1,6 +1,6 @@
-import { Count } from "../util/testtools";
-import { PeerModule } from "../modules/peer/webrtc";
-import Uuid from "../util/uuid";
+import { Count } from "./testtools";
+import { PeerModule } from "..";
+import Uuid from "../kademlia/util/uuid";
 
 describe("webrtc", () => {
   test(

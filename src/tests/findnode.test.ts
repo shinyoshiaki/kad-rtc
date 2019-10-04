@@ -1,6 +1,6 @@
-import { Peer } from "../modules/peer/base";
-import findNode from "../actions/findnode";
-import { testSetupNodes } from "../util/testtools";
+import { Peer } from "../kademlia/modules/peer/base";
+import findNode from "../kademlia/actions/findnode";
+import { testSetupNodes } from "./testtools";
 
 const kBucketSize = 8;
 const num = 10;
