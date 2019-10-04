@@ -10,13 +10,16 @@ export default class Kademlia {
     constructor(kid: string, modules: Modules, opt?: Partial<Options>);
     findNode(searchkid: string): Promise<Peer | undefined>;
     store(key: string, value: string | ArrayBuffer, msg?: string): Promise<{
-        type: "Store";
-        key: string;
-        value: string | ArrayBuffer;
-        msg: string | undefined;
+        item: {
+            type: "Store";
+            key: string;
+            value: string | ArrayBuffer;
+            msg: string | undefined;
+        };
+        peers: Peer[];
     }>;
     findValue(key: string): Promise<{
-        item: import("./modules/kvs/base").Item;
+        item: import("..").Item;
         peer: Peer;
     } | undefined>;
     add(connect: Peer, opt?: Partial<{

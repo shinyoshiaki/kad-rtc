@@ -4,7 +4,6 @@ import JobSystem from "./services/jobsystem";
 import Modules from "./modules";
 import RpcManager from "./services/rpcmanager";
 import Signaling from "./services/signaling";
-export declare type DependencyInjection = ReturnType<typeof dependencyInjection>;
 export declare const dependencyInjection: (kid: string, modules: Modules, opt?: Partial<import("./ktable/kbucket").Option>) => {
     modules: Modules;
     kTable: Ktable;
@@ -13,3 +12,4 @@ export declare const dependencyInjection: (kid: string, modules: Modules, opt?: 
     jobSystem: JobSystem;
     eventManager: EventManager;
 };
+export declare type DependencyInjection = ReturnType<typeof dependencyInjection>;

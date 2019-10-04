@@ -1,9 +1,13 @@
 import { DependencyInjection } from "../../di";
+import { Peer } from "../../modules/peer/base";
 export default function store(di: DependencyInjection, key: string, value: string | ArrayBuffer, msg?: string): Promise<{
-    type: "Store";
-    key: string;
-    value: string | ArrayBuffer;
-    msg: string | undefined;
+    item: {
+        type: "Store";
+        key: string;
+        value: string | ArrayBuffer;
+        msg: string | undefined;
+    };
+    peers: Peer[];
 }>;
 declare const Store: (key: string, value: string | ArrayBuffer, msg?: string | undefined) => {
     type: "Store";

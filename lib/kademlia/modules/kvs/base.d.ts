@@ -3,7 +3,7 @@ export declare type Item = {
     value: string | ArrayBuffer;
     msg?: string;
 };
-export default class KevValueStore {
+export default class KeyValueStore {
     db: {
         [key: string]: Item;
     };
@@ -14,4 +14,3 @@ export default class KevValueStore {
     set(key: string, value: string | ArrayBuffer, msg: string): void;
     get: (key: string) => Item | undefined;
 }
-export declare const KvsModule: KevValueStore;

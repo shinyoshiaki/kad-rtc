@@ -14,7 +14,7 @@ export default class PeerWebRTC implements Peer {
     rpc: (send: RPCBase & ID & {
         [key: string]: unknown;
     }) => void;
-    eventRpc: (type: string, id: string) => Event<any>;
+    eventRpc: (type: string, transactionId: string) => Event<any>;
     createOffer: () => Promise<Signal>;
     setOffer: (offer: Signal) => Promise<Signal>;
     setAnswer: (answer: Signal) => Promise<Error | undefined>;
