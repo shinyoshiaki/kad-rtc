@@ -2,6 +2,7 @@ import { FindValueProxyAnswer, FindValueProxyOpen } from "./node";
 import { ID, Peer } from "../../../modules/peer/base";
 
 import { DependencyInjection } from "../../../di";
+import { Signal } from "webrtc4me";
 import { listeners } from "../../../listeners";
 
 export default class FindValuePeer {
@@ -31,7 +32,7 @@ export default class FindValuePeer {
       const offer = await peer.createOffer();
 
       this.listen.rpc({
-        ...FindValuePeerOffer(kTable.kid, JSON.stringify(offer)),
+        ...FindValuePeerOffer(kTable.kid, offer),
         id
       });
     } else {
@@ -44,12 +45,12 @@ export default class FindValuePeer {
 
     const peer = this.candidates[finderkid];
     if (!peer) return;
-    const err = await peer.setAnswer(JSON.parse(sdp));
+    const err = await peer.setAnswer(sdp);
     if (!err) listeners(peer, this.di);
   };
 }
 
-const FindValuePeerOffer = (peerkid: string, sdp?: string) => ({
+const FindValuePeerOffer = (peerkid: string, sdp?: Signal) => ({
   type: "FindValuePeerOffer" as const,
   sdp,
   peerkid

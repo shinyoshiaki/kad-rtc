@@ -2,6 +2,7 @@ import { FindNodeProxyAnswer, FindNodeProxyOpen } from "./node";
 import { ID, Peer } from "../../../modules/peer/base";
 
 import { DependencyInjection } from "../../../di";
+import { Signal } from "webrtc4me";
 import { listeners } from "../../../listeners";
 
 export default class FindNodePeer {
@@ -31,7 +32,7 @@ export default class FindNodePeer {
       const offer = await peer.createOffer();
 
       this.listen.rpc({
-        ...FindNodePeerOffer(kTable.kid, JSON.stringify(offer)),
+        ...FindNodePeerOffer(kTable.kid, offer),
         id
       });
     } else {
@@ -44,12 +45,12 @@ export default class FindNodePeer {
 
     const peer = this.candidates[finderkid];
     if (!peer) return;
-    const err = await peer.setAnswer(JSON.parse(sdp));
+    const err = await peer.setAnswer(sdp);
     if (!err) listeners(peer, this.di);
   };
 }
 
-const FindNodePeerOffer = (peerkid: string, sdp?: string) => ({
+const FindNodePeerOffer = (peerkid: string, sdp?: Signal) => ({
   type: "FindNodePeerOffer" as const,
   sdp,
   peerkid
