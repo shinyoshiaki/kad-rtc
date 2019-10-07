@@ -1,6 +1,5 @@
-import Kbucket from "../kademlia/ktable/kbucket";
-import Ktable from "../kademlia/ktable";
-import { PeerMock } from "../kademlia/modules/peer/base";
+import { Kbucket, Ktable, PeerMock } from "../kademlia";
+
 import { distance } from "kad-distance";
 import sha1 from "sha1";
 

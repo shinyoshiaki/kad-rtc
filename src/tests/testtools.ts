@@ -1,9 +1,12 @@
-import { DependencyInjection, dependencyInjection } from "../kademlia/di";
+import {
+  DependencyInjection,
+  KeyValueStore,
+  PeerModule,
+  dependencyInjection,
+  findNode,
+  listeners
+} from "../kademlia";
 
-import KeyValueStore from "../kademlia/modules/kvs/base";
-import PeerModule from "../kademlia/modules/peer";
-import findNode from "../kademlia/actions/findnode";
-import { listeners } from "../kademlia/listeners";
 import sha1 from "sha1";
 
 export class Count {

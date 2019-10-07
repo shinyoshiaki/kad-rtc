@@ -1,6 +1,6 @@
-import findValue from "../kademlia/actions/findvalue";
+import { findValue, store } from "../kademlia";
+
 import sha1 from "sha1";
-import store from "../kademlia/actions/store";
 import { testSetupNodes } from "./testtools";
 
 const kBucketSize = 8;
