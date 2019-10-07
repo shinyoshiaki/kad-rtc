@@ -18,7 +18,7 @@ export default async function findValue(
     const findValueResultResult = await Promise.all(
       // todo : allPeers -> findnode()
       kTable.allPeers.map(async proxy => {
-        const except = kTable.allPeers.map(({ kid }) => kid);
+        const except = kTable.findNode(key).map(({ kid }) => kid);
 
         const wait = rpcManager.getWait<FindValueResult>(
           proxy,
@@ -43,39 +43,34 @@ export default async function findValue(
       })
     );
 
-    if (!result) {
-      const findValueAnswer = async (offer: Offer, proxy: Peer) => {
-        const { peerkid, sdp } = offer;
-        const { peer, candidate } = signaling.create(peerkid);
+    if (result) return;
 
-        if (peer) {
-          const answer = await peer.setOffer(JSON.parse(sdp));
+    const findValueAnswer = async (offer: Offer, proxy: Peer) => {
+      const { peerkid, sdp } = offer;
+      const { peer, candidate } = signaling.create(peerkid);
 
-          rpcManager.run(
-            proxy,
-            FindValueAnswer(JSON.stringify(answer), peerkid)
-          );
+      if (peer) {
+        const answer = await peer.setOffer(JSON.parse(sdp));
 
-          const err = await peer.onConnect
-            .asPromise(timeout)
-            .catch(() => "err");
-          if (err) {
-            signaling.delete(peerkid);
-          } else {
-            listeners(peer, di);
-          }
-        } else if (candidate) {
-          const peer = await candidate.asPromise(timeout).catch(() => {});
-          if (peer) listeners(peer, di);
+        rpcManager.run(proxy, FindValueAnswer(JSON.stringify(answer), peerkid));
+
+        const err = await peer.onConnect.asPromise(timeout).catch(() => "err");
+        if (err) {
+          signaling.delete(peerkid);
+        } else {
+          listeners(peer, di);
         }
-      };
+      } else if (candidate) {
+        const peer = await candidate.asPromise(timeout).catch(() => {});
+        if (peer) listeners(peer, di);
+      }
+    };
 
-      await Promise.all(
-        findValueResultResult
-          .map(v => v.offers.map(offer => findValueAnswer(offer, v.proxy)))
-          .flatMap(v => v)
-      );
-    }
+    await Promise.all(
+      findValueResultResult
+        .map(v => v.offers.map(offer => findValueAnswer(offer, v.proxy)))
+        .flatMap(v => v)
+    );
   };
 
   for (
