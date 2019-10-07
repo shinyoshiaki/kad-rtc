@@ -1,7 +1,7 @@
 import {
   DependencyInjection,
   KeyValueStore,
-  PeerModule,
+  PeerCreater,
   dependencyInjection,
   findNode,
   listeners
@@ -19,7 +19,12 @@ export class Count {
   };
 }
 
-export async function testSetupNodes(kBucketSize: number, num: number) {
+export async function testSetupNodes(
+  kBucketSize: number,
+  num: number,
+  PeerModule: PeerCreater,
+  timeout = 10000
+) {
   const nodes: DependencyInjection[] = [];
 
   for (let i = 0; i < num; i++) {
@@ -27,9 +32,7 @@ export async function testSetupNodes(kBucketSize: number, num: number) {
       const node = dependencyInjection(
         sha1(i.toString()).toString(),
         { peerCreate: PeerModule, kvs: new KeyValueStore() },
-        {
-          kBucketSize
-        }
+        { kBucketSize, timeout }
       );
       nodes.push(node);
     } else {
@@ -37,9 +40,7 @@ export async function testSetupNodes(kBucketSize: number, num: number) {
       const push = dependencyInjection(
         sha1(i.toString()).toString(),
         { peerCreate: PeerModule, kvs: new KeyValueStore() },
-        {
-          kBucketSize
-        }
+        { kBucketSize, timeout }
       );
       const offer = PeerModule(push.kTable.kid);
       const offerSdp = await offer.createOffer();

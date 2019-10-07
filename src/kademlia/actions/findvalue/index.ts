@@ -5,13 +5,13 @@ import { Item } from "../../modules/kvs/base";
 import { Peer } from "../../modules/peer/base";
 import { Signal } from "webrtc4me";
 import { listeners } from "../../listeners";
-import { timeout } from "../../const";
 
 export default async function findValue(
   key: string,
   di: DependencyInjection
 ): Promise<{ item: Item; peer: Peer } | undefined> {
   const { kTable, rpcManager, signaling } = di;
+  const { timeout } = di.opt;
 
   let result: { item: Item; peer: Peer } | undefined;
 

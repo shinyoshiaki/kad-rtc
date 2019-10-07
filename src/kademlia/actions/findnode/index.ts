@@ -8,13 +8,13 @@ import { DependencyInjection } from "../../di";
 import { Peer } from "../../modules/peer/base";
 import { Signal } from "webrtc4me";
 import { listeners } from "../../listeners";
-import { timeout } from "../../const";
 
 export default async function findNode(
   searchkid: string,
   di: DependencyInjection
 ) {
   const { kTable, rpcManager, signaling } = di;
+  const { timeout } = di.opt;
 
   if (kTable.getPeer(searchkid)) return kTable.getPeer(searchkid);
 
@@ -27,7 +27,9 @@ export default async function findNode(
         FindNode(searchkid, except)
       );
 
-      const res = await wait(timeout).catch(() => {});
+      const res = await wait(timeout).catch(() => {
+        return false as const;
+      });
 
       if (res) {
         const { peers } = res;
@@ -53,14 +55,18 @@ export default async function findNode(
         });
 
       rpcManager.run(proxy, FindNodeAnswer(answer, peerkid));
-      const err = await peer.onConnect.asPromise(timeout).catch(() => "err");
+      const err = await peer.onConnect.asPromise(timeout).catch(() => {
+        return "err";
+      });
       if (err) {
         signaling.delete(peerkid);
       } else {
         listeners(peer, di);
       }
     } else if (candidate) {
-      const peer = await candidate.asPromise(timeout).catch(() => {});
+      const peer = await candidate.asPromise(timeout).catch(() => {
+        return false as const;
+      });
       if (peer) listeners(peer, di);
     }
   };

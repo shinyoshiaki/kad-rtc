@@ -5,9 +5,10 @@ import { DependencyInjection } from "../../../di";
 import { FindValuePeerOffer } from "./signaling";
 import { Item } from "../../../modules/kvs/base";
 import { Signal } from "webrtc4me";
-import { timeout } from "../../../const";
 
 export default class FindValueProxy {
+  timeout = this.di.opt.timeout;
+
   constructor(private listen: Peer, private di: DependencyInjection) {
     const { rpcManager } = di;
 
@@ -41,7 +42,7 @@ export default class FindValueProxy {
               peer,
               FindValueProxyOpen(this.listen.kid)
             );
-            const res = await wait(timeout).catch(() => {});
+            const res = await wait(this.timeout).catch(() => {});
 
             if (res) {
               const { peerkid, sdp } = res;

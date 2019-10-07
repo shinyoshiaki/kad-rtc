@@ -53,10 +53,9 @@ export class PeerMock implements Peer {
     });
   }
 
-  rpc = (data: { type: string; id: string }) => {
-    setTimeout(() => {
-      if (this.send) this.send.execute(data);
-    }, 0);
+  rpc = async (data: { type: string; id: string }) => {
+    // await new Promise(r => setTimeout(r));
+    this.send!.execute(data);
   };
 
   parseRPC = (data: ArrayBuffer) => undefined as any;

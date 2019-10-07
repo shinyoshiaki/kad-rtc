@@ -14,11 +14,9 @@ import findValue from "./actions/findvalue";
 import genKid from "./util/kid";
 import { listeners } from "./listeners";
 import store from "./actions/store";
-import { updateTimeout } from "./const";
 
 export {
   genKid,
-  updateTimeout,
   Item,
   EventManager,
   KeyValueStore,

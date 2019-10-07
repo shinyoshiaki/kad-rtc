@@ -4,9 +4,10 @@ import { ID, Peer, RPCBase } from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
 import { FindNodePeerOffer } from "./signaling";
 import { Signal } from "webrtc4me";
-import { timeout } from "../../../const";
 
 export default class FindNodeProxy {
+  timeout = this.di.opt.timeout;
+
   constructor(private listen: Peer, private di: DependencyInjection) {
     const { rpcManager } = di;
 
@@ -34,7 +35,7 @@ export default class FindNodeProxy {
             peer,
             FindNodeProxyOpen(this.listen.kid)
           );
-          const res = await wait(timeout).catch(() => {});
+          const res = await wait(this.timeout).catch(() => {});
           if (res) {
             const { peerkid, sdp } = res;
             if (sdp) offers.push({ peerkid, sdp });
