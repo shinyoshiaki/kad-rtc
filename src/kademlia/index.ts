@@ -7,6 +7,7 @@ import EventManager from "./services/eventmanager";
 import Kademlia from "./kademlia";
 import Kbucket from "./ktable/kbucket";
 import Ktable from "./ktable";
+import { PeerCreater } from "./modules/index";
 import Uuid from "./util/uuid";
 import findNode from "./actions/findnode";
 import findValue from "./actions/findvalue";
@@ -33,7 +34,8 @@ export {
   PeerMock,
   Uuid,
   PeerModule,
-  PeerMockModule
+  PeerMockModule,
+  PeerCreater
 };
 
 export default Kademlia;
