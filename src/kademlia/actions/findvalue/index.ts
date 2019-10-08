@@ -65,6 +65,9 @@ export default async function findValue(
         const peer = await candidate.asPromise(timeout).catch(() => {});
         if (peer) listeners(peer, di);
       }
+      // 相手側のlistenが完了するまで待つ
+      // TODO : ちゃんと実装する
+      await new Promise(r => setTimeout(r, 100));
     };
 
     await Promise.all(

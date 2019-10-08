@@ -7,6 +7,7 @@ import EventManager from "./services/eventmanager";
 import Kademlia from "./kademlia";
 import Kbucket from "./ktable/kbucket";
 import Ktable from "./ktable";
+import { Options } from "./kademlia";
 import { PeerCreater } from "./modules/index";
 import Uuid from "./util/uuid";
 import findNode from "./actions/findnode";
@@ -16,6 +17,7 @@ import { listeners } from "./listeners";
 import store from "./actions/store";
 
 export {
+  Options,
   genKid,
   Item,
   EventManager,

@@ -46,11 +46,10 @@ export default class Kademlia {
     return res;
   };
 
-  add = async (connect: Peer) => {
+  add = (connect: Peer) => {
     const { kTable } = this.di;
 
     kTable.add(connect);
     listeners(connect, this.di);
-    await findNode(this.kid, this.di);
   };
 }

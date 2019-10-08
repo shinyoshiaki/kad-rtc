@@ -26,20 +26,23 @@ export default class FindNodeProxy {
 
     const offers: { peerkid: string; sdp: Signal }[] = [];
 
-    const peers = kTable.findNode(searchkid);
+    const peers = kTable
+      .findNode(searchkid)
+      .filter(({ kid }) => kid !== this.listen.kid)
+      .filter(({ kid }) => !except.includes(kid));
 
     await Promise.all(
       peers.map(async peer => {
-        if (!(peer.kid === this.listen.kid || except.includes(peer.kid))) {
-          const wait = rpcManager.getWait<FindNodePeerOffer>(
-            peer,
-            FindNodeProxyOpen(this.listen.kid)
-          );
-          const res = await wait(this.timeout).catch(() => {});
-          if (res) {
-            const { peerkid, sdp } = res;
-            if (sdp) offers.push({ peerkid, sdp });
-          }
+        const wait = rpcManager.getWait<FindNodePeerOffer>(
+          peer,
+          FindNodeProxyOpen(this.listen.kid)
+        );
+        const res = await wait(this.timeout).catch(() => {
+          return undefined;
+        });
+        if (res) {
+          const { peerkid, sdp } = res;
+          if (sdp) offers.push({ peerkid, sdp });
         }
       })
     );
