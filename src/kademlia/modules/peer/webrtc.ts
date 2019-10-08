@@ -3,7 +3,6 @@ import WebRTC, { Signal } from "webrtc4me";
 import { decode, encode } from "@msgpack/msgpack";
 
 import Event from "rx.mini";
-import { timeout } from "../../const";
 
 const wrtc = require("wrtc");
 
@@ -85,7 +84,7 @@ export default class PeerWebRTC implements Peer {
     return answer;
   };
 
-  setAnswer = async (answer: Signal) => {
+  setAnswer = async (answer: Signal, timeout = 10000) => {
     this.peer.setSdp(answer);
     const err = await this.peer.onConnect
       .asPromise(timeout)

@@ -4,8 +4,7 @@ import Kademlia, {
   KeyValueStore,
   Peer,
   PeerModule,
-  genKid,
-  updateTimeout
+  genKid
 } from "./kademlia";
 import { ReceiveVideo, StreamVideo } from "./extensions/media";
 import { findFile, storeFile } from "./extensions/file";
@@ -21,7 +20,6 @@ export {
   KeyValueStore,
   Peer,
   genKid,
-  updateTimeout,
   storeFile,
   findFile,
   StreamVideo,

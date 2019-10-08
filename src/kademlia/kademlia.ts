@@ -8,7 +8,7 @@ import findValue from "./actions/findvalue";
 import { listeners } from "./listeners";
 import store from "./actions/store";
 
-type Options = OptTable;
+export type Options = Partial<OptTable> & { timeout: number };
 
 export default class Kademlia {
   di: DependencyInjection;
@@ -16,7 +16,7 @@ export default class Kademlia {
   constructor(
     public kid: string,
     modules: Modules,
-    opt: Partial<Options> = {}
+    opt: Options = { timeout: 10000 }
   ) {
     this.di = dependencyInjection(kid, modules, opt);
   }

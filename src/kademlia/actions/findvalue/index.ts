@@ -3,14 +3,15 @@ import { FindValueResult, Offer } from "./listen/node";
 import { DependencyInjection } from "../../di";
 import { Item } from "../../modules/kvs/base";
 import { Peer } from "../../modules/peer/base";
+import { Signal } from "webrtc4me";
 import { listeners } from "../../listeners";
-import { timeout } from "../../const";
 
 export default async function findValue(
   key: string,
   di: DependencyInjection
 ): Promise<{ item: Item; peer: Peer } | undefined> {
   const { kTable, rpcManager, signaling } = di;
+  const { timeout } = di.opt;
 
   let result: { item: Item; peer: Peer } | undefined;
 
@@ -50,9 +51,9 @@ export default async function findValue(
       const { peer, candidate } = signaling.create(peerkid);
 
       if (peer) {
-        const answer = await peer.setOffer(JSON.parse(sdp));
+        const answer = await peer.setOffer(sdp);
 
-        rpcManager.run(proxy, FindValueAnswer(JSON.stringify(answer), peerkid));
+        rpcManager.run(proxy, FindValueAnswer(answer, peerkid));
 
         const err = await peer.onConnect.asPromise(timeout).catch(() => "err");
         if (err) {
@@ -93,7 +94,7 @@ const FindValue = (key: string, except: string[]) => ({
 
 export type FindValue = ReturnType<typeof FindValue>;
 
-const FindValueAnswer = (sdp: string, peerkid: string) => ({
+const FindValueAnswer = (sdp: Signal, peerkid: string) => ({
   type: "FindValueAnswer" as const,
   sdp,
   peerkid

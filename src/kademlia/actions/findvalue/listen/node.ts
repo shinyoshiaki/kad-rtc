@@ -4,9 +4,11 @@ import { ID, Peer } from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
 import { FindValuePeerOffer } from "./signaling";
 import { Item } from "../../../modules/kvs/base";
-import { timeout } from "../../../const";
+import { Signal } from "webrtc4me";
 
 export default class FindValueProxy {
+  timeout = this.di.opt.timeout;
+
   constructor(private listen: Peer, private di: DependencyInjection) {
     const { rpcManager } = di;
 
@@ -31,7 +33,7 @@ export default class FindValueProxy {
       this.listen.rpc({ ...FindValueResult({ item }), id });
     } else {
       const peers = kTable.findNode(key);
-      const offers: { peerkid: string; sdp: string }[] = [];
+      const offers: { peerkid: string; sdp: Signal }[] = [];
 
       await Promise.all(
         peers.map(async peer => {
@@ -40,7 +42,7 @@ export default class FindValueProxy {
               peer,
               FindValueProxyOpen(this.listen.kid)
             );
-            const res = await wait(timeout).catch(() => {});
+            const res = await wait(this.timeout).catch(() => {});
 
             if (res) {
               const { peerkid, sdp } = res;
@@ -69,7 +71,7 @@ const FindValueResult = (data: Partial<{ item: Item; offers: Offer[] }>) => ({
   data
 });
 
-export type Offer = { peerkid: string; sdp: string };
+export type Offer = { peerkid: string; sdp: Signal };
 
 export type FindValueResult = ReturnType<typeof FindValueResult>;
 
@@ -80,7 +82,7 @@ const FindValueProxyOpen = (finderkid: string) => ({
 
 export type FindValueProxyOpen = ReturnType<typeof FindValueProxyOpen>;
 
-const FindValueProxyAnswer = (sdp: string, finderkid: string) => ({
+const FindValueProxyAnswer = (sdp: Signal, finderkid: string) => ({
   type: "FindValueProxyAnswer" as const,
   sdp,
   finderkid

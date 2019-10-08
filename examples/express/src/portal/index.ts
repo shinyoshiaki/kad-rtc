@@ -1,5 +1,6 @@
+import { Kademlia, Peer, PeerModule } from "../../../../src";
+
 import Express from "express";
-import { Kademlia, PeerModule, Peer } from "../../../../src";
 import bodyParser from "body-parser";
 
 const peers: { [key: string]: Peer } = {};
@@ -46,7 +47,7 @@ export default async function potalnode(kad: Kademlia, port: number) {
       if (answer && kid) {
         const peer = peers[kid];
         await peer.setAnswer(answer);
-        kad.add(peer, { notfind: true });
+        kad.add(peer);
         delete peers[kid];
         console.log("connected");
         return res.send("connected");
