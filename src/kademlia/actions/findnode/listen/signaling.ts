@@ -48,7 +48,7 @@ export default class FindNodePeer {
     const finish = await peer.setAnswer(sdp);
     if (finish) {
       listeners(peer, this.di);
-      await new Promise(r => setTimeout(r, 100));
+      await new Promise(r => setTimeout(r));
       finish();
     }
   };
