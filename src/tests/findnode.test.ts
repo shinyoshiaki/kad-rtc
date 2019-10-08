@@ -54,7 +54,7 @@ describe("findnode", () => {
   // test(
   //   "peer",
   //   async () => {
-  //     const nodes = await testSetupNodes(kBucketSize, num, PeerModule);
+  //     const nodes = await testSetupNodes(kBucketSize, num, PeerModule, 1000);
   //     await menu(nodes);
   //   },
   //   1000 * 6000
@@ -63,7 +63,7 @@ describe("findnode", () => {
   test(
     "mock",
     async () => {
-      const nodes = await testSetupNodes(kBucketSize, num, PeerMockModule, 10);
+      const nodes = await testSetupNodes(kBucketSize, num, PeerMockModule, 100);
       await menu(nodes);
     },
     1000 * 6000

@@ -60,12 +60,12 @@ export class PeerMock implements Peer {
 
   parseRPC = (data: ArrayBuffer) => undefined as any;
 
-  eventRpc = <T extends { type: string }>(rpc: T["type"], id: string) => {
+  eventRpc = (type: string, id: string) => {
     const observer = new Event<any>();
-    const once = this.onData.subscribe(data => {
-      if (data.type === rpc && data.id === id) {
+    const { unSubscribe } = this.onData.subscribe(data => {
+      if (data.type === type && data.id === id) {
         observer.execute(data);
-        once.unSubscribe();
+        unSubscribe();
       }
     });
     return observer;
@@ -79,15 +79,15 @@ export class PeerMock implements Peer {
   };
 
   setAnswer = async (sdp: any) => {
-    this.send = sdp.send;
-    const connect: Event = sdp.connect;
+    const { send, connect } = sdp;
 
-    setTimeout(() => {
-      connect.execute(null);
-      this.onConnect.execute(null);
-    }, 0);
+    this.send = send;
+    await new Promise(r => setTimeout(r, 0));
 
-    return true as any;
+    connect.execute(null);
+    this.onConnect.execute(null);
+
+    return undefined;
   };
 
   disconnect = () => {};
