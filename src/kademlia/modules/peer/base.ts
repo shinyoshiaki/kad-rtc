@@ -13,6 +13,8 @@ export type RPC = {
 
 export type Peer = PeerClass & PeerProps;
 
+export type Finish = () => Promise<void>;
+
 class PeerClass {
   constructor(public kid: string) {}
 }
@@ -21,7 +23,8 @@ type PeerProps = {
   type: string;
   onRpc: Event<RPCBase & ID>;
   onDisconnect: Event;
-  onConnect: Event;
+  onConnect: Event<Finish>;
+  onConnectFinish: Event;
   parseRPC: (data: ArrayBuffer) => RPC | undefined;
   rpc: (data: RPCBase & ID & { [key: string]: unknown }) => void;
   eventRpc: <T extends { type: string }>(
@@ -30,7 +33,7 @@ type PeerProps = {
   ) => Event<T>;
   createOffer: () => Promise<Signal>;
   setOffer: (sdp: Signal) => Promise<Signal>;
-  setAnswer: (sdp: Signal) => Promise<Error | undefined>;
+  setAnswer: (sdp: Signal) => Promise<Finish | undefined>;
   disconnect: () => void;
 };
 
@@ -41,15 +44,20 @@ export class PeerMock implements Peer {
 
   onRpc = new Event<any>();
   onDisconnect = new Event();
-  onConnect = new Event();
+  onConnect = new Event<Finish>();
+  onConnectFinish = new Event();
 
   constructor(public kid: string) {
     this.onData.subscribe(data => {
-      try {
-        if (data.type) {
-          this.onRpc.execute(data);
-        }
-      } catch (error) {}
+      if (typeof data === "string") {
+        this.onConnectFinish.execute(null);
+      } else {
+        try {
+          if (data.type) {
+            this.onRpc.execute(data);
+          }
+        } catch (error) {}
+      }
     });
   }
 
@@ -82,12 +90,17 @@ export class PeerMock implements Peer {
     const { send, connect } = sdp;
 
     this.send = send;
-    await new Promise(r => setTimeout(r, 0));
+    await new Promise(r => setTimeout(r));
 
-    connect.execute(null);
-    this.onConnect.execute(null);
+    const finish = async () => {
+      await new Promise(r => setTimeout(r));
+      send.execute("onConnectFinish");
+    };
 
-    return undefined;
+    connect.execute(finish);
+    this.onConnect.execute(finish);
+
+    return finish;
   };
 
   disconnect = () => {};

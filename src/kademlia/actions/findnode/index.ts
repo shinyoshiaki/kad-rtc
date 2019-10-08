@@ -19,8 +19,9 @@ export default async function findNode(
   if (kTable.getPeer(searchkid)) return kTable.getPeer(searchkid);
 
   const findNodeProxyOfferResult = await Promise.all(
+    // todo : allPeers -> findnode()
     kTable.findNode(searchkid).map(async peer => {
-      const except = kTable.allPeers.map(item => item.kid);
+      const except = kTable.findNode(searchkid).map(({ kid }) => kid);
 
       const wait = rpcManager.getWait<FindNodeProxyOffer>(
         peer,
@@ -56,23 +57,27 @@ export default async function findNode(
 
       rpcManager.run(proxy, FindNodeAnswer(answer, peerkid));
 
-      const err = await peer.onConnect.asPromise(timeout).catch(() => {
-        return "err";
-      });
-      if (err) {
-        signaling.delete(peerkid);
-      } else {
-        listeners(peer, di);
-      }
-    } else if (candidate) {
-      const peer = await candidate.asPromise(timeout).catch(() => {
+      const finish = await peer.onConnect.asPromise(timeout).catch(() => {
         return undefined;
       });
-      if (peer) listeners(peer, di);
+      if (finish) {
+        listeners(peer, di);
+        finish();
+        await peer.onConnectFinish.asPromise();
+      } else {
+        signaling.delete(peerkid);
+      }
+    } else if (candidate) {
+      const res = await candidate.asPromise(timeout).catch(() => {
+        return undefined;
+      });
+      if (res) {
+        const { peer, finish } = res;
+        listeners(peer, di);
+        finish();
+        await peer.onConnectFinish.asPromise();
+      }
     }
-    // 相手側のlistenが完了するまで待つ
-    // TODO : ちゃんと実装する
-    await new Promise(r => setTimeout(r, 100));
   };
 
   await Promise.all(

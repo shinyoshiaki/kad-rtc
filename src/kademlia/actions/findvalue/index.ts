@@ -55,19 +55,23 @@ export default async function findValue(
 
         rpcManager.run(proxy, FindValueAnswer(answer, peerkid));
 
-        const err = await peer.onConnect.asPromise(timeout).catch(() => "err");
-        if (err) {
-          signaling.delete(peerkid);
-        } else {
+        const finish = await peer.onConnect.asPromise(timeout).catch(() => {});
+        if (finish) {
           listeners(peer, di);
+          finish();
+          await peer.onConnectFinish.asPromise();
+        } else {
+          signaling.delete(peerkid);
         }
       } else if (candidate) {
-        const peer = await candidate.asPromise(timeout).catch(() => {});
-        if (peer) listeners(peer, di);
+        const res = await candidate.asPromise(timeout).catch(() => {});
+        if (res) {
+          const { peer, finish } = res;
+          listeners(peer, di);
+          finish();
+          await peer.onConnectFinish.asPromise();
+        }
       }
-      // 相手側のlistenが完了するまで待つ
-      // TODO : ちゃんと実装する
-      await new Promise(r => setTimeout(r, 100));
     };
 
     await Promise.all(

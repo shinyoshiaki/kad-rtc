@@ -1,4 +1,4 @@
-import { ID, Peer, RPC, RPCBase } from "./base";
+import { Finish, ID, Peer, RPC, RPCBase } from "./base";
 import WebRTC, { Signal } from "webrtc4me";
 import { decode, encode } from "@msgpack/msgpack";
 
@@ -13,21 +13,30 @@ export default class PeerWebRTC implements Peer {
   peer: WebRTC = new WebRTC({ disable_stun: true, wrtc });
   onRpc = new Event<RPCBase & ID>();
   onDisconnect = new Event();
-  onConnect = new Event();
+  onConnect = new Event<Finish>();
+  onConnectFinish = new Event();
+
+  finish = async () => {
+    this.peer.send("onConnectFinish");
+  };
 
   constructor(public kid: string) {
     this.peer.nodeId = kid;
-    this.peer.onConnect.once(() => this.onConnect.execute(null));
+    this.peer.onConnect.once(() => this.onConnect.execute(this.finish));
     this.peer.onDisconnect.once(() => this.onDisconnect.execute(null));
     const { unSubscribe } = this.peer.onData.subscribe(
       ({ label, data, dataType }) => {
-        try {
-          if (label == "datachannel" && dataType === "ArrayBuffer") {
-            const obj = this.parseRPC(data as ArrayBuffer);
-            if (obj) this.onRpc.execute(obj);
+        if (typeof data === "string") {
+          this.onConnectFinish.execute(null);
+        } else {
+          try {
+            if (label == "datachannel" && dataType === "ArrayBuffer") {
+              const obj = this.parseRPC(data as ArrayBuffer);
+              if (obj) this.onRpc.execute(obj);
+            }
+          } catch (error) {
+            // console.error(error);
           }
-        } catch (error) {
-          // console.error(error);
         }
       }
     );
@@ -89,8 +98,11 @@ export default class PeerWebRTC implements Peer {
     const err = await this.peer.onConnect
       .asPromise(timeout)
       .catch(e => new Error(e));
-    if (err) this.onConnect.error(err);
-    return err;
+    if (err) {
+      this.onConnect.error(err);
+      return undefined;
+    }
+    return this.finish;
   };
 
   disconnect = () => {

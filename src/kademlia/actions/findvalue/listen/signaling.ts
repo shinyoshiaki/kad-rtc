@@ -45,8 +45,12 @@ export default class FindValuePeer {
 
     const peer = this.candidates[finderkid];
     if (!peer) return;
-    const err = await peer.setAnswer(sdp);
-    if (!err) listeners(peer, this.di);
+    const finish = await peer.setAnswer(sdp);
+    if (finish) {
+      listeners(peer, this.di);
+      await new Promise(r => setTimeout(r, 100));
+      finish();
+    }
   };
 }
 

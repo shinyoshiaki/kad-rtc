@@ -18,6 +18,7 @@ export default class Kademlia {
     modules: Modules,
     opt: Options = { timeout: 10000 }
   ) {
+    if (opt.timeout! < 200) throw new Error("timeout must more than 200");
     this.di = dependencyInjection(kid, modules, opt);
   }
 
