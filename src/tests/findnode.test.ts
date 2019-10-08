@@ -51,14 +51,14 @@ describe("findnode", () => {
     );
   };
 
-  // test(
-  //   "peer",
-  //   async () => {
-  //     const nodes = await testSetupNodes(kBucketSize, num, PeerModule, 1000);
-  //     await menu(nodes);
-  //   },
-  //   1000 * 6000
-  // );
+  test(
+    "peer",
+    async () => {
+      const nodes = await testSetupNodes(kBucketSize, num, PeerModule, 1000);
+      await menu(nodes);
+    },
+    1000 * 6000
+  );
 
   test(
     "mock",
