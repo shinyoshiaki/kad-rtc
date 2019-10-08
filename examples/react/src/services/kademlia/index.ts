@@ -2,13 +2,10 @@ import {
   Kademlia,
   KeyValueStore,
   PeerModule,
-  genKid,
-  updateTimeout
+  genKid
 } from "../../../../../src";
 
 import axios from "axios";
-
-updateTimeout(2 * 3000);
 
 const kad: Kademlia = new Kademlia(
   genKid(),
@@ -16,7 +13,7 @@ const kad: Kademlia = new Kademlia(
     peerCreate: PeerModule,
     kvs: new KeyValueStore()
   },
-  { kBucketSize: 4 }
+  { kBucketSize: 4, timeout: 6000 }
 );
 
 export { kad };

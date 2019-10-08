@@ -8,7 +8,7 @@ import findValue from "./actions/findvalue";
 import { listeners } from "./listeners";
 import store from "./actions/store";
 
-export type Options = Partial<OptTable> & { timeout: number };
+export type Options = Partial<OptTable> & { timeout?: number };
 
 export default class Kademlia {
   di: DependencyInjection;
