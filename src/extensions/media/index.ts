@@ -74,10 +74,9 @@ export class StreamVideo extends Media {
         if (ab.byteLength > 16000) {
           console.warn("to large", ab.byteLength);
         }
-        const key = hash(buffer);
         const data = buffer;
         const msg = hash(ab);
-        kad.store(key, data, msg);
+        kad.store(data, msg);
         buffer = ab;
       } else {
         await new Promise(r => setTimeout(r, 0));

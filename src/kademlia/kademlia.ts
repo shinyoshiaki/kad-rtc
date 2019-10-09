@@ -6,6 +6,7 @@ import { Peer } from "./modules/peer/base";
 import findNode from "./actions/findnode";
 import findValue from "./actions/findvalue";
 import { listeners } from "./listeners";
+import sha1 from "sha1";
 import store from "./actions/store";
 
 export type Options = Partial<OptTable> & { timeout?: number };
@@ -37,7 +38,9 @@ export default class Kademlia {
     return target;
   };
 
-  store = async (key: string, value: string | ArrayBuffer, msg?: string) => {
+  store = async (value: string | ArrayBuffer, msg?: string) => {
+    const key =
+      typeof value === "string" ? sha1(value) : sha1(Buffer.from(value));
     const res = await store(this.di, key, value, msg);
     return res;
   };

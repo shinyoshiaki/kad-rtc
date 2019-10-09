@@ -1,7 +1,8 @@
+import { abs2torrent, interval, mimeType, torrent2hash } from "./const";
+
 import Event from "rx.mini";
-import { mimeType, interval, torrent2hash, abs2torrent } from "./const";
-import { readAsArrayBuffer } from "../media/media";
 import { Kademlia } from "../..";
+import { readAsArrayBuffer } from "../media/media";
 
 export default class SuperStreamVideo {
   onChunks = new Event<ArrayBuffer[]>();
@@ -49,14 +50,13 @@ export default class SuperStreamVideo {
     this.onChunks.subscribe(abs => {
       const torrent = abs2torrent(buffer);
 
-      const key = torrent2hash(torrent);
       const value = JSON.stringify(torrent);
       const msg = torrent2hash(abs2torrent(abs));
 
-      kad.store(key, value, msg);
+      kad.store(value, msg);
       torrent.map(item => {
         const ab = buffer[item.i];
-        kad.store(item.v, Buffer.from(ab));
+        kad.store(Buffer.from(ab));
       });
 
       buffer = abs;

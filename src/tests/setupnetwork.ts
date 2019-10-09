@@ -34,8 +34,5 @@ export async function testSetupNodes(
     }
   }
 
-  for (let node of nodes) {
-    await node.findNode(node.kid);
-  }
   return nodes;
 }

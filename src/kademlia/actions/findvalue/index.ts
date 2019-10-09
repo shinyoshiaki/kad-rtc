@@ -11,7 +11,8 @@ export default async function findValue(
   di: DependencyInjection
 ): Promise<{ item: Item; peer: Peer } | undefined> {
   const { kTable, rpcManager, signaling } = di;
-  const { timeout } = di.opt;
+  let { timeout } = di.opt;
+  timeout! *= 2;
 
   let result: { item: Item; peer: Peer } | undefined;
 
@@ -25,7 +26,9 @@ export default async function findValue(
           proxy,
           FindValue(key, except)
         );
-        const res = await wait(timeout).catch(() => {});
+        const res = await wait(timeout).catch(() => {
+          return undefined;
+        });
 
         if (res) {
           const { item, offers } = res.data;
@@ -55,7 +58,9 @@ export default async function findValue(
 
         rpcManager.run(proxy, FindValueAnswer(answer, peerkid));
 
-        const finish = await peer.onConnect.asPromise(timeout).catch(() => {});
+        const finish = await peer.onConnect.asPromise(timeout).catch(() => {
+          return undefined;
+        });
         if (finish) {
           listeners(peer, di);
           finish();
@@ -64,7 +69,9 @@ export default async function findValue(
           signaling.delete(peerkid);
         }
       } else if (candidate) {
-        const res = await candidate.asPromise(timeout).catch(() => {});
+        const res = await candidate.asPromise(timeout).catch(() => {
+          return undefined;
+        });
         if (res) {
           const { peer, finish } = res;
           listeners(peer, di);
