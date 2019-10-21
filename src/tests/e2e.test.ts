@@ -1,14 +1,13 @@
 import { PeerMockModule, PeerModule } from "../kademlia";
 
 import Kademlia from "..";
-import sha1 from "sha1";
 import { testSetupNodes } from "./setupnetwork";
 
 describe("e2e", () => {
   const job = async (nodes: Kademlia[]) => {
     const kadStore = nodes.pop()!;
 
-    const { item } = await kadStore.store(sha1("test"), "test");
+    const { item } = await kadStore.store("test");
 
     await new Promise(r => setTimeout(r));
 
@@ -27,12 +26,12 @@ describe("e2e", () => {
   };
 
   test("mock", async () => {
-    const nodes = await testSetupNodes(10, PeerMockModule, { timeout: 5_000 });
+    const nodes = await testSetupNodes(10, PeerMockModule, { timeout: 10_000 });
     await job(nodes);
   }, 600_000);
 
   test("webrtc", async () => {
-    const nodes = await testSetupNodes(10, PeerModule, { timeout: 5_000 });
+    const nodes = await testSetupNodes(10, PeerModule, { timeout: 10_000 });
     await job(nodes);
   }, 600_000);
 });

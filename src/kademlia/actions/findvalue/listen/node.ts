@@ -7,7 +7,7 @@ import { Item } from "../../../modules/kvs/base";
 import { Signal } from "webrtc4me";
 
 export default class FindValueProxy {
-  timeout = this.di.opt.timeout;
+  timeout = this.di.opt.timeout! / 2;
 
   constructor(private listen: Peer, private di: DependencyInjection) {
     const { rpcManager } = di;

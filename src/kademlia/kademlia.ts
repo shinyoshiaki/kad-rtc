@@ -44,15 +44,12 @@ export default class Kademlia {
     return res;
   };
 
-  findValue = async (key: string) => {
-    const res = await findValue(key, this.di);
+  findValue = async (key: string, opt?: { preferTimeout?: number }) => {
+    const res = await findValue(key, this.di, opt);
     return res;
   };
 
   add = (connect: Peer) => {
-    const { kTable } = this.di;
-
-    kTable.add(connect);
     listeners(connect, this.di);
   };
 }

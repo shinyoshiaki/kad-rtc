@@ -1,12 +1,12 @@
 import { FindNode, FindNodeAnswer } from "..";
-import { ID, Peer, RPCBase } from "../../../modules/peer/base";
+import { ID, Peer } from "../../../modules/peer/base";
 
 import { DependencyInjection } from "../../../di";
 import { FindNodePeerOffer } from "./signaling";
 import { Signal } from "webrtc4me";
 
 export default class FindNodeProxy {
-  timeout = this.di.opt.timeout;
+  timeout = this.di.opt.timeout! / 2;
 
   constructor(private listen: Peer, private di: DependencyInjection) {
     const { rpcManager } = di;

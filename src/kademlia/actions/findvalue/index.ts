@@ -8,17 +8,17 @@ import { listeners } from "../../listeners";
 
 export default async function findValue(
   key: string,
-  di: DependencyInjection
+  di: DependencyInjection,
+  opt?: { preferTimeout?: number }
 ): Promise<{ item: Item; peer: Peer } | undefined> {
   const { kTable, rpcManager, signaling } = di;
   let { timeout } = di.opt;
-  timeout! *= 2;
+  if (opt && opt.preferTimeout) timeout = opt.preferTimeout;
 
   let result: { item: Item; peer: Peer } | undefined;
 
   const job = async () => {
     const findValueResultResult = await Promise.all(
-      // todo : allPeers -> findnode()
       kTable.allPeers.map(async proxy => {
         const except = kTable.findNode(key).map(({ kid }) => kid);
 
@@ -26,7 +26,9 @@ export default async function findValue(
           proxy,
           FindValue(key, except)
         );
-        const res = await wait(timeout).catch(() => {});
+        const res = await wait(timeout).catch(() => {
+          return undefined;
+        });
 
         if (res) {
           const { item, offers } = res.data;
@@ -56,14 +58,18 @@ export default async function findValue(
 
         rpcManager.run(proxy, FindValueAnswer(answer, peerkid));
 
-        const err = await peer.onConnect.asPromise(timeout).catch(() => "err");
+        const err = await peer.onConnect.asPromise(timeout).catch(() => {
+          return "err";
+        });
         if (err) {
           signaling.delete(peerkid);
         } else {
           listeners(peer, di);
         }
       } else if (candidate) {
-        const peer = await candidate.asPromise(timeout).catch(() => {});
+        const peer = await candidate.asPromise(timeout).catch(() => {
+          return undefined;
+        });
         if (peer) listeners(peer, di);
       }
       // 相手側のlistenが完了するまで待つ
