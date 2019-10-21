@@ -1,10 +1,11 @@
 import React, { FC } from "react";
+import { findFile, storeFile } from "../../../../../../src";
+
 import { Content } from "../../atoms/styled";
-import { useObject } from "../../../hooks/useObject";
-import { useApi } from "../../../hooks/useApi";
 import { getSliceArrayBuffer } from "../../../util/file";
-import { storeFile, findFile } from "../../../../../../src";
 import { kad } from "../../../services/kademlia";
+import { useApi } from "../../../hooks/useApi";
+import { useObject } from "../../../hooks/useObject";
 
 const FileShare: FC = () => {
   const fileobj = useObject({ storedkey: "", findkey: "" });
@@ -21,7 +22,6 @@ const FileShare: FC = () => {
     console.log({ chunks });
     const blob = new Blob(chunks);
     const url = window.URL.createObjectURL(blob);
-    console.log({ url });
     const anchor = document.createElement("a");
     anchor.download = "file.png";
     anchor.href = url;

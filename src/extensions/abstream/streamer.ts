@@ -1,5 +1,6 @@
+import { abs2torrent, torrent2hash } from "./const";
+
 import Event from "rx.mini";
-import { torrent2hash, abs2torrent } from "./const";
 import { Kademlia } from "../..";
 
 export default class StreamArraybuffer {
@@ -22,14 +23,13 @@ export default class StreamArraybuffer {
     this.onChunks.subscribe(abs => {
       const torrent = abs2torrent(buffer);
 
-      const key = torrent2hash(torrent);
       const value = JSON.stringify(torrent);
       const msg = torrent2hash(abs2torrent(abs));
 
-      kad.store(key, value, msg);
+      kad.store(value, msg);
       torrent.map(item => {
         const uint8 = buffer[item.i];
-        kad.store(item.v, uint8);
+        kad.store(uint8);
       });
 
       buffer = abs;
