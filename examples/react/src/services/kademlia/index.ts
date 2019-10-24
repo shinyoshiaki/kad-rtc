@@ -31,6 +31,7 @@ export default async function guest(target: string) {
     answer
   });
   kad.add(peer);
+  await kad.findNode(kad.kid);
   if (res) {
     console.log("connected");
   }
