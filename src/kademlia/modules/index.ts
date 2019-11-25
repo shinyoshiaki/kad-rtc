@@ -1,9 +1,9 @@
 import KeyValueStore from "./kvs/base";
 import { Peer } from "./peer/base";
 
-export type PeerCreater = (kid: string) => Peer;
+export type PeerCreator = (kid: string) => Peer;
 
-export default interface Modules {
-  peerCreate: PeerCreater;
+export type Modules = {
+  peerCreate: PeerCreator;
   kvs: KeyValueStore;
-}
+};

@@ -286,7 +286,7 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^13.0.0"
 
-"@msgpack/msgpack@^1.4.5", "@msgpack/msgpack@^1.6.0":
+"@msgpack/msgpack@^1.4.5":
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/@msgpack/msgpack/-/msgpack-1.9.1.tgz#b0ed7e1ebdc612081bedd13b604ac22588bdc339"
   integrity sha512-oXZUHpDGpmMj06v5XHs9Y75mP403Xce7InSFtygzRqYdC4zILomBR28468IGjyBbTCKzrAtN6YlImb89CAINTA==
@@ -3448,11 +3448,6 @@ ts-node@^8.1.0:
     source-map-support "^0.5.6"
     yn "^3.0.0"
 
-ts-toolbelt@^3.2.24:
-  version "3.14.0"
-  resolved "https://registry.yarnpkg.com/ts-toolbelt/-/ts-toolbelt-3.14.0.tgz#f4c4984cf4e988915a0175fd6a8ded00bd1d23b0"
-  integrity sha512-DYjD8tL7M1kBogRd9UKg3bUP5yh69WWcMSaA3By8ATiJU9fgYudSYIe8tWD5cpPkrGCdGGnKXQHG+5IrjJ5uhQ==
-
 tslib@^1.9.3:
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.10.0.tgz#c3c19f95973fb0a62973fb09d90d961ee43e5c8a"
@@ -3579,14 +3574,12 @@ webidl-conversions@^4.0.2:
   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-4.0.2.tgz#a855980b1f0b6b359ba1d5d9fb39ae941faa63ad"
   integrity sha512-YQ+BmxuTgd6UXZW3+ICGfyqRyHXVlD5GtQr5+qjiNW7bF0cqrzX500HVXPBOvgXb5YnzDd+h0zqyv61KUD7+Sg==
 
-webrtc4me@^0.7.0:
-  version "0.7.1"
-  resolved "https://registry.yarnpkg.com/webrtc4me/-/webrtc4me-0.7.1.tgz#c9c65e32a3ce911d9c5710ec797c4772a89136f6"
-  integrity sha512-dGWrjWnA7pqOud2RwgNS/a0kW+QJivl2M7sbnjH3szbwa+aUfjrQZ7RPvPhZV8OTzQq6dp0MpSTiq0rJU0u8Sg==
+webrtc4me@^0.8.1:
+  version "0.8.1"
+  resolved "https://registry.yarnpkg.com/webrtc4me/-/webrtc4me-0.8.1.tgz#c511958d4e827b980e373b385ac694dacd653c8c"
+  integrity sha512-2RLfwb1M1I0w15/inz0ep3yyoeLpwhEY4G7K9oJNpa169wlfcbskgS7BQ16vUkgjfdT92T5CTMda5ArP9VCaMw==
   dependencies:
-    "@msgpack/msgpack" "^1.6.0"
     rx.mini "^0.1.0"
-    ts-toolbelt "^3.2.24"
 
 whatwg-encoding@^1.0.1, whatwg-encoding@^1.0.3:
   version "1.0.5"

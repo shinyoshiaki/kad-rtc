@@ -27,8 +27,12 @@ export default async function store(
   const item = Store(key, value, msg);
 
   const onStore = async (peer: Peer) => {
-    const wait = rpcManager.getWait(peer, item);
-    await wait(timeout).catch(() => {});
+    await rpcManager
+      .getWait(
+        peer,
+        item
+      )(timeout)
+      .catch(() => {});
     // TODO error handling
   };
 

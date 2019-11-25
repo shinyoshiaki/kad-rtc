@@ -16,14 +16,14 @@ describe("findnode", () => {
     const search = async (word: string) => {
       const node = nodes[0];
 
-      let target: undefined | Peer;
+      let target: undefined | Peer[];
 
       let pre = "",
-        trytime = 0;
+        tryTimes = 0;
       for (
         ;
         pre !== node.kTable.getHash(word);
-        pre = node.kTable.getHash(word), trytime++
+        pre = node.kTable.getHash(word), tryTimes++
       ) {
         target = await findNode(word, node);
 

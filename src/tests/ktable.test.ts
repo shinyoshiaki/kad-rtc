@@ -10,10 +10,10 @@ describe("ktable", () => {
 
   test("constructor", () => {
     const ktable = new Ktable(sha1("a").toString(), { kBucketSize });
-    const kbuckets: Kbucket[] = (ktable as any).kbuckets;
+    const kBuckets: Kbucket[] = ktable.kBuckets;
     const k: number = (ktable as any).k;
 
-    expect(kbuckets.length).toBe(160);
+    expect(kBuckets.length).toBe(160);
     expect(k).toBe(kBucketSize);
   });
 

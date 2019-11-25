@@ -8,7 +8,7 @@ describe("setup network", () => {
     // 1sでタイムアウト無発生
     const nodes = await testSetupNodes(10, PeerMockModule, {
       kBucketSize: 8,
-      timeout: 1_000 / 2
+      timeout: 1_000
     });
     expect(nodes.length).toBe(10);
   }, 60_000_0);
