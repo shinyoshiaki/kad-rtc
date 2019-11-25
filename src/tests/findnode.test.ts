@@ -16,14 +16,14 @@ describe("findnode", () => {
     const search = async (word: string) => {
       const node = nodes[0];
 
-      let target: undefined | Peer;
+      let target: undefined | Peer[];
 
       let pre = "",
-        trytime = 0;
+        tryTimes = 0;
       for (
         ;
         pre !== node.kTable.getHash(word);
-        pre = node.kTable.getHash(word), trytime++
+        pre = node.kTable.getHash(word), tryTimes++
       ) {
         target = await findNode(word, node);
 
@@ -54,7 +54,12 @@ describe("findnode", () => {
   test(
     "peer",
     async () => {
-      const nodes = await testSetupNodes(kBucketSize, num, PeerModule, 1000);
+      const nodes = await testSetupNodes(
+        kBucketSize,
+        num,
+        PeerModule,
+        60_000 * 10
+      );
       await menu(nodes);
     },
     1000 * 6000
@@ -63,7 +68,12 @@ describe("findnode", () => {
   test(
     "mock",
     async () => {
-      const nodes = await testSetupNodes(kBucketSize, num, PeerMockModule, 100);
+      const nodes = await testSetupNodes(
+        kBucketSize,
+        num,
+        PeerMockModule,
+        60_000 * 10
+      );
       await menu(nodes);
     },
     1000 * 6000

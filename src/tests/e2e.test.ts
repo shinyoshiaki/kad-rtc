@@ -26,7 +26,7 @@ describe("e2e", () => {
   };
 
   test("mock", async () => {
-    const nodes = await testSetupNodes(10, PeerMockModule, { timeout: 10_000 });
+    const nodes = await testSetupNodes(10, PeerMockModule, { timeout: 20_000 });
     await job(nodes);
   }, 600_000);
 

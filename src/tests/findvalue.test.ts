@@ -15,7 +15,12 @@ describe("findvalue", () => {
   test(
     "findvalue",
     async () => {
-      const nodes = await testSetupNodes(kBucketSize, num, PeerModule);
+      const nodes = await testSetupNodes(
+        kBucketSize,
+        num,
+        PeerModule,
+        60_000 * 10
+      );
 
       const testStore = async (value: string) => {
         const node = nodes[0];

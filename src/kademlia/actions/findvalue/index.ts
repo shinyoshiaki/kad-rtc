@@ -1,4 +1,4 @@
-import { FindValueResult, Offer } from "./listen/node";
+import { FindValueResult, OfferPayload } from "./listen/node";
 
 import { DependencyInjection } from "../../di";
 import { Item } from "../../modules/kvs/base";
@@ -22,16 +22,15 @@ export default async function findValue(
       kTable.allPeers.map(async proxy => {
         const except = kTable.findNode(key).map(({ kid }) => kid);
 
-        const wait = rpcManager.getWait<FindValueResult>(
-          proxy,
-          FindValue(key, except)
-        );
-        const res = await wait(timeout).catch(() => {
-          return undefined;
-        });
+        const res = await rpcManager
+          .getWait<FindValueResult>(
+            proxy,
+            FindValue(key, except)
+          )(timeout)
+          .catch(() => {});
 
         if (res) {
-          const { item, offers } = res.data;
+          const { item, offers } = res.value;
 
           if (item && !result) {
             result = { item, peer: proxy };
@@ -41,6 +40,8 @@ export default async function findValue(
               return { offers, proxy };
             }
           }
+        } else {
+          console.log("timeout", proxy.type, timeout);
         }
 
         return { offers: [], proxy };
@@ -49,28 +50,36 @@ export default async function findValue(
 
     if (result) return;
 
-    const findValueAnswer = async (offer: Offer, proxy: Peer) => {
-      const { peerkid, sdp } = offer;
-      const { peer, candidate } = signaling.create(peerkid);
+    const findValueAnswer = async (offer: OfferPayload, proxy: Peer) => {
+      const { peerKid, sdp } = offer;
+      const { peer, candidate } = signaling.create(peerKid);
 
-      if (peer) {
+      const _createAnswer = async (peer: Peer) => {
         const answer = await peer.setOffer(sdp);
 
-        rpcManager.run(proxy, FindValueAnswer(answer, peerkid));
+        rpcManager.run(proxy, FindValueAnswer(answer, peerKid));
 
         const err = await peer.onConnect.asPromise(timeout).catch(() => {
           return "err";
         });
         if (err) {
-          signaling.delete(peerkid);
+          signaling.delete(peerKid);
         } else {
           listeners(peer, di);
         }
+      };
+
+      if (peer) {
+        await _createAnswer(peer);
       } else if (candidate) {
-        const peer = await candidate.asPromise(timeout).catch(() => {
-          return undefined;
-        });
-        if (peer) listeners(peer, di);
+        const { peer, event } = candidate;
+        // node.ts側でタイミング悪くPeerを作ってしまった場合の処理
+        // (並行テスト時にしか起きないと思う)
+        if (peer.SdpType === "offer") {
+          await _createAnswer(peer);
+        } else {
+          await event.asPromise(timeout).catch(() => {});
+        }
       }
       // 相手側のlistenが完了するまで待つ
       // TODO : ちゃんと実装する
@@ -104,10 +113,10 @@ const FindValue = (key: string, except: string[]) => ({
 
 export type FindValue = ReturnType<typeof FindValue>;
 
-const FindValueAnswer = (sdp: Signal, peerkid: string) => ({
+const FindValueAnswer = (sdp: Signal, peerKid: string) => ({
   type: "FindValueAnswer" as const,
   sdp,
-  peerkid
+  peerKid
 });
 
 export type FindValueAnswer = ReturnType<typeof FindValueAnswer>;

@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - develop
+      - "feature/*"
 
 jobs:
   build:
@@ -22,8 +23,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: yarn install, build, and test
         run: |
-          yarn       
+          yarn
           cd examples/react && yarn && cd ../..
-          yarn deploy
+          sudo bash -c 'ulimit -n 4096'
+          sudo yarn test
         env:
           CI: true

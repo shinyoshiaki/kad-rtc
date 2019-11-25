@@ -4,11 +4,9 @@ import { testSetupNodes } from "./setupnetwork";
 
 describe("setup network", () => {
   test("mock", async () => {
-    // 500msでタイムアウト発生
-    // 1sでタイムアウト無発生
     const nodes = await testSetupNodes(10, PeerMockModule, {
       kBucketSize: 8,
-      timeout: 1_000 / 2
+      timeout: 60_000 * 10
     });
     expect(nodes.length).toBe(10);
   }, 60_000_0);
@@ -16,7 +14,7 @@ describe("setup network", () => {
   test("webrtc", async () => {
     const nodes = await testSetupNodes(10, PeerModule, {
       kBucketSize: 8,
-      timeout: 1_000
+      timeout: 60_000 * 10
     });
     expect(nodes.length).toBe(10);
   }, 60_000_0);

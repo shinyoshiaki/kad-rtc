@@ -10,6 +10,7 @@ export const PeerModule = (kid: string) => new PeerWebRTC(kid);
 
 export default class PeerWebRTC implements Peer {
   type = "webrtc";
+  SdpType: "offer" | "answer" | undefined = undefined;
   peer: WebRTC = new WebRTC({ disable_stun: true, wrtc });
   onRpc = new Event<RPCBase & ID>();
   onDisconnect = new Event();
@@ -73,16 +74,18 @@ export default class PeerWebRTC implements Peer {
   };
 
   createOffer = async () => {
-    this.peer.makeOffer();
-    const offer = await this.peer.onSignal.asPromise();
-    await new Promise(r => setTimeout(r, 0));
+    this.SdpType = "offer";
+    setTimeout(() => this.peer.makeOffer());
+    const offer = await this.peer.onSignal.asPromise(1000).catch(() => {});
+    if (!offer) return this.peer.rtc.localDescription!;
     return offer;
   };
 
-  setOffer = async (offer: Signal) => {
+  setOffer = async (offer: Signal, timeout = 10000) => {
+    this.SdpType = "answer";
     this.peer.setSdp(offer);
-    const answer = await this.peer.onSignal.asPromise();
-    await new Promise(r => setTimeout(r, 0));
+    const answer = await this.peer.onSignal.asPromise(timeout).catch(() => {});
+    if (!answer) throw new Error("timeout");
     return answer;
   };
 

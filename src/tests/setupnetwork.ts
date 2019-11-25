@@ -1,22 +1,23 @@
-import Kademlia, { KeyValueStore, Options, PeerCreater } from "../kademlia";
+import Kademlia, { KeyValueStore, PeerCreator } from "../kademlia";
 
+import { Options } from "../kademlia";
 import sha1 from "sha1";
 
 export async function testSetupNodes(
   num: number,
-  PeerModule: PeerCreater,
+  PeerModule: PeerCreator,
   opt: Options
 ) {
-  const modules = { peerCreate: PeerModule, kvs: new KeyValueStore() };
+  const modules = () => ({ peerCreate: PeerModule, kvs: new KeyValueStore() });
   const nodes: Kademlia[] = [];
 
   for (let i = 0; i < num; i++) {
     if (nodes.length === 0) {
-      const node = new Kademlia(sha1(i.toString()), modules, opt);
+      const node = new Kademlia(sha1(i.toString()), modules(), opt);
       nodes.push(node);
     } else {
       const pre = nodes.slice(-1)[0];
-      const push = new Kademlia(sha1(i.toString()), modules, opt);
+      const push = new Kademlia(sha1(i.toString()), modules(), opt);
 
       const pushOffer = PeerModule(pre.di.kTable.kid);
       const offerSdp = await pushOffer.createOffer();
@@ -34,8 +35,5 @@ export async function testSetupNodes(
     }
   }
 
-  for (let node of nodes) {
-    await node.findNode(node.kid);
-  }
   return nodes;
 }

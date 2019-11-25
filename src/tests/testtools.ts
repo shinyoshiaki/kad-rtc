@@ -1,7 +1,7 @@
 import {
   DependencyInjection,
   KeyValueStore,
-  PeerCreater,
+  PeerCreator,
   dependencyInjection,
   findNode,
   listeners
@@ -22,8 +22,8 @@ export class Count {
 export async function testSetupNodes(
   kBucketSize: number,
   num: number,
-  PeerModule: PeerCreater,
-  timeout = 10000
+  PeerModule: PeerCreator,
+  timeout: number
 ) {
   const nodes: DependencyInjection[] = [];
 

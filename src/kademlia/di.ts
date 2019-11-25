@@ -1,7 +1,7 @@
 import EventManager from "./services/eventmanager";
 import JobSystem from "./services/jobsystem";
 import Ktable from "./ktable";
-import Modules from "./modules";
+import { Modules } from "./modules";
 import { Options } from "./kademlia";
 import RpcManager from "./services/rpcmanager";
 import Signaling from "./services/signaling";
