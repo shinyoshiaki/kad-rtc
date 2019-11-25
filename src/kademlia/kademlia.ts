@@ -15,11 +15,7 @@ const initialOptions: Required<Options> = { timeout: 10_000, kBucketSize: 20 };
 export default class Kademlia {
   di: DependencyInjection;
 
-  constructor(
-    public kid: string,
-    modules: Modules,
-    opt: Options = { timeout: 10000 }
-  ) {
+  constructor(public kid: string, modules: Modules, opt?: Partial<Options>) {
     opt = { ...initialOptions, ...opt };
     this.di = dependencyInjection(kid, modules, opt);
   }
