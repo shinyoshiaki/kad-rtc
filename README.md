@@ -6,6 +6,6 @@ can use as npm package directly.
 # ブランチ運用ルール
 feature/* -> 機能追加  
 maintain/* -> 改善  
-develop -> feature,maintainのマージ先  
-master -> developのマージ先、ビルド、ドキュメンテーション  
+develop -> feature,maintainのマージ先、ドキュメンテーション  
+master -> developのマージ先、ビルド
 release/* -> masterのマージ先、プラットフォームごとのビルド  
