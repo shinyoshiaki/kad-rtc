@@ -26,12 +26,12 @@ describe("e2e", () => {
   };
 
   test("mock", async () => {
-    const nodes = await testSetupNodes(10, PeerMockModule, { timeout: 20_000 });
+    const nodes = await testSetupNodes(10, PeerMockModule, { timeout: 60_000 });
     await job(nodes);
   }, 600_000);
 
   test("webrtc", async () => {
-    const nodes = await testSetupNodes(10, PeerModule, { timeout: 10_000 });
+    const nodes = await testSetupNodes(10, PeerModule, { timeout: 60_000 });
     await job(nodes);
   }, 600_000);
 });
