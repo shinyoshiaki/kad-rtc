@@ -9,7 +9,7 @@ import Signaling from "./services/signaling";
 export const dependencyInjection = (
   kid: string,
   modules: Modules,
-  opt: Options
+  opt: Required<Options>
 ) => {
   const rpcManager = new RpcManager();
   return {

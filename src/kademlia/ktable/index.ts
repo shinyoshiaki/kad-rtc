@@ -13,10 +13,9 @@ export default class Ktable {
   pack = Pack();
   onAdd = this.pack.event<Peer>();
 
-  // todo refactor
-  constructor(public kid: string, opt: Partial<Option> = {}) {
+  constructor(public kid: string, opt: Option) {
     const { kBucketSize } = opt;
-    this.k = kBucketSize || this.k;
+    this.k = kBucketSize;
 
     this.kBuckets = [...Array(160)].map(() => new Kbucket(opt));
   }

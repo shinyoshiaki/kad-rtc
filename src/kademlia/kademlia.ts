@@ -16,8 +16,8 @@ export default class Kademlia {
   di: DependencyInjection;
 
   constructor(public kid: string, modules: Modules, opt?: Partial<Options>) {
-    opt = { ...initialOptions, ...opt };
-    this.di = dependencyInjection(kid, modules, opt);
+    const options = { ...initialOptions, ...opt };
+    this.di = dependencyInjection(kid, modules, options);
   }
 
   findNode = async (searchKid: string) => {
