@@ -1,38 +1,40 @@
 import { ID, Peer } from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
+import { Signal } from "webrtc4me";
 export default class FindNodeProxy {
     private listen;
     private di;
+    timeout: number;
     constructor(listen: Peer, di: DependencyInjection);
     findnode: (data: {
         type: "FindNode";
-        searchkid: string;
+        searchKid: string;
         except: string[];
     } & ID) => Promise<void>;
-    findnodeanswer: (data: {
+    findNodeAnswer: (data: {
         type: "FindNodeAnswer";
-        sdp: string;
-        peerkid: string;
+        sdp: Signal;
+        peerKid: string;
     } & ID) => Promise<void>;
 }
-export declare type Offer = {
-    peerkid: string;
-    sdp: string;
+export declare type OfferPayload = {
+    peerKid: string;
+    sdp: Signal;
 };
-declare const FindNodeProxyOffer: (peers: Offer[]) => {
+declare const FindNodeProxyOffer: (peers: OfferPayload[]) => {
     type: "FindNodeProxyOffer";
-    peers: Offer[];
+    peers: OfferPayload[];
 };
 export declare type FindNodeProxyOffer = ReturnType<typeof FindNodeProxyOffer>;
-declare const FindNodeProxyOpen: (finderkid: string) => {
+declare const FindNodeProxyOpen: (finderKid: string) => {
     type: "FindNodeProxyOpen";
-    finderkid: string;
+    finderKid: string;
 };
 export declare type FindNodeProxyOpen = ReturnType<typeof FindNodeProxyOpen>;
-declare const FindNodeProxyAnswer: (sdp: string, finderkid: string) => {
+declare const FindNodeProxyAnswer: (sdp: Signal, finderKid: string) => {
     type: "FindNodeProxyAnswer";
-    sdp: string;
-    finderkid: string;
+    sdp: Signal;
+    finderKid: string;
 };
 export declare type FindNodeProxyAnswer = ReturnType<typeof FindNodeProxyAnswer>;
 declare const FindNodeProxyAnswerError: () => {

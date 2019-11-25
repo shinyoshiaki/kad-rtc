@@ -1,29 +1,18 @@
-import { Option as OptTable } from "./ktable";
-import { Peer } from "./modules/peer/base";
-import { DependencyInjection } from "./di";
-import Modules from "./modules";
-declare type Options = OptTable;
-export default class Kademlia {
-    kid: string;
-    private opt;
-    di: DependencyInjection;
-    constructor(kid: string, modules: Modules, opt?: Partial<Options>);
-    findNode(searchkid: string): Promise<Peer | undefined>;
-    store(key: string, value: string | ArrayBuffer, msg?: string): Promise<{
-        item: {
-            type: "Store";
-            key: string;
-            value: string | ArrayBuffer;
-            msg: string | undefined;
-        };
-        peers: Peer[];
-    }>;
-    findValue(key: string): Promise<{
-        item: import("..").Item;
-        peer: Peer;
-    } | undefined>;
-    add(connect: Peer, opt?: Partial<{
-        notfind: boolean;
-    }>): Promise<void>;
-}
-export {};
+import { DependencyInjection, dependencyInjection } from "./di";
+import KeyValueStore, { Item } from "./modules/kvs/base";
+import { Peer, PeerMock } from "./modules/peer/base";
+import PeerModule, { PeerMockModule } from "./modules/peer";
+import EventManager from "./services/eventmanager";
+import Kademlia from "./kademlia";
+import Kbucket from "./ktable/kbucket";
+import Ktable from "./ktable";
+import { Options } from "./kademlia";
+import { PeerCreator } from "./modules/index";
+import Uuid from "./util/uuid";
+import findNode from "./actions/findnode";
+import findValue from "./actions/findvalue";
+import genKid from "./util/kid";
+import { listeners } from "./listeners";
+import store from "./actions/store";
+export { Options, genKid, Item, EventManager, KeyValueStore, listeners, dependencyInjection, DependencyInjection, Peer, findNode, findValue, store, Kbucket, Ktable, PeerMock, Uuid, PeerModule, PeerMockModule, PeerCreator };
+export default Kademlia;

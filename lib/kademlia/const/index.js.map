@@ -1,1 +1,0 @@
-{"version":3,"file":"index.js","sourceRoot":"","sources":["../../../src/kademlia/const/index.ts"],"names":[],"mappings":";;AAAW,QAAA,OAAO,GAAG,KAAK,CAAC;AAE3B,SAAgB,aAAa,CAAC,CAAS;IACrC,eAAO,GAAG,CAAC,CAAC;AACd,CAAC;AAFD,sCAEC","sourcesContent":["export let timeout = 10000;\n\nexport function updateTimeout(n: number) {\n  timeout = n;\n}\n"]}

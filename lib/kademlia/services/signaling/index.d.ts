@@ -7,7 +7,10 @@ export default class Signaling {
     private exist;
     delete(kid: string): void;
     create(kid: string): {
-        candidate: Event<Peer>;
+        candidate: {
+            event: Event<Peer>;
+            peer: Peer;
+        };
         peer?: undefined;
     } | {
         peer: Peer;

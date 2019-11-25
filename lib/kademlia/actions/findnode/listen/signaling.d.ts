@@ -1,5 +1,6 @@
 import { ID, Peer } from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
+import { Signal } from "webrtc4me";
 export default class FindNodePeer {
     private listen;
     private di;
@@ -9,18 +10,18 @@ export default class FindNodePeer {
     constructor(listen: Peer, di: DependencyInjection);
     findNodeProxyOpen: (data: {
         type: "FindNodeProxyOpen";
-        finderkid: string;
+        finderKid: string;
     } & ID) => Promise<void>;
     findNodeProxyAnswer: (data: {
         type: "FindNodeProxyAnswer";
-        sdp: string;
-        finderkid: string;
+        sdp: Signal;
+        finderKid: string;
     }) => Promise<void>;
 }
-declare const FindNodePeerOffer: (peerkid: string, sdp?: string | undefined) => {
+declare const FindNodePeerOffer: (peerKid: string, sdp?: Signal | undefined) => {
     type: "FindNodePeerOffer";
-    sdp: string | undefined;
-    peerkid: string;
+    sdp: Signal | undefined;
+    peerKid: string;
 };
 export declare type FindNodePeerOffer = ReturnType<typeof FindNodePeerOffer>;
 export {};

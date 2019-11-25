@@ -5,6 +5,7 @@ export declare const PeerModule: (kid: string) => PeerWebRTC;
 export default class PeerWebRTC implements Peer {
     kid: string;
     type: string;
+    SdpType: "offer" | "answer" | undefined;
     peer: WebRTC;
     onRpc: Event<RPCBase & ID>;
     onDisconnect: Event<null>;
@@ -15,8 +16,8 @@ export default class PeerWebRTC implements Peer {
         [key: string]: unknown;
     }) => void;
     eventRpc: (type: string, transactionId: string) => Event<any>;
-    createOffer: () => Promise<Signal>;
-    setOffer: (offer: Signal) => Promise<Signal>;
-    setAnswer: (answer: Signal) => Promise<Error | undefined>;
+    createOffer: () => Promise<Signal | RTCSessionDescription>;
+    setOffer: (offer: Signal, timeout?: number) => Promise<Signal>;
+    setAnswer: (answer: Signal, timeout?: number) => Promise<Error | undefined>;
     disconnect: () => void;
 }

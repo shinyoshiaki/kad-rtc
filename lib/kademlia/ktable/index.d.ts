@@ -3,7 +3,7 @@ import { Peer } from "../modules/peer/base";
 export declare type Option = OptBucket;
 export default class Ktable {
     kid: string;
-    readonly kbuckets: Kbucket[];
+    readonly kBuckets: Kbucket[];
     private k;
     pack: {
         event: <T>() => import("rx.mini").default<T>;

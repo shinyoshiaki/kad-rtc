@@ -1,9 +1,11 @@
 import { ID, Peer } from "../../../modules/peer/base";
 import { DependencyInjection } from "../../../di";
 import { Item } from "../../../modules/kvs/base";
+import { Signal } from "webrtc4me";
 export default class FindValueProxy {
     private listen;
     private di;
+    timeout: number;
     constructor(listen: Peer, di: DependencyInjection);
     findvalue: (data: {
         type: "FindValue";
@@ -12,34 +14,34 @@ export default class FindValueProxy {
     } & ID) => Promise<void>;
     findValueAnswer: (data: {
         type: "FindValueAnswer";
-        sdp: string;
-        peerkid: string;
+        sdp: Signal;
+        peerKid: string;
     } & ID) => void;
 }
-declare const FindValueResult: (data: Partial<{
+declare const FindValueResult: (value: Partial<{
     item: Item;
-    offers: Offer[];
+    offers: OfferPayload[];
 }>) => {
     type: "FindValueResult";
-    data: Partial<{
+    value: Partial<{
         item: Item;
-        offers: Offer[];
+        offers: OfferPayload[];
     }>;
 };
-export declare type Offer = {
-    peerkid: string;
-    sdp: string;
+export declare type OfferPayload = {
+    peerKid: string;
+    sdp: Signal;
 };
 export declare type FindValueResult = ReturnType<typeof FindValueResult>;
-declare const FindValueProxyOpen: (finderkid: string) => {
+declare const FindValueProxyOpen: (finderKid: string) => {
     type: "FindValueProxyOpen";
-    finderkid: string;
+    finderKid: string;
 };
 export declare type FindValueProxyOpen = ReturnType<typeof FindValueProxyOpen>;
-declare const FindValueProxyAnswer: (sdp: string, finderkid: string) => {
+declare const FindValueProxyAnswer: (sdp: Signal, finderKid: string) => {
     type: "FindValueProxyAnswer";
-    sdp: string;
-    finderkid: string;
+    sdp: Signal;
+    finderKid: string;
 };
 export declare type FindValueProxyAnswer = ReturnType<typeof FindValueProxyAnswer>;
 export {};

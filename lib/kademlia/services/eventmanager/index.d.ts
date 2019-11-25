@@ -16,7 +16,7 @@ export default class EventManager {
     } & ID>>;
     findnode: Event<WithPeer<{
         type: "FindNode";
-        searchkid: string;
+        searchKid: string;
         except: string[];
     } & ID>>;
     findvalue: Event<WithPeer<{
@@ -24,6 +24,7 @@ export default class EventManager {
         key: string;
         except: string[];
     } & ID>>;
+    addPeer: Event<Peer>;
     constructor(rpcManager: RpcManager);
     listen(peer: Peer): void;
     private listenStore;

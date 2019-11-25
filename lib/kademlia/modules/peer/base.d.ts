@@ -19,6 +19,7 @@ declare class PeerClass {
 }
 declare type PeerProps = {
     type: string;
+    SdpType: "offer" | "answer" | undefined;
     onRpc: Event<RPCBase & ID>;
     onDisconnect: Event;
     onConnect: Event;
@@ -37,21 +38,22 @@ declare type PeerProps = {
 export declare class PeerMock implements Peer {
     kid: string;
     type: string;
+    onData: Event<RPC>;
+    SdpType: "offer" | "answer" | undefined;
     onRpc: Event<any>;
     onDisconnect: Event<null>;
     onConnect: Event<null>;
+    targetContext?: PeerMock;
     constructor(kid: string);
     rpc: (data: {
         type: string;
         id: string;
-    }) => void;
+    }) => Promise<void>;
     parseRPC: (data: ArrayBuffer) => any;
-    eventRpc: <T extends {
-        type: string;
-    }>(rpc: T["type"], id: string) => Event<T>;
+    eventRpc: (type: string, id: string) => Event<any>;
     createOffer: () => Promise<any>;
-    setOffer: (sdp: Signal) => Promise<any>;
-    setAnswer: (sdp: Signal) => Promise<any>;
+    setOffer: (sdp: any) => Promise<any>;
+    setAnswer: (sdp: any) => Promise<undefined>;
     disconnect: () => void;
 }
 export {};

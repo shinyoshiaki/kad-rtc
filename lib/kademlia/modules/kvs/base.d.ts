@@ -13,4 +13,5 @@ export default class KeyValueStore {
     }>;
     set(key: string, value: string | ArrayBuffer, msg: string): void;
     get: (key: string) => Item | undefined;
+    delete: (key: string) => void;
 }
