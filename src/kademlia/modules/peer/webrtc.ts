@@ -3,7 +3,6 @@ import WebRTC, { Signal } from "webrtc4me";
 import { decode, encode } from "@msgpack/msgpack";
 
 import Event from "rx.mini";
-import { timeout } from "../../const";
 
 const wrtc = require("wrtc");
 
@@ -11,6 +10,7 @@ export const PeerModule = (kid: string) => new PeerWebRTC(kid);
 
 export default class PeerWebRTC implements Peer {
   type = "webrtc";
+  SdpType: "offer" | "answer" | undefined = undefined;
   peer: WebRTC = new WebRTC({ disable_stun: true, wrtc });
   onRpc = new Event<RPCBase & ID>();
   onDisconnect = new Event();
@@ -40,6 +40,7 @@ export default class PeerWebRTC implements Peer {
     try {
       const data: RPC = decode(buffer) as any;
       if (data.type) {
+        if (data.sdp) data.sdp = JSON.parse(data.sdp as any);
         return data;
       }
     } catch (error) {
@@ -49,6 +50,7 @@ export default class PeerWebRTC implements Peer {
   };
 
   rpc = (send: RPCBase & ID & { [key: string]: unknown }) => {
+    if (send.sdp) send.sdp = JSON.stringify(send.sdp);
     const packet = encode(send);
     this.peer.send(packet);
   };
@@ -72,20 +74,22 @@ export default class PeerWebRTC implements Peer {
   };
 
   createOffer = async () => {
-    this.peer.makeOffer();
-    const offer = await this.peer.onSignal.asPromise();
-    await new Promise(r => setTimeout(r, 0));
+    this.SdpType = "offer";
+    setTimeout(() => this.peer.makeOffer());
+    const offer = await this.peer.onSignal.asPromise(1000).catch(() => {});
+    if (!offer) return this.peer.rtc.localDescription!;
     return offer;
   };
 
-  setOffer = async (offer: Signal) => {
+  setOffer = async (offer: Signal, timeout = 10000) => {
+    this.SdpType = "answer";
     this.peer.setSdp(offer);
-    const answer = await this.peer.onSignal.asPromise();
-    await new Promise(r => setTimeout(r, 0));
+    const answer = await this.peer.onSignal.asPromise(timeout).catch(() => {});
+    if (!answer) throw new Error("timeout");
     return answer;
   };
 
-  setAnswer = async (answer: Signal) => {
+  setAnswer = async (answer: Signal, timeout = 10000) => {
     this.peer.setSdp(answer);
     const err = await this.peer.onConnect
       .asPromise(timeout)

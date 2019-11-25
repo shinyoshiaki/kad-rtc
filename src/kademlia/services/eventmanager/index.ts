@@ -13,6 +13,7 @@ export default class EventManager {
   store = new Event<WithPeer<Store & ID>>();
   findnode = new Event<WithPeer<FindNode & ID>>();
   findvalue = new Event<WithPeer<FindValue & ID>>();
+  addPeer = new Event<Peer>();
 
   constructor(public rpcManager: RpcManager) {}
 
@@ -27,6 +28,8 @@ export default class EventManager {
       });
       peer.onDisconnect.once(unSubscribe);
     }
+
+    this.addPeer.execute(peer);
   }
 
   private listenStore(peer: Peer) {

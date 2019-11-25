@@ -35,7 +35,7 @@ export async function storeFile(file: ArrayBuffer[], kad: Kademlia) {
 
     await Promise.all(
       jobs.map(async job => {
-        await workers.add(kad.store.bind(kad), [job.key, job.value]);
+        await workers.add(kad.store.bind(kad), [job.value]);
       })
     );
 

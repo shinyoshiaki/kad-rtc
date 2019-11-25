@@ -19,6 +19,7 @@ class PeerClass {
 
 type PeerProps = {
   type: string;
+  SdpType: "offer" | "answer" | undefined;
   onRpc: Event<RPCBase & ID>;
   onDisconnect: Event;
   onConnect: Event;
@@ -36,24 +37,72 @@ type PeerProps = {
 
 export class PeerMock implements Peer {
   type = "mock";
+  onData = new Event<RPC>();
+  SdpType: "offer" | "answer" | undefined = undefined;
+
   onRpc = new Event<any>();
   onDisconnect = new Event();
   onConnect = new Event();
+  targetContext?: PeerMock;
 
-  constructor(public kid: string) {}
+  constructor(public kid: string) {
+    this.onData.subscribe(data => {
+      try {
+        if (data.type) {
+          this.onRpc.execute(data);
+        }
+      } catch (error) {}
+    });
+  }
 
-  rpc = (data: { type: string; id: string }) => {};
+  rpc = async (data: { type: string; id: string }) => {
+    await new Promise(r => setTimeout(r));
+    this.targetContext!.onData.execute(data);
+  };
 
   parseRPC = (data: ArrayBuffer) => undefined as any;
 
-  eventRpc = <T extends { type: string }>(rpc: T["type"], id: string) =>
-    new Event<T>();
+  eventRpc = (type: string, id: string) => {
+    const observer = new Event<any>();
+    const { unSubscribe } = this.onData.subscribe(data => {
+      if (data.type === type && data.id === id) {
+        observer.execute(data);
+        unSubscribe();
+      }
+    });
+    return observer;
+  };
 
-  createOffer = async () => null as any;
+  createOffer = async () => {
+    this.SdpType = "offer";
+    return this as any;
+  };
 
-  setOffer = async (sdp: Signal) => null as any;
+  setOffer = async (sdp: any) => {
+    this.SdpType = "answer";
+    this.targetContext = sdp as PeerMock;
+    return this as any;
+  };
 
-  setAnswer = async (sdp: Signal) => null as any;
+  setAnswer = async (sdp: any) => {
+    const { onConnect } = sdp as PeerMock;
+    this.targetContext = sdp;
 
-  disconnect = () => {};
+    await new Promise(r => setTimeout(r, 0));
+
+    onConnect.execute(null);
+    this.onConnect.execute(null);
+
+    return undefined;
+  };
+
+  disconnect = () => {
+    const { onDisconnect, onData } = this.targetContext!;
+
+    onDisconnect.execute(null);
+    this.onDisconnect.execute(null);
+
+    onData.allUnsubscribe();
+    this.onData.allUnsubscribe();
+  };
 }

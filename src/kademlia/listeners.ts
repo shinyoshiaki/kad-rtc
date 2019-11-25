@@ -6,8 +6,8 @@ import listenStore from "./actions/store/listen";
 
 export function listeners(peer: Peer, di: DependencyInjection) {
   const { kTable, eventManager } = di;
-  eventManager.listen(peer);
   kTable.add(peer);
+  eventManager.listen(peer);
 
   listenStore(peer, di);
   listenFindnode(peer, di);

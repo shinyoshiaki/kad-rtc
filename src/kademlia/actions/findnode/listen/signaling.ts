@@ -2,6 +2,7 @@ import { FindNodeProxyAnswer, FindNodeProxyOpen } from "./node";
 import { ID, Peer } from "../../../modules/peer/base";
 
 import { DependencyInjection } from "../../../di";
+import { Signal } from "webrtc4me";
 import { listeners } from "../../../listeners";
 
 export default class FindNodePeer {
@@ -21,17 +22,17 @@ export default class FindNodePeer {
 
   findNodeProxyOpen = async (data: FindNodeProxyOpen & ID) => {
     const { kTable, signaling } = this.di;
-    const { finderkid, id } = data;
+    const { finderKid, id } = data;
 
-    const { peer } = signaling.create(finderkid);
+    const { peer } = signaling.create(finderKid);
 
     if (peer) {
-      this.candidates[finderkid] = peer;
+      this.candidates[finderKid] = peer;
 
       const offer = await peer.createOffer();
 
       this.listen.rpc({
-        ...FindNodePeerOffer(kTable.kid, JSON.stringify(offer)),
+        ...FindNodePeerOffer(kTable.kid, offer),
         id
       });
     } else {
@@ -40,19 +41,19 @@ export default class FindNodePeer {
   };
 
   findNodeProxyAnswer = async (data: FindNodeProxyAnswer) => {
-    const { finderkid, sdp } = data;
+    const { finderKid, sdp } = data;
 
-    const peer = this.candidates[finderkid];
+    const peer = this.candidates[finderKid];
     if (!peer) return;
-    const err = await peer.setAnswer(JSON.parse(sdp));
+    const err = await peer.setAnswer(sdp);
     if (!err) listeners(peer, this.di);
   };
 }
 
-const FindNodePeerOffer = (peerkid: string, sdp?: string) => ({
+const FindNodePeerOffer = (peerKid: string, sdp?: Signal) => ({
   type: "FindNodePeerOffer" as const,
   sdp,
-  peerkid
+  peerKid
 });
 
 export type FindNodePeerOffer = ReturnType<typeof FindNodePeerOffer>;

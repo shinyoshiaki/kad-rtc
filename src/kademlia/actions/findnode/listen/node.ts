@@ -1,11 +1,13 @@
 import { FindNode, FindNodeAnswer } from "..";
-import { ID, Peer, RPCBase } from "../../../modules/peer/base";
+import { ID, Peer } from "../../../modules/peer/base";
 
 import { DependencyInjection } from "../../../di";
 import { FindNodePeerOffer } from "./signaling";
-import { timeout } from "../../../const";
+import { Signal } from "webrtc4me";
 
 export default class FindNodeProxy {
+  timeout = this.di.opt.timeout! / 2;
+
   constructor(private listen: Peer, private di: DependencyInjection) {
     const { rpcManager } = di;
 
@@ -15,29 +17,34 @@ export default class FindNodeProxy {
 
     rpcManager
       .asObservable<FindNodeAnswer>("FindNodeAnswer", listen)
-      .subscribe(this.findnodeanswer);
+      .subscribe(this.findNodeAnswer);
   }
 
   findnode = async (data: FindNode & ID) => {
     const { kTable, rpcManager } = this.di;
-    const { searchkid, except, id } = data;
+    const { searchKid, except, id } = data;
 
-    const offers: { peerkid: string; sdp: string }[] = [];
+    const offers: { peerKid: string; sdp: Signal }[] = [];
 
-    const peers = kTable.findNode(searchkid);
+    const peers = kTable
+      .findNode(searchKid)
+      .filter(({ kid }) => kid !== this.listen.kid)
+      .filter(({ kid }) => !except.includes(kid));
 
     await Promise.all(
       peers.map(async peer => {
-        if (!(peer.kid === this.listen.kid || except.includes(peer.kid))) {
-          const wait = rpcManager.getWait<FindNodePeerOffer>(
+        const res = await rpcManager
+          .getWait<FindNodePeerOffer>(
             peer,
             FindNodeProxyOpen(this.listen.kid)
-          );
-          const res = await wait(timeout).catch(() => {});
-          if (res) {
-            const { peerkid, sdp } = res;
-            if (sdp) offers.push({ peerkid, sdp });
-          }
+          )(this.timeout)
+          .catch(() => {});
+
+        if (res) {
+          const { peerKid, sdp } = res;
+          if (sdp) offers.push({ peerKid, sdp });
+        } else {
+          console.log("timeout");
         }
       })
     );
@@ -45,38 +52,39 @@ export default class FindNodeProxy {
     this.listen.rpc({ ...FindNodeProxyOffer(offers), id });
   };
 
-  findnodeanswer = async (data: FindNodeAnswer & ID) => {
+  findNodeAnswer = async (data: FindNodeAnswer & ID) => {
     const { kTable } = this.di;
-    const { sdp, peerkid, id } = data;
+    const { sdp, peerKid, id } = data;
 
-    const peer = kTable.getPeer(peerkid);
-    if (peer) peer.rpc({ ...FindNodeProxyAnswer(sdp, this.listen.kid), id });
-    else {
+    const peer = kTable.getPeer(peerKid);
+    if (peer) {
+      peer.rpc({ ...FindNodeProxyAnswer(sdp, this.listen.kid), id });
+    } else {
       this.listen.rpc({ ...FindNodeProxyAnswerError(), id });
     }
   };
 }
 
-export type Offer = { peerkid: string; sdp: string };
+export type OfferPayload = { peerKid: string; sdp: Signal };
 
-const FindNodeProxyOffer = (peers: Offer[]) => ({
+const FindNodeProxyOffer = (peers: OfferPayload[]) => ({
   type: "FindNodeProxyOffer" as const,
   peers
 });
 
 export type FindNodeProxyOffer = ReturnType<typeof FindNodeProxyOffer>;
 
-const FindNodeProxyOpen = (finderkid: string) => ({
+const FindNodeProxyOpen = (finderKid: string) => ({
   type: "FindNodeProxyOpen" as const,
-  finderkid
+  finderKid
 });
 
 export type FindNodeProxyOpen = ReturnType<typeof FindNodeProxyOpen>;
 
-const FindNodeProxyAnswer = (sdp: string, finderkid: string) => ({
+const FindNodeProxyAnswer = (sdp: Signal, finderKid: string) => ({
   type: "FindNodeProxyAnswer" as const,
   sdp,
-  finderkid
+  finderKid
 });
 
 export type FindNodeProxyAnswer = ReturnType<typeof FindNodeProxyAnswer>;

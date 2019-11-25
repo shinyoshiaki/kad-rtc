@@ -1,9 +1,12 @@
-import { DependencyInjection, dependencyInjection } from "../kademlia/di";
+import {
+  DependencyInjection,
+  KeyValueStore,
+  PeerCreator,
+  dependencyInjection,
+  findNode,
+  listeners
+} from "../kademlia";
 
-import KeyValueStore from "../kademlia/modules/kvs/base";
-import PeerModule from "../kademlia/modules/peer";
-import findNode from "../kademlia/actions/findnode";
-import { listeners } from "../kademlia/listeners";
 import sha1 from "sha1";
 
 export class Count {
@@ -16,7 +19,12 @@ export class Count {
   };
 }
 
-export async function testSetupNodes(kBucketSize: number, num: number) {
+export async function testSetupNodes(
+  kBucketSize: number,
+  num: number,
+  PeerModule: PeerCreator,
+  timeout: number
+) {
   const nodes: DependencyInjection[] = [];
 
   for (let i = 0; i < num; i++) {
@@ -24,9 +32,7 @@ export async function testSetupNodes(kBucketSize: number, num: number) {
       const node = dependencyInjection(
         sha1(i.toString()).toString(),
         { peerCreate: PeerModule, kvs: new KeyValueStore() },
-        {
-          kBucketSize
-        }
+        { kBucketSize, timeout }
       );
       nodes.push(node);
     } else {
@@ -34,9 +40,7 @@ export async function testSetupNodes(kBucketSize: number, num: number) {
       const push = dependencyInjection(
         sha1(i.toString()).toString(),
         { peerCreate: PeerModule, kvs: new KeyValueStore() },
-        {
-          kBucketSize
-        }
+        { kBucketSize, timeout }
       );
       const offer = PeerModule(push.kTable.kid);
       const offerSdp = await offer.createOffer();

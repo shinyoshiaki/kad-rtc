@@ -1,58 +1,41 @@
-import { Option as OptTable } from "./ktable";
-import findNode from "./actions/findnode";
-import { Peer } from "./modules/peer/base";
 import { DependencyInjection, dependencyInjection } from "./di";
-import store from "./actions/store";
+import KeyValueStore, { Item } from "./modules/kvs/base";
+import { Peer, PeerMock } from "./modules/peer/base";
+import PeerModule, { PeerMockModule } from "./modules/peer";
+
+import EventManager from "./services/eventmanager";
+import Kademlia from "./kademlia";
+import Kbucket from "./ktable/kbucket";
+import Ktable from "./ktable";
+import { Options } from "./kademlia";
+import { PeerCreator } from "./modules/index";
+import Uuid from "./util/uuid";
+import findNode from "./actions/findnode";
 import findValue from "./actions/findvalue";
+import genKid from "./util/kid";
 import { listeners } from "./listeners";
-import Modules from "./modules";
+import store from "./actions/store";
 
-type Options = OptTable;
+export {
+  Options,
+  genKid,
+  Item,
+  EventManager,
+  KeyValueStore,
+  listeners,
+  dependencyInjection,
+  DependencyInjection,
+  Peer,
+  findNode,
+  findValue,
+  store,
+  Kbucket,
+  Ktable,
+  PeerMock,
+  Uuid,
+  PeerModule,
+  PeerMockModule,
+  PeerCreator
+};
 
-export default class Kademlia {
-  di: DependencyInjection;
-
-  constructor(
-    public kid: string,
-    modules: Modules,
-    private opt: Partial<Options> = {}
-  ) {
-    this.di = dependencyInjection(kid, modules, opt);
-  }
-
-  async findNode(searchkid: string) {
-    let target: undefined | Peer;
-
-    for (
-      let pre = "";
-      pre !== this.di.kTable.getHash(searchkid);
-      pre = this.di.kTable.getHash(searchkid)
-    ) {
-      target = await findNode(searchkid, this.di);
-      if (target) break;
-    }
-
-    return target;
-  }
-
-  async store(key: string, value: string | ArrayBuffer, msg?: string) {
-    return await store(this.di, key, value, msg);
-  }
-
-  async findValue(key: string) {
-    const res = await findValue(key, this.di);
-    return res;
-  }
-
-  async add(connect: Peer, opt: Partial<{ notfind: boolean }> = {}) {
-    const { kTable } = this.di;
-    const { notfind } = opt;
-
-    kTable.add(connect);
-    listeners(connect, this.di);
-    if (!notfind) {
-      await new Promise(r => setTimeout(r, 1000));
-      await findNode(this.kid, this.di);
-    }
-  }
-}
+export default Kademlia;

@@ -15,7 +15,7 @@
     "server": "cd ./examples/express && npm run portal",
     "react": "cd ./examples/react && npm run start",
     "react:build": "cd ./examples/react && npm run build",
-    "deploy": "npm run type && npm run test && npm run update && npm run react:build"
+    "deploy": "npm run test && npm run update"
   },
   "main": "lib/index.js",
   "files": [
@@ -27,7 +27,7 @@
     "kad-distance": "git+https://git@github.com/shinyoshiaki/kad-distance.git",
     "rx.mini": "^0.1.0",
     "sha1": "^1.1.1",
-    "webrtc4me": "^0.7.0",
+    "webrtc4me": "^0.8.1",
     "wrtc": "^0.4.0"
   },
   "devDependencies": {

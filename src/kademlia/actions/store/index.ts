@@ -1,7 +1,6 @@
 import { DependencyInjection } from "../../di";
 import { Peer } from "../../modules/peer/base";
 import findNode from "../findnode";
-import { timeout } from "../../const";
 
 export default async function store(
   di: DependencyInjection,
@@ -10,6 +9,7 @@ export default async function store(
   msg?: string
 ) {
   const { kTable, rpcManager, jobSystem } = di;
+  const { timeout } = di.opt;
   const { kvs } = di.modules;
 
   kvs.set(key, value, msg as any);
@@ -27,8 +27,12 @@ export default async function store(
   const item = Store(key, value, msg);
 
   const onStore = async (peer: Peer) => {
-    const wait = rpcManager.getWait(peer, item);
-    await wait(timeout).catch(() => {});
+    await rpcManager
+      .getWait(
+        peer,
+        item
+      )(timeout)
+      .catch(() => {});
     // TODO error handling
   };
 

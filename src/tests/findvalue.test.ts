@@ -1,6 +1,6 @@
-import findValue from "../kademlia/actions/findvalue";
+import { PeerModule, findValue, store } from "../kademlia";
+
 import sha1 from "sha1";
-import store from "../kademlia/actions/store";
 import { testSetupNodes } from "./testtools";
 
 const kBucketSize = 8;
@@ -15,7 +15,12 @@ describe("findvalue", () => {
   test(
     "findvalue",
     async () => {
-      const nodes = await testSetupNodes(kBucketSize, num);
+      const nodes = await testSetupNodes(
+        kBucketSize,
+        num,
+        PeerModule,
+        60_000 * 10
+      );
 
       const testStore = async (value: string) => {
         const node = nodes[0];

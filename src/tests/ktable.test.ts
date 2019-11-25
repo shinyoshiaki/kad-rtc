@@ -1,6 +1,5 @@
-import Kbucket from "../kademlia/ktable/kbucket";
-import Ktable from "../kademlia/ktable";
-import { PeerMock } from "../kademlia/modules/peer/base";
+import { Kbucket, Ktable, PeerMock } from "../kademlia";
+
 import { distance } from "kad-distance";
 import sha1 from "sha1";
 
@@ -11,10 +10,10 @@ describe("ktable", () => {
 
   test("constructor", () => {
     const ktable = new Ktable(sha1("a").toString(), { kBucketSize });
-    const kbuckets: Kbucket[] = (ktable as any).kbuckets;
+    const kBuckets: Kbucket[] = ktable.kBuckets;
     const k: number = (ktable as any).k;
 
-    expect(kbuckets.length).toBe(160);
+    expect(kBuckets.length).toBe(160);
     expect(k).toBe(kBucketSize);
   });
 
