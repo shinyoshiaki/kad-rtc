@@ -23,7 +23,7 @@ export async function testSetupNodes(
   kBucketSize: number,
   num: number,
   PeerModule: PeerCreator,
-  timeout = 10000
+  timeout: number
 ) {
   const nodes: DependencyInjection[] = [];
 
