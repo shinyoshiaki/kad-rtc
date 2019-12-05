@@ -4,8 +4,7 @@ import { ID, Peer, RPC, RPCBase } from "./base";
 import { decode, encode } from "@msgpack/msgpack";
 
 import Event from "rx.mini";
-
-let udpPort = 30000;
+import getPort from "get-port";
 
 export class PeerUdpMock implements Peer {
   type = "udp mock";
@@ -16,7 +15,7 @@ export class PeerUdpMock implements Peer {
   onConnect = new Event();
 
   private host = "127.0.0.1";
-  private port = udpPort++;
+  private port?: number;
   private socket = dgram.createSocket("udp4");
   private target = { host: "", port: 0 };
 
@@ -30,7 +29,10 @@ export class PeerUdpMock implements Peer {
       const obj = this.parseRPC(message);
       if (obj) this.onRpc.execute(obj);
     });
+  }
 
+  private async bind() {
+    this.port = await getPort();
     this.socket.bind(this.port, this.host);
   }
 
@@ -54,7 +56,7 @@ export class PeerUdpMock implements Peer {
 
   createOffer = async () => {
     this.SdpType = "offer";
-    await new Promise(r => setTimeout(r));
+    await this.bind();
 
     return { host: this.host, port: this.port } as any;
   };
@@ -62,7 +64,8 @@ export class PeerUdpMock implements Peer {
   setOffer = async (sdp: any) => {
     this.SdpType = "answer";
     this.target = { port: sdp.port, host: sdp.host };
-    await new Promise(r => setTimeout(r));
+
+    await this.bind();
 
     return this as any;
   };
