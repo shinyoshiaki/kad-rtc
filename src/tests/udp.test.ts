@@ -1,5 +1,10 @@
+import {
+  PeerUdpMock,
+  closeUdpSocket,
+  setUpSocket
+} from "../kademlia/modules/peer/udp";
+
 import { Count } from "./testtools";
-import { PeerUdpMock } from "../kademlia/modules/peer/udp";
 import { Uuid } from "../kademlia";
 
 const PeerModule = (kid: string) => new PeerUdpMock(kid);
@@ -8,6 +13,7 @@ describe("mock", () => {
   test(
     "test",
     async () => {
+      await setUpSocket();
       await new Promise(async resolve => {
         const count = new Count(2, () => {
           a.disconnect();
@@ -46,6 +52,7 @@ describe("mock", () => {
           });
         });
       });
+      closeUdpSocket();
     },
     1000 * 6000
   );
