@@ -41,7 +41,7 @@ export default async function findValue(
             }
           }
         } else {
-          console.log("timeout", proxy.type, timeout);
+          console.log("timeout", "FindValue", proxy.type, timeout);
         }
 
         return { offers: [], proxy };

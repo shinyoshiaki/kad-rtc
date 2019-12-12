@@ -48,7 +48,7 @@ export default class FindValueProxy {
               const { peerKid, sdp } = res;
               if (sdp) offers.push({ peerKid, sdp });
             } else {
-              console.log("timeout");
+              console.log("timeout", "FindValueProxyOpen", peer.type);
             }
           }
         })

@@ -2,6 +2,7 @@ import { DependencyInjection, dependencyInjection } from "./di";
 import KeyValueStore, { Item } from "./modules/kvs/base";
 import { Peer, PeerMock } from "./modules/peer/base";
 import PeerModule, { PeerMockModule } from "./modules/peer";
+import { PeerUdpMock, PeerUdpModule } from "./modules/peer/udp";
 
 import EventManager from "./services/eventmanager";
 import Kademlia from "./kademlia";
@@ -17,6 +18,8 @@ import { listeners } from "./listeners";
 import store from "./actions/store";
 
 export {
+  PeerUdpMock,
+  PeerUdpModule,
   Options,
   genKid,
   Item,

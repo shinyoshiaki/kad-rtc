@@ -6,6 +6,22 @@ import { decode, encode } from "@msgpack/msgpack";
 import Event from "rx.mini";
 import getPort from "get-port";
 
+let port = 0,
+  socket = dgram.createSocket("udp4");
+
+// 1 worker につき1ソケットを割り当てる
+export async function setUpSocket() {
+  port = await getPort();
+  socket.bind(port, "127.0.0.1");
+  socket.setMaxListeners(100000);
+  await new Promise(r => socket.once("listening", r));
+}
+
+export async function closeUdpSocket() {
+  socket.close();
+  await new Promise(r => socket.once("close", r));
+}
+
 export class PeerUdpMock implements Peer {
   type = "udp mock";
   SdpType: "offer" | "answer" | undefined = undefined;
@@ -14,26 +30,19 @@ export class PeerUdpMock implements Peer {
   onDisconnect = new Event();
   onConnect = new Event();
 
-  private host = "127.0.0.1";
-  private port?: number;
-  private socket = dgram.createSocket("udp4");
-  private target = { host: "", port: 0 };
+  uuid = Math.random().toString() + Date.now();
+  target = { uuid: "", port: 0 };
 
   constructor(public kid: string) {
-    this.socket.on("message", message => {
-      if (message.toString() === "connect") {
+    socket.on("message", message => {
+      if (message.toString() === "connect," + this.uuid) {
         this.onConnect.execute(null);
         return;
       }
 
       const obj = this.parseRPC(message);
-      if (obj) this.onRpc.execute(obj);
+      if (obj && obj.uuid === this.uuid) this.onRpc.execute(obj);
     });
-  }
-
-  private async bind() {
-    this.port = await getPort();
-    this.socket.bind(this.port, this.host);
   }
 
   parseRPC = (data: ArrayBuffer) => {
@@ -50,29 +59,27 @@ export class PeerUdpMock implements Peer {
 
   rpc = (send: RPCBase & ID & { [key: string]: unknown }) => {
     if (send.sdp) send.sdp = JSON.stringify(send.sdp);
+    (send as any).uuid = this.target.uuid;
     const packet = encode(send);
-    this.socket.send(packet, this.target.port, this.target.host);
+    socket.send(packet, this.target.port, "127.0.0.1");
   };
 
   createOffer = async () => {
     this.SdpType = "offer";
-    await this.bind();
-
-    return { host: this.host, port: this.port } as any;
+    return { uuid: this.uuid, port } as any;
   };
 
   setOffer = async (sdp: any) => {
     this.SdpType = "answer";
-    this.target = { port: sdp.port, host: sdp.host };
-
-    await this.bind();
-
-    return this as any;
+    this.target.uuid = sdp.uuid;
+    this.target.port = sdp.port;
+    return { uuid: this.uuid, port } as any;
   };
 
   setAnswer = async (sdp: any) => {
-    this.target = { port: sdp.port, host: sdp.host };
-    this.socket.send("connect", this.target.port, this.target.host);
+    this.target.uuid = sdp.uuid;
+    this.target.port = sdp.port;
+    socket.send("connect," + this.target.uuid, this.target.port, "127.0.0.1");
     await new Promise(r => setTimeout(r, 0));
     this.onConnect.execute(null);
 

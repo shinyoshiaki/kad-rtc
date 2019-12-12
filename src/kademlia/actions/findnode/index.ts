@@ -34,7 +34,7 @@ export default async function findNode(
         const { peers } = res;
         if (peers.length > 0) return { peers, peer };
       } else {
-        console.log("timeout", timeout, peer.type);
+        console.log("timeout", "FindNode", timeout, peer.type);
       }
 
       return { peers: [], peer };
