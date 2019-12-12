@@ -44,7 +44,7 @@ export default class FindNodeProxy {
           const { peerKid, sdp } = res;
           if (sdp) offers.push({ peerKid, sdp });
         } else {
-          console.log("timeout");
+          console.log("timeout", "FindNodeProxyOpen", this.timeout, peer.type);
         }
       })
     );

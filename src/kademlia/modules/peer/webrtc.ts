@@ -11,10 +11,10 @@ export const PeerModule = (kid: string) => new PeerWebRTC(kid);
 export default class PeerWebRTC implements Peer {
   type = "webrtc";
   SdpType: "offer" | "answer" | undefined = undefined;
-  peer: WebRTC = new WebRTC({ disable_stun: true, wrtc });
   onRpc = new Event<RPCBase & ID>();
   onDisconnect = new Event();
   onConnect = new Event();
+  private peer: WebRTC = new WebRTC({ disable_stun: true, wrtc });
 
   constructor(public kid: string) {
     this.peer.nodeId = kid;
@@ -43,9 +43,7 @@ export default class PeerWebRTC implements Peer {
         if (data.sdp) data.sdp = JSON.parse(data.sdp as any);
         return data;
       }
-    } catch (error) {
-      // console.error(error, buffer);
-    }
+    } catch (error) {}
     return undefined;
   };
 
@@ -53,24 +51,6 @@ export default class PeerWebRTC implements Peer {
     if (send.sdp) send.sdp = JSON.stringify(send.sdp);
     const packet = encode(send);
     this.peer.send(packet);
-  };
-
-  eventRpc = (type: string, transactionId: string) => {
-    const observer = new Event<any>();
-    const { unSubscribe } = this.peer.onData.subscribe(
-      ({ label, data, dataType }) => {
-        if (label == "datachannel" && dataType === "ArrayBuffer") {
-          const obj = this.parseRPC(data as ArrayBuffer);
-          if (obj && obj.type === type) {
-            if (obj.id === transactionId) {
-              observer.execute(decode(data as ArrayBuffer));
-              unSubscribe();
-            }
-          }
-        }
-      }
-    );
-    return observer;
   };
 
   createOffer = async () => {

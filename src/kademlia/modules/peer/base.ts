@@ -25,10 +25,6 @@ type PeerProps = {
   onConnect: Event;
   parseRPC: (data: ArrayBuffer) => RPC | undefined;
   rpc: (data: RPCBase & ID & { [key: string]: unknown }) => void;
-  eventRpc: <T extends { type: string }>(
-    rpc: T["type"],
-    id: string
-  ) => Event<T>;
   createOffer: () => Promise<Signal>;
   setOffer: (sdp: Signal) => Promise<Signal>;
   setAnswer: (sdp: Signal) => Promise<Error | undefined>;
@@ -61,17 +57,6 @@ export class PeerMock implements Peer {
   };
 
   parseRPC = (data: ArrayBuffer) => undefined as any;
-
-  eventRpc = (type: string, id: string) => {
-    const observer = new Event<any>();
-    const { unSubscribe } = this.onData.subscribe(data => {
-      if (data.type === type && data.id === id) {
-        observer.execute(data);
-        unSubscribe();
-      }
-    });
-    return observer;
-  };
 
   createOffer = async () => {
     this.SdpType = "offer";
