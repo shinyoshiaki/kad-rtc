@@ -11,7 +11,7 @@ import Ktable from "./ktable";
 import { Options } from "./kademlia";
 import { PeerCreator } from "./modules/index";
 import Uuid from "./util/uuid";
-import findNode from "./actions/findnode";
+import { findNode } from "./actions/findnode";
 import findValue from "./actions/findvalue";
 import genKid from "./util/kid";
 import { listeners } from "./listeners";

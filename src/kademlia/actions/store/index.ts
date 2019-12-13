@@ -1,6 +1,6 @@
 import { DependencyInjection } from "../../di";
 import { Peer } from "../../modules/peer/base";
-import findNode from "../findnode";
+import { findNode } from "../findnode";
 
 export default async function store(
   di: DependencyInjection,

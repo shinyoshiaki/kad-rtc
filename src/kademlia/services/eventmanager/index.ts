@@ -1,7 +1,6 @@
 import { ID, Peer, RPC } from "../../modules/peer/base";
 
 import Event from "rx.mini";
-import { FindNode } from "../../actions/findnode";
 import { FindValue } from "../../actions/findvalue";
 import RpcManager from "../rpcmanager";
 import { Store } from "../../actions/store";
@@ -11,7 +10,7 @@ type WithPeer<T> = { rpc: T; peer: Peer };
 export default class EventManager {
   event = new Event<WithPeer<RPC>>();
   store = new Event<WithPeer<Store & ID>>();
-  findnode = new Event<WithPeer<FindNode & ID>>();
+
   findvalue = new Event<WithPeer<FindValue & ID>>();
   addPeer = new Event<Peer>();
 
@@ -19,7 +18,6 @@ export default class EventManager {
 
   listen(peer: Peer) {
     this.listenStore(peer);
-    this.listenFindnode(peer);
     this.listenFindvalue(peer);
 
     {
@@ -36,14 +34,6 @@ export default class EventManager {
     this.rpcManager
       .asObservable<Store>("Store", peer)
       .subscribe(rpc => this.store.execute({ rpc: rpc as Store & ID, peer }));
-  }
-
-  private listenFindnode(peer: Peer) {
-    this.rpcManager
-      .asObservable<FindNode>("FindNode", peer)
-      .subscribe(rpc =>
-        this.findnode.execute({ rpc: rpc as FindNode & ID, peer })
-      );
   }
 
   private listenFindvalue(peer: Peer) {

@@ -7,10 +7,11 @@ import Event from "rx.mini";
 import getPort from "get-port";
 
 let port = 0,
-  socket = dgram.createSocket("udp4");
+  socket: dgram.Socket = null as any;
 
 // 1 worker につき1ソケットを割り当てる
 export async function setUpSocket() {
+  socket = dgram.createSocket("udp4");
   port = await getPort();
   socket.bind(port, "127.0.0.1");
   socket.setMaxListeners(100000);
@@ -20,6 +21,7 @@ export async function setUpSocket() {
 export async function closeUdpSocket() {
   socket.close();
   await new Promise(r => socket.once("close", r));
+  socket = null as any;
 }
 
 export class PeerUdpMock implements Peer {
@@ -80,8 +82,8 @@ export class PeerUdpMock implements Peer {
     this.target.uuid = sdp.uuid;
     this.target.port = sdp.port;
     socket.send("connect," + this.target.uuid, this.target.port, "127.0.0.1");
-    await new Promise(r => setTimeout(r, 0));
     this.onConnect.execute(null);
+    await new Promise(r => setTimeout(r, 0));
 
     return undefined;
   };

@@ -1,5 +1,8 @@
+import { decode, encode } from "@msgpack/msgpack";
+
 import Event from "rx.mini";
 import { Signal } from "webrtc4me";
+import { Subject } from "rxjs";
 
 export type ID = { id: string };
 
@@ -31,6 +34,8 @@ type PeerProps = {
   disconnect: () => void;
 };
 
+const peerMockSubject = new Subject<ArrayBuffer | string>();
+
 export class PeerMock implements Peer {
   type = "mock";
   onData = new Event<RPC>();
@@ -39,55 +44,69 @@ export class PeerMock implements Peer {
   onRpc = new Event<any>();
   onDisconnect = new Event();
   onConnect = new Event();
-  targetContext?: PeerMock;
+  uuid = Math.random().toString() + Date.now();
+  target = { uuid: "", port: 0 };
 
   constructor(public kid: string) {
-    this.onData.subscribe(data => {
-      try {
-        if (data.type) {
-          this.onRpc.execute(data);
+    peerMockSubject.subscribe(data => {
+      if (typeof data === "string") {
+        if (data === "connect," + this.uuid) {
+          this.onConnect.execute(null);
         }
-      } catch (error) {}
+        if (data === "disconnect," + this.uuid) {
+          this.onDisconnect.execute(null);
+          this.uuid = "";
+        }
+      } else {
+        const obj = this.parseRPC(data);
+        if (obj && obj.uuid === this.uuid) this.onRpc.execute(obj);
+      }
     });
   }
 
-  rpc = async (data: { type: string; id: string }) => {
-    await new Promise(r => setTimeout(r));
-    this.targetContext!.onData.execute(data);
+  parseRPC = (data: ArrayBuffer) => {
+    const buffer = Buffer.from(data);
+    try {
+      const data: RPC = decode(buffer) as any;
+      if (data.type) {
+        if (data.sdp) data.sdp = JSON.parse(data.sdp as any);
+        return data;
+      }
+    } catch (error) {}
+    return undefined;
   };
 
-  parseRPC = (data: ArrayBuffer) => undefined as any;
+  rpc = async (send: RPCBase & ID & { [key: string]: unknown }) => {
+    if (send.sdp) send.sdp = JSON.stringify(send.sdp);
+    (send as any).uuid = this.target.uuid;
+    const packet = encode(send);
+    await new Promise(r => setTimeout(r));
+    peerMockSubject.next(packet);
+  };
 
   createOffer = async () => {
     this.SdpType = "offer";
-    return this as any;
+    return { uuid: this.uuid } as any;
   };
 
   setOffer = async (sdp: any) => {
     this.SdpType = "answer";
-    this.targetContext = sdp as PeerMock;
-    return this as any;
+    this.target.uuid = sdp.uuid;
+    return { uuid: this.uuid } as any;
   };
 
   setAnswer = async (sdp: any) => {
-    const { onConnect } = sdp as PeerMock;
-    this.targetContext = sdp;
-
-    await new Promise(r => setTimeout(r, 0));
-
-    onConnect.execute(null);
+    this.target.uuid = sdp.uuid;
+    peerMockSubject.next("connect," + this.target.uuid);
     this.onConnect.execute(null);
+    await new Promise(r => setTimeout(r, 0));
 
     return undefined;
   };
 
   disconnect = () => {
-    const { onDisconnect, onData } = this.targetContext!;
-
-    onDisconnect.execute(null);
+    this.uuid = "";
     this.onDisconnect.execute(null);
-
-    onData.allUnsubscribe();
-    this.onData.allUnsubscribe();
+    peerMockSubject.next("disconnect," + this.target.uuid);
   };
 }

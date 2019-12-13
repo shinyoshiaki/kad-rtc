@@ -3,7 +3,7 @@ import { DependencyInjection, dependencyInjection } from "./di";
 import { Modules } from "./modules";
 import { Option as OptTable } from "./ktable";
 import { Peer } from "./modules/peer/base";
-import findNode from "./actions/findnode";
+import { findNode } from "./actions/findnode";
 import findValue from "./actions/findvalue";
 import { listeners } from "./listeners";
 import sha1 from "sha1";
