@@ -25,13 +25,8 @@ describe("mock", () => {
 
         const a = PeerModule("a");
         const b = PeerModule("b");
-        const offer = await a.createOffer();
-        const answer = await b.setOffer(offer);
-        a.setAnswer(answer);
 
         a.onConnect.once(async () => {
-          const data = { type: "a", msg: "a", id: uuid.get() };
-          a.rpc(data);
           a.onRpc.once(v => {
             const { msg } = v as any;
             if (v.type === "b") {
@@ -39,10 +34,9 @@ describe("mock", () => {
               count.check();
             }
           });
+          a.rpc({ type: "a", msg: "a", id: uuid.get() });
         });
         b.onConnect.once(async () => {
-          const data = { type: "b", msg: "b", id: uuid.get() };
-          b.rpc(data);
           b.onRpc.once(v => {
             const { msg } = v as any;
             if (v.type === "a") {
@@ -50,7 +44,12 @@ describe("mock", () => {
               count.check();
             }
           });
+          b.rpc({ type: "b", msg: "b", id: uuid.get() });
         });
+
+        const offer = await a.createOffer();
+        const answer = await b.setOffer(offer);
+        a.setAnswer(answer);
       });
       closeUdpSocket();
     },

@@ -82,8 +82,8 @@ export class PeerUdpMock implements Peer {
     this.target.uuid = sdp.uuid;
     this.target.port = sdp.port;
     socket.send("connect," + this.target.uuid, this.target.port, "127.0.0.1");
-    this.onConnect.execute(null);
     await new Promise(r => setTimeout(r, 0));
+    this.onConnect.execute(null);
 
     return undefined;
   };
