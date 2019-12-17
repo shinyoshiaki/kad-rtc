@@ -52,7 +52,7 @@ describe("mock", () => {
           });
         });
       });
-      closeUdpSocket();
+      await closeUdpSocket();
     },
     1000 * 6000
   );
