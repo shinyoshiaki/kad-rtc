@@ -6,10 +6,10 @@ import { Peer } from "../../../modules/peer/base";
 import { TestFindNodePeer } from "./signaling";
 
 export function listenerFindNodeProxy(listen: Peer, di: DependencyInjection) {
-  expose(new TestFindNodeProxy(listen, di), exposer(listen));
+  expose(new FindNodeProxy(listen, di), exposer(listen));
 }
 
-export class TestFindNodeProxy {
+export class FindNodeProxy {
   timeout = this.di.opt.timeout! / 2;
 
   constructor(private listen: Peer, private di: DependencyInjection) {}

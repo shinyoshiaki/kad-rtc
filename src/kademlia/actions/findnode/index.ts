@@ -1,6 +1,6 @@
 import { DependencyInjection } from "../../di";
 import { Peer } from "../../modules/peer/base";
-import { TestFindNodeProxy } from "./listen/node";
+import { FindNodeProxy } from "./listen/node";
 import { listeners } from "../../listeners";
 import { wrap } from "../../../vendor/airpc/main";
 import { wrapper } from "../rpc";
@@ -14,7 +14,7 @@ export async function findNode(searchKid: string, di: DependencyInjection) {
 
   const findNodeProxyOfferResult = await Promise.all(
     kTable.findNode(searchKid).map(async peer => {
-      const node = wrap(TestFindNodeProxy, wrapper(peer));
+      const node = wrap(FindNodeProxy, wrapper(peer));
 
       const except = kTable.allPeers.map(item => item.kid);
 
@@ -29,7 +29,7 @@ export async function findNode(searchKid: string, di: DependencyInjection) {
     findNodeProxyOfferResult
       .map(({ peer: node, peers }) =>
         peers.map(async offer => {
-          const findNodeProxy = wrap(TestFindNodeProxy, wrapper(node));
+          const findNodeProxy = wrap(FindNodeProxy, wrapper(node));
 
           const { peerKid, sdp } = offer;
           const { peer, candidate } = signaling.create(peerKid);

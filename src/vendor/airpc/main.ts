@@ -9,7 +9,7 @@ export type Wrapper = {
 };
 export type Exposer = Subject<ExposerObject>;
 export type ExposerObject = {
-  port: { postMessage: (v: Uint8Array) => void };
+  postMessage: (v: Uint8Array) => void;
   value: Uint8Array;
 };
 
@@ -44,11 +44,11 @@ export function wrap<T>(
 
 export function expose(instance: any, exposer: Exposer) {
   exposer.subscribe(async v => {
-    const { port, value } = v;
+    const { postMessage, value } = v;
     const { type, args, uuid } = decode(value) as any;
     if (instance[type]) {
       const response = await instance[type](...args);
-      port.postMessage(encode({ uuid, response }));
+      postMessage(encode({ uuid, response }));
     }
   });
 }

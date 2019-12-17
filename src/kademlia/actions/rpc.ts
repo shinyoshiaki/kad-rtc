@@ -9,10 +9,8 @@ export const exposer = (listen: Peer) => {
     if (data.type !== "airpc") return;
     subject.next({
       value,
-      port: {
-        postMessage: v => {
-          listen.rpc({ type: "airpc", id: "", value: v });
-        }
+      postMessage: v => {
+        listen.rpc({ type: "airpc", id: "", value: v });
       }
     });
   });

@@ -1,6 +1,9 @@
 import { DependencyInjection } from "../../di";
+import { ListenStore } from "./listen";
 import { Peer } from "../../modules/peer/base";
 import { findNode } from "../findnode";
+import { wrap } from "../../../vendor/airpc/main";
+import { wrapper } from "../rpc";
 
 export default async function store(
   di: DependencyInjection,
@@ -27,13 +30,8 @@ export default async function store(
   const item = Store(key, value, msg);
 
   const onStore = async (peer: Peer) => {
-    await rpcManager
-      .getWait(
-        peer,
-        item
-      )(timeout)
-      .catch(() => {});
-    // TODO error handling
+    const actions = wrap(ListenStore, wrapper(peer));
+    await actions.store(key, value, msg);
   };
 
   await Promise.all(
