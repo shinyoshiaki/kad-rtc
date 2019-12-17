@@ -10,6 +10,7 @@ export function listenerFindValueProxy(listen: Peer, di: DependencyInjection) {
 }
 
 export class TestFindValueProxy {
+  timeout = this.di.opt.timeout! / 2;
   constructor(private listen: Peer, private di: DependencyInjection) {}
 
   async findvalue(key: string, except: string[]) {
@@ -30,8 +31,14 @@ export class TestFindValueProxy {
 
       await Promise.all(
         peers.map(async peer => {
-          const actions = wrap(TestFindValueSignaling, wrapper(peer));
-          const data = await actions.findValueProxyOpen(this.listen.kid);
+          const actions = wrap(
+            TestFindValueSignaling,
+            wrapper(peer),
+            this.timeout
+          );
+          const data = await actions
+            .findValueProxyOpen(this.listen.kid)
+            .catch(() => {});
 
           if (data) {
             const { offer, kid } = data;
@@ -51,7 +58,7 @@ export class TestFindValueProxy {
     const peer = kTable.getPeer(peerKid);
     if (!peer) return false;
 
-    const actions = wrap(TestFindValueSignaling, wrapper(peer));
+    const actions = wrap(TestFindValueSignaling, wrapper(peer), this.timeout);
     actions.findValueProxyAnswer(this.listen.kid, sdp);
   }
 }

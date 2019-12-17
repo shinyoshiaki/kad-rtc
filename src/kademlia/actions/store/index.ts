@@ -13,6 +13,7 @@ export default async function store(
 ) {
   const { kTable, jobSystem } = di;
   const { kvs } = di.modules;
+  const { timeout } = di.opt;
 
   kvs.set(key, value, msg as any);
 
@@ -29,7 +30,7 @@ export default async function store(
   const item = { key, value, msg };
 
   const onStore = async (peer: Peer) => {
-    const actions = wrap(ListenStore, wrapper(peer));
+    const actions = wrap(ListenStore, wrapper(peer), timeout);
     await actions.store(key, value, msg);
   };
 

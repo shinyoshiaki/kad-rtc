@@ -21,12 +21,12 @@ export default async function findValue(
     const findValueResultResult = await Promise.all(
       kTable.findNode(key).map(async proxy => {
         const except = kTable.findNode(key).map(({ kid }) => kid);
-        const actions = wrap(TestFindValueProxy, wrapper(proxy));
+        const actions = wrap(TestFindValueProxy, wrapper(proxy), timeout);
 
-        const res = await actions.findvalue(key, except);
+        const data = await actions.findvalue(key, except).catch(() => {});
 
-        if (res) {
-          const { item, offers } = res;
+        if (data) {
+          const { item, offers } = data;
 
           if (item && !result) {
             result = { item, peer: proxy };
@@ -53,7 +53,7 @@ export default async function findValue(
       const { peerKid, sdp } = offer;
       const { peer, candidate } = signaling.create(peerKid);
 
-      const actions = wrap(TestFindValueProxy, wrapper(proxy));
+      const actions = wrap(TestFindValueProxy, wrapper(proxy), timeout);
 
       const _createAnswer = async (peer: Peer) => {
         const answer = await peer.setOffer(JSON.parse(sdp));

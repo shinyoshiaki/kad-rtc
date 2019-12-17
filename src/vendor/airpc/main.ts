@@ -14,17 +14,20 @@ export type ExposerObject = {
 };
 
 class Wrap {
-  constructor(target: any, wrapper: Wrapper) {
+  constructor(target: any, wrapper: Wrapper, timeout?: number) {
     Object.getOwnPropertyNames(target.prototype).forEach(type => {
       if (type === "constructor") return;
 
       (this as any)[type] = (...args: any[]) =>
-        new Promise(r => {
+        new Promise((r, f) => {
           const parentId = generateUUID();
+
+          const id = timeout && setTimeout(() => f("wrap timeout"), timeout);
 
           wrapper.subject.subscribe(res => {
             const { uuid, response } = decode(res) as any;
             if (parentId === uuid) {
+              if (id) clearTimeout(id);
               r(response);
             }
           });
@@ -37,9 +40,10 @@ class Wrap {
 
 export function wrap<T>(
   target: { new (...args: any[]): T },
-  wrapper: Wrapper
+  wrapper: Wrapper,
+  timeout?: number
 ): Remote<T> {
-  return new Wrap(target, wrapper) as any;
+  return new Wrap(target, wrapper, timeout) as any;
 }
 
 export function expose(instance: any, exposer: Exposer) {

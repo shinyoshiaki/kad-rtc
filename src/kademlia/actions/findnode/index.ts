@@ -14,13 +14,15 @@ export async function findNode(searchKid: string, di: DependencyInjection) {
 
   const findNodeProxyOfferResult = await Promise.all(
     kTable.findNode(searchKid).map(async peer => {
-      const actions = wrap(FindNodeProxy, wrapper(peer));
+      const actions = wrap(FindNodeProxy, wrapper(peer), timeout);
 
       const except = kTable.allPeers.map(item => item.kid);
 
-      const peers = await actions.findnode(searchKid, except);
+      const data = await actions.findnode(searchKid, except).catch(() => {});
+      if (data) {
+        if (data.length > 0) return { peers: data, peer };
+      }
 
-      if (peers.length > 0) return { peers, peer };
       return { peers: [], peer };
     })
   );
@@ -29,7 +31,7 @@ export async function findNode(searchKid: string, di: DependencyInjection) {
     findNodeProxyOfferResult
       .map(({ peer: node, peers }) =>
         peers.map(async offer => {
-          const findNodeProxy = wrap(FindNodeProxy, wrapper(node));
+          const actions = wrap(FindNodeProxy, wrapper(node), timeout);
 
           const { peerKid, sdp } = offer;
           const { peer, candidate } = signaling.create(peerKid);
@@ -37,7 +39,7 @@ export async function findNode(searchKid: string, di: DependencyInjection) {
           const _createAnswer = async (peer: Peer) => {
             const answer = await peer.setOffer(JSON.parse(sdp));
 
-            findNodeProxy.findNodeAnswer(JSON.stringify(answer), peerKid);
+            actions.findNodeAnswer(JSON.stringify(answer), peerKid);
 
             const err = await peer.onConnect.asPromise(timeout).catch(() => {
               return "err";
