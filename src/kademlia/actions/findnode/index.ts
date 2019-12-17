@@ -1,6 +1,6 @@
 import { DependencyInjection } from "../../di";
-import { Peer } from "../../modules/peer/base";
 import { FindNodeProxy } from "./listen/node";
+import { Peer } from "../../modules/peer/base";
 import { listeners } from "../../listeners";
 import { wrap } from "../../../vendor/airpc/main";
 import { wrapper } from "../rpc";
@@ -14,11 +14,11 @@ export async function findNode(searchKid: string, di: DependencyInjection) {
 
   const findNodeProxyOfferResult = await Promise.all(
     kTable.findNode(searchKid).map(async peer => {
-      const node = wrap(FindNodeProxy, wrapper(peer));
+      const actions = wrap(FindNodeProxy, wrapper(peer));
 
       const except = kTable.allPeers.map(item => item.kid);
 
-      const peers = await node.findnode(searchKid, except);
+      const peers = await actions.findnode(searchKid, except);
 
       if (peers.length > 0) return { peers, peer };
       return { peers: [], peer };

@@ -1,17 +1,17 @@
-import { FindValueResult, OfferPayload } from "./listen/node";
-
 import { DependencyInjection } from "../../di";
 import { Item } from "../../modules/kvs/base";
 import { Peer } from "../../modules/peer/base";
-import { Signal } from "webrtc4me";
+import { TestFindValueProxy } from "./listen/node";
 import { listeners } from "../../listeners";
+import { wrap } from "../../../vendor/airpc/main";
+import { wrapper } from "../rpc";
 
 export default async function findValue(
   key: string,
   di: DependencyInjection,
   opt?: { preferTimeout?: number }
 ): Promise<{ item: Item; peer: Peer } | undefined> {
-  const { kTable, rpcManager, signaling } = di;
+  const { kTable, signaling } = di;
   let { timeout } = di.opt;
   if (opt && opt.preferTimeout) timeout = opt.preferTimeout;
 
@@ -19,18 +19,14 @@ export default async function findValue(
 
   const job = async () => {
     const findValueResultResult = await Promise.all(
-      kTable.allPeers.map(async proxy => {
+      kTable.findNode(key).map(async proxy => {
         const except = kTable.findNode(key).map(({ kid }) => kid);
+        const actions = wrap(TestFindValueProxy, wrapper(proxy));
 
-        const res = await rpcManager
-          .getWait<FindValueResult>(
-            proxy,
-            FindValue(key, except)
-          )(timeout)
-          .catch(() => {});
+        const res = await actions.findvalue(key, except);
 
         if (res) {
-          const { item, offers } = res.value;
+          const { item, offers } = res;
 
           if (item && !result) {
             result = { item, peer: proxy };
@@ -50,14 +46,19 @@ export default async function findValue(
 
     if (result) return;
 
-    const findValueAnswer = async (offer: OfferPayload, proxy: Peer) => {
+    const findValueAnswer = async (
+      offer: { peerKid: string; sdp: string },
+      proxy: Peer
+    ) => {
       const { peerKid, sdp } = offer;
       const { peer, candidate } = signaling.create(peerKid);
 
-      const _createAnswer = async (peer: Peer) => {
-        const answer = await peer.setOffer(sdp);
+      const actions = wrap(TestFindValueProxy, wrapper(proxy));
 
-        rpcManager.run(proxy, FindValueAnswer(answer, peerKid));
+      const _createAnswer = async (peer: Peer) => {
+        const answer = await peer.setOffer(JSON.parse(sdp));
+
+        actions.findValueAnswer(JSON.stringify(answer), peerKid);
 
         const err = await peer.onConnect.asPromise(timeout).catch(() => {
           return "err";
@@ -73,16 +74,13 @@ export default async function findValue(
         await _createAnswer(peer);
       } else if (candidate) {
         const { peer, event } = candidate;
-        // node.ts側でタイミング悪くPeerを作ってしまった場合の処理
-        // (並行テスト時にしか起きないと思う)
         if (peer.SdpType === "offer") {
           await _createAnswer(peer);
         } else {
           await event.asPromise(timeout).catch(() => {});
         }
       }
-      // 相手側のlistenが完了するまで待つ
-      // TODO : ちゃんと実装する
+
       await new Promise(r => setTimeout(r, 100));
     };
 
@@ -104,19 +102,3 @@ export default async function findValue(
 
   return result;
 }
-
-const FindValue = (key: string, except: string[]) => ({
-  type: "FindValue" as const,
-  key,
-  except
-});
-
-export type FindValue = ReturnType<typeof FindValue>;
-
-const FindValueAnswer = (sdp: Signal, peerKid: string) => ({
-  type: "FindValueAnswer" as const,
-  sdp,
-  peerKid
-});
-
-export type FindValueAnswer = ReturnType<typeof FindValueAnswer>;

@@ -1,95 +1,57 @@
-import { FindValue, FindValueAnswer } from "..";
-import { ID, Peer } from "../../../modules/peer/base";
+import { expose, wrap } from "../../../../vendor/airpc/main";
+import { exposer, wrapper } from "../../rpc";
 
 import { DependencyInjection } from "../../../di";
-import { FindValuePeerOffer } from "./signaling";
-import { Item } from "../../../modules/kvs/base";
-import { Signal } from "webrtc4me";
+import { Peer } from "../../../modules/peer/base";
+import { TestFindValueSignaling } from "./signaling";
 
-export default class FindValueProxy {
-  timeout = this.di.opt.timeout! / 2;
+export function listenerFindValueProxy(listen: Peer, di: DependencyInjection) {
+  expose(new TestFindValueProxy(listen, di), exposer(listen));
+}
 
-  constructor(private listen: Peer, private di: DependencyInjection) {
-    const { rpcManager } = di;
+export class TestFindValueProxy {
+  constructor(private listen: Peer, private di: DependencyInjection) {}
 
-    rpcManager
-      .asObservable<FindValue>("FindValue", listen)
-      .subscribe(this.findvalue);
-
-    rpcManager
-      .asObservable<FindValueAnswer>("FindValueAnswer", listen)
-      .subscribe(this.findValueAnswer);
-  }
-
-  findvalue = async (data: FindValue & ID) => {
-    const { kTable, rpcManager } = this.di;
+  async findvalue(key: string, except: string[]) {
+    const { kTable } = this.di;
     const { kvs } = this.di.modules;
-    const { key, except, id } = data;
 
     const item = kvs.get(key);
 
     if (item) {
-      this.listen.rpc({ ...FindValueResult({ item }), id });
+      return { item };
     } else {
-      const peers = kTable.findNode(key);
-      const offers: { peerKid: string; sdp: Signal }[] = [];
+      const offers: { peerKid: string; sdp: string }[] = [];
+
+      const peers = kTable
+        .findNode(key)
+        .filter(({ kid }) => kid !== this.listen.kid)
+        .filter(({ kid }) => !except.includes(kid));
 
       await Promise.all(
         peers.map(async peer => {
-          if (!(peer.kid === this.listen.kid || except.includes(peer.kid))) {
-            const res = await rpcManager
-              .getWait<FindValuePeerOffer>(
-                peer,
-                FindValueProxyOpen(this.listen.kid)
-              )(this.timeout)
-              .catch(() => {});
+          const actions = wrap(TestFindValueSignaling, wrapper(peer));
+          const data = await actions.findValueProxyOpen(this.listen.kid);
 
-            if (res) {
-              const { peerKid, sdp } = res;
-              if (sdp) offers.push({ peerKid, sdp });
-            } else {
-              console.log("timeout", "FindValueProxyOpen", peer.type);
-            }
+          if (data) {
+            const { offer, kid } = data;
+            if (offer) offers.push({ peerKid: kid, sdp: offer });
+          } else {
+            console.log("timeout", "FindValueProxyOpen", peer.type);
           }
         })
       );
-
-      this.listen.rpc({ ...FindValueResult({ offers }), id });
+      return { offers };
     }
-  };
+  }
 
-  findValueAnswer = (data: FindValueAnswer & ID) => {
+  findValueAnswer(sdp: string, peerKid: string) {
     const { kTable } = this.di;
-    const { sdp, peerKid, id } = data;
 
     const peer = kTable.getPeer(peerKid);
-    if (!peer) return;
-    peer.rpc({ ...FindValueProxyAnswer(sdp, this.listen.kid), id });
-  };
+    if (!peer) return false;
+
+    const actions = wrap(TestFindValueSignaling, wrapper(peer));
+    actions.findValueProxyAnswer(this.listen.kid, sdp);
+  }
 }
-
-const FindValueResult = (
-  value: Partial<{ item: Item; offers: OfferPayload[] }>
-) => ({
-  type: "FindValueResult" as const,
-  value
-});
-
-export type OfferPayload = { peerKid: string; sdp: Signal };
-
-export type FindValueResult = ReturnType<typeof FindValueResult>;
-
-const FindValueProxyOpen = (finderKid: string) => ({
-  type: "FindValueProxyOpen" as const,
-  finderKid
-});
-
-export type FindValueProxyOpen = ReturnType<typeof FindValueProxyOpen>;
-
-const FindValueProxyAnswer = (sdp: Signal, finderKid: string) => ({
-  type: "FindValueProxyAnswer" as const,
-  sdp,
-  finderKid
-});
-
-export type FindValueProxyAnswer = ReturnType<typeof FindValueProxyAnswer>;

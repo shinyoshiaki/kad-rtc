@@ -11,8 +11,7 @@ export default async function store(
   value: string | ArrayBuffer,
   msg?: string
 ) {
-  const { kTable, rpcManager, jobSystem } = di;
-  const { timeout } = di.opt;
+  const { kTable, jobSystem } = di;
   const { kvs } = di.modules;
 
   kvs.set(key, value, msg as any);
@@ -27,7 +26,7 @@ export default async function store(
 
   const peers = di.kTable.findNode(key);
 
-  const item = Store(key, value, msg);
+  const item = { key, value, msg };
 
   const onStore = async (peer: Peer) => {
     const actions = wrap(ListenStore, wrapper(peer));
@@ -40,12 +39,3 @@ export default async function store(
 
   return { item, peers };
 }
-
-const Store = (key: string, value: string | ArrayBuffer, msg?: string) => ({
-  type: "Store" as const,
-  key,
-  value,
-  msg
-});
-
-export type Store = ReturnType<typeof Store>;

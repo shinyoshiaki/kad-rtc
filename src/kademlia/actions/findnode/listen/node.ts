@@ -26,11 +26,9 @@ export class FindNodeProxy {
 
     await Promise.all(
       peers.map(async peer => {
-        const findNodePeer = wrap(TestFindNodePeer, wrapper(peer));
+        const actions = wrap(TestFindNodePeer, wrapper(peer));
 
-        const { offer, kid } = await findNodePeer.findNodeProxyOpen(
-          this.listen.kid
-        );
+        const { offer, kid } = await actions.findNodeProxyOpen(this.listen.kid);
         if (offer) offers.push({ peerKid: kid, sdp: offer });
       })
     );
@@ -42,11 +40,9 @@ export class FindNodeProxy {
     const { kTable } = this.di;
 
     const peer = kTable.getPeer(peerKid);
-    if (peer) {
-      const findNodePeer = wrap(TestFindNodePeer, wrapper(peer));
-      findNodePeer.findNodeProxyAnswer(this.listen.kid, sdp);
-    } else {
-      return false;
-    }
+    if (!peer) return false;
+
+    const findNodePeer = wrap(TestFindNodePeer, wrapper(peer));
+    findNodePeer.findNodeProxyAnswer(this.listen.kid, sdp);
   }
 }

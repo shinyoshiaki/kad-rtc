@@ -1,28 +1,23 @@
-import { FindValueProxyAnswer, FindValueProxyOpen } from "./node";
-import { ID, Peer } from "../../../modules/peer/base";
-
 import { DependencyInjection } from "../../../di";
-import { Signal } from "webrtc4me";
+import { Peer } from "../../../modules/peer/base";
+import { expose } from "../../../../vendor/airpc/main";
+import { exposer } from "../../rpc";
 import { listeners } from "../../../listeners";
 
-export default class FindValuePeer {
+export function listenerFindValueSignaling(
+  listen: Peer,
+  di: DependencyInjection
+) {
+  expose(new TestFindValueSignaling(di), exposer(listen));
+}
+
+export class TestFindValueSignaling {
   candidates: { [key: string]: Peer } = {};
 
-  constructor(private listen: Peer, private di: DependencyInjection) {
-    const { rpcManager } = di;
+  constructor(private di: DependencyInjection) {}
 
-    rpcManager
-      .asObservable<FindValueProxyOpen>("FindValueProxyOpen", listen)
-      .subscribe(this.findValueProxyOpen);
-
-    rpcManager
-      .asObservable<FindValueProxyAnswer>("FindValueProxyAnswer", listen)
-      .subscribe(this.findValueProxyAnswer);
-  }
-
-  findValueProxyOpen = async (data: FindValueProxyOpen & ID) => {
+  async findValueProxyOpen(finderKid: string) {
     const { kTable, signaling } = this.di;
-    const { finderKid, id } = data;
 
     const { peer } = signaling.create(finderKid);
 
@@ -31,29 +26,16 @@ export default class FindValuePeer {
 
       const offer = await peer.createOffer();
 
-      this.listen.rpc({
-        ...FindValuePeerOffer(kTable.kid, offer),
-        id
-      });
+      return { kid: kTable.kid, offer: JSON.stringify(offer) };
     } else {
-      this.listen.rpc({ ...FindValuePeerOffer(kTable.kid), id });
+      return { kid: kTable.kid };
     }
-  };
+  }
 
-  findValueProxyAnswer = async (data: FindValueProxyAnswer) => {
-    const { finderKid, sdp } = data;
-
+  async findValueProxyAnswer(finderKid: string, sdp: string) {
     const peer = this.candidates[finderKid];
     if (!peer) return;
-    const err = await peer.setAnswer(sdp);
+    const err = await peer.setAnswer(JSON.parse(sdp));
     if (!err) listeners(peer, this.di);
-  };
+  }
 }
-
-const FindValuePeerOffer = (peerKid: string, sdp?: Signal) => ({
-  type: "FindValuePeerOffer" as const,
-  sdp,
-  peerKid
-});
-
-export type FindValuePeerOffer = ReturnType<typeof FindValuePeerOffer>;

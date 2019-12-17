@@ -9,6 +9,7 @@
   "scripts": {
     "build": "tsc",
     "type": "tsc --noEmit",
+    "start": "npm run portal",
     "portal": "ts-node --project ./tsconfig.json ./src/portalnode.ts",
     "guest": "ts-node --project ./tsconfig.json ./src/guestnode.ts"
   },
