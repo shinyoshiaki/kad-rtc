@@ -27,7 +27,7 @@
         "--runInBand",
         "--forceExit",
         "--detectOpenHandles",
-        "${workspaceRoot}/src/tests/setupnetwork.test.ts"
+        "${workspaceRoot}/src/tests/udp.test.ts"
       ],
       "windows": {
         "program": "${workspaceRoot}/node_modules/jest/bin/jest.js"

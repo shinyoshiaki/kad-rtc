@@ -15,7 +15,7 @@ describe("udp", () => {
       const b = PeerUdpModule("b");
 
       await testPeerModule(a, b);
-      closeUdpSocket();
+      await closeUdpSocket();
     },
     1000 * 6000
   );

@@ -38,6 +38,11 @@ export class PeerUdpMock implements Peer {
   constructor(public kid: string) {
     socket.on("message", message => {
       if (message.toString() === "connect," + this.uuid) {
+        socket.send(
+          "connect," + this.target.uuid,
+          this.target.port,
+          "127.0.0.1"
+        );
         this.onConnect.execute(null);
         return;
       }
@@ -80,8 +85,7 @@ export class PeerUdpMock implements Peer {
     this.target.uuid = sdp.uuid;
     this.target.port = sdp.port;
     socket.send("connect," + this.target.uuid, this.target.port, "127.0.0.1");
-    await new Promise(r => setTimeout(r, 0));
-    this.onConnect.execute(null);
+    await this.onConnect.asPromise();
 
     return undefined;
   };
