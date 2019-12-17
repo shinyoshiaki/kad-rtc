@@ -10,7 +10,7 @@
     "type": "tsc --noEmit --project ./tsconfig.json",
     "update": "rm -rf ./lib && npm run build",
     "publish": "npm publish --access=public",
-    "test": "npm run type && jest --forceExit",
+    "test": "npm run type && jest --forceExit --runInBand",
     "ci": "npm run type && jest --forceExit --runInBand",
     "test_target": "jest --forceExit ./src/kademlia/actions/findnode/test.ts",
     "server": "cd ./examples/express && npm run portal",

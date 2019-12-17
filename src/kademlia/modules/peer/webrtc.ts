@@ -1,4 +1,4 @@
-import { ID, Peer, RPC, RPCBase } from "./base";
+import { Peer, RPC } from "./base";
 import WebRTC, { Signal } from "webrtc4me";
 import { decode, encode } from "@msgpack/msgpack";
 
@@ -11,7 +11,7 @@ export const PeerModule = (kid: string) => new PeerWebRTC(kid);
 export default class PeerWebRTC implements Peer {
   type = "webrtc";
   SdpType: "offer" | "answer" | undefined = undefined;
-  onRpc = new Event<RPCBase & ID>();
+  onRpc = new Event<RPC>();
   onDisconnect = new Event();
   onConnect = new Event();
   private peer: WebRTC = new WebRTC({ disable_stun: true, wrtc });
@@ -27,9 +27,7 @@ export default class PeerWebRTC implements Peer {
             const obj = this.parseRPC(data as ArrayBuffer);
             if (obj) this.onRpc.execute(obj);
           }
-        } catch (error) {
-          // console.error(error);
-        }
+        } catch (error) {}
       }
     );
     this.onDisconnect.once(unSubscribe);
@@ -40,15 +38,13 @@ export default class PeerWebRTC implements Peer {
     try {
       const data: RPC = decode(buffer) as any;
       if (data.type) {
-        if (data.sdp) data.sdp = JSON.parse(data.sdp as any);
         return data;
       }
     } catch (error) {}
     return undefined;
   };
 
-  rpc = (send: RPCBase & ID & { [key: string]: unknown }) => {
-    if (send.sdp) send.sdp = JSON.stringify(send.sdp);
+  rpc = (send: RPC) => {
     const packet = encode(send);
     this.peer.send(packet);
   };

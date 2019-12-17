@@ -1,6 +1,6 @@
 import * as dgram from "dgram";
 
-import { ID, Peer, RPC, RPCBase } from "./base";
+import { Peer, RPC } from "./base";
 import { decode, encode } from "@msgpack/msgpack";
 
 import Event from "rx.mini";
@@ -43,7 +43,7 @@ export class PeerUdpMock implements Peer {
       }
 
       const obj = this.parseRPC(message);
-      if (obj && obj.uuid === this.uuid) this.onRpc.execute(obj);
+      if (obj && (obj as any).uuid === this.uuid) this.onRpc.execute(obj);
     });
   }
 
@@ -52,15 +52,13 @@ export class PeerUdpMock implements Peer {
     try {
       const data: RPC = decode(buffer) as any;
       if (data.type) {
-        if (data.sdp) data.sdp = JSON.parse(data.sdp as any);
         return data;
       }
     } catch (error) {}
     return undefined;
   };
 
-  rpc = (send: RPCBase & ID & { [key: string]: unknown }) => {
-    if (send.sdp) send.sdp = JSON.stringify(send.sdp);
+  rpc = (send: RPC) => {
     (send as any).uuid = this.target.uuid;
     const packet = encode(send);
     socket.send(packet, this.target.port, "127.0.0.1");

@@ -4,14 +4,9 @@ import Event from "rx.mini";
 import { Signal } from "webrtc4me";
 import { Subject } from "rxjs";
 
-export type ID = { id: string };
-
-export type RPCBase = { type: string };
-
 export type RPC = {
   type: string;
-  [key: string]: string | Buffer | ArrayBuffer;
-  id: string;
+  value: Uint8Array;
 };
 
 export type Peer = PeerClass & PeerProps;
@@ -23,11 +18,11 @@ class PeerClass {
 type PeerProps = {
   type: string;
   SdpType: "offer" | "answer" | undefined;
-  onRpc: Event<RPCBase & ID>;
+  onRpc: Event<RPC>;
   onDisconnect: Event;
   onConnect: Event;
   parseRPC: (data: ArrayBuffer) => RPC | undefined;
-  rpc: (data: RPCBase & ID & { [key: string]: unknown }) => void;
+  rpc: (data: RPC) => void;
   createOffer: () => Promise<Signal>;
   setOffer: (sdp: Signal) => Promise<Signal>;
   setAnswer: (sdp: Signal) => Promise<Error | undefined>;
@@ -41,7 +36,7 @@ export class PeerMock implements Peer {
   onData = new Event<RPC>();
   SdpType: "offer" | "answer" | undefined = undefined;
 
-  onRpc = new Event<any>();
+  onRpc = new Event<RPC>();
   onDisconnect = new Event();
   onConnect = new Event();
   uuid = Math.random().toString() + Date.now();
@@ -59,7 +54,7 @@ export class PeerMock implements Peer {
         }
       } else {
         const obj = this.parseRPC(data);
-        if (obj && obj.uuid === this.uuid) this.onRpc.execute(obj);
+        if (obj && (obj as any).uuid === this.uuid) this.onRpc.execute(obj);
       }
     });
   }
@@ -69,15 +64,13 @@ export class PeerMock implements Peer {
     try {
       const data: RPC = decode(buffer) as any;
       if (data.type) {
-        if (data.sdp) data.sdp = JSON.parse(data.sdp as any);
         return data;
       }
     } catch (error) {}
     return undefined;
   };
 
-  rpc = async (send: RPCBase & ID & { [key: string]: unknown }) => {
-    if (send.sdp) send.sdp = JSON.stringify(send.sdp);
+  rpc = async (send: RPC) => {
     (send as any).uuid = this.target.uuid;
     const packet = encode(send);
     await new Promise(r => setTimeout(r));

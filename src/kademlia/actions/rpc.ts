@@ -10,7 +10,7 @@ export const exposer = (listen: Peer) => {
     subject.next({
       value,
       postMessage: v => {
-        listen.rpc({ type: "airpc", id: "", value: v });
+        listen.rpc({ type: "airpc", value: v });
       }
     });
   });
@@ -25,7 +25,7 @@ export const wrapper = (peer: Peer) => {
     subject.next(value);
   });
   const post = (uint8: Uint8Array) => {
-    peer.rpc({ type: "airpc", id: "", value: uint8 });
+    peer.rpc({ type: "airpc", value: uint8 });
   };
   return { subject, post };
 };
