@@ -1,14 +1,13 @@
 import { Peer, RPC } from "../../modules/peer/base";
 
 import Event from "rx.mini";
-import RpcManager from "../rpcmanager";
 
 type WithPeer<T> = { rpc: T; peer: Peer };
 
 export default class EventManager {
   event = new Event<WithPeer<RPC>>();
 
-  constructor(public rpcManager: RpcManager) {}
+  constructor() {}
 
   listen(peer: Peer) {
     const { unSubscribe } = peer.onRpc.subscribe(rpc => {
