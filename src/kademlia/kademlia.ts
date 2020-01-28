@@ -20,8 +20,8 @@ export default class Kademlia {
     this.di = dependencyInjection(kid, modules, options);
   }
 
-  findNode = async (searchKid: string) => {
-    let target: Peer[] | undefined;
+  findNode = async (searchKid: string): Promise<Peer | undefined> => {
+    let target: Peer | undefined;
 
     for (
       let pre = "";

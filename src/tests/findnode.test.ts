@@ -16,7 +16,7 @@ describe("findnode", () => {
     const search = async (word: string) => {
       const node = nodes[0];
 
-      let target: undefined | Peer[];
+      let target: undefined | Peer;
 
       let pre = "",
         tryTimes = 0;

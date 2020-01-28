@@ -24,9 +24,10 @@ class Wrap {
 
           const id = timeout && setTimeout(() => f("wrap timeout"), timeout);
 
-          wrapper.subject.subscribe(res => {
+          const subscription = wrapper.subject.subscribe(res => {
             const { uuid, response } = decode(res) as any;
             if (parentId === uuid) {
+              subscription.unsubscribe();
               if (id) clearTimeout(id);
               r(response);
             }
@@ -47,7 +48,7 @@ export function wrap<T>(
 }
 
 export function expose(instance: any, exposer: Exposer) {
-  exposer.subscribe(async v => {
+  const subscription = exposer.subscribe(async v => {
     const { postMessage, value } = v;
     const { type, args, uuid } = decode(value) as any;
     if (instance[type]) {
@@ -55,6 +56,7 @@ export function expose(instance: any, exposer: Exposer) {
       postMessage(encode({ uuid, response }));
     }
   });
+  return subscription;
 }
 
 function generateUUID(): string {

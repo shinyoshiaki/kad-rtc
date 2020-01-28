@@ -5,12 +5,20 @@ import { listeners } from "../../listeners";
 import { wrap } from "../../../vendor/airpc/main";
 import { wrapper } from "../rpc";
 
-export async function findNode(searchKid: string, di: DependencyInjection) {
-  const connected: Peer[] = [];
+/**
+ * if searchKid exist return peer
+ * @param searchKid
+ * @param di
+ */
+
+export async function findNode(
+  searchKid: string,
+  di: DependencyInjection
+): Promise<Peer | undefined> {
   const { kTable, signaling } = di;
   const { timeout } = di.opt;
 
-  if (kTable.getPeer(searchKid)) return [kTable.getPeer(searchKid)!];
+  if (kTable.getPeer(searchKid)) return kTable.getPeer(searchKid)!;
 
   const findNodeProxyOfferResult = await Promise.all(
     kTable.findNode(searchKid).map(async peer => {
@@ -27,6 +35,7 @@ export async function findNode(searchKid: string, di: DependencyInjection) {
     })
   );
 
+  // signaling
   await Promise.all(
     findNodeProxyOfferResult
       .map(({ peer: node, peers }) =>
@@ -48,7 +57,6 @@ export async function findNode(searchKid: string, di: DependencyInjection) {
               signaling.delete(peerKid);
             } else {
               listeners(peer, di);
-              connected.push(peer);
             }
           };
 
