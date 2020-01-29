@@ -1,16 +1,17 @@
 import * as dgram from "dgram";
 
-import { ID, Peer, RPC, RPCBase } from "./base";
+import { Peer, RPC } from "./base";
 import { decode, encode } from "@msgpack/msgpack";
 
 import Event from "rx.mini";
 import getPort from "get-port";
 
 let port = 0,
-  socket = dgram.createSocket("udp4");
+  socket: dgram.Socket = null as any;
 
 // 1 worker につき1ソケットを割り当てる
 export async function setUpSocket() {
+  socket = dgram.createSocket("udp4");
   port = await getPort();
   socket.bind(port, "127.0.0.1");
   socket.setMaxListeners(100000);
@@ -20,6 +21,7 @@ export async function setUpSocket() {
 export async function closeUdpSocket() {
   socket.close();
   await new Promise(r => socket.once("close", r));
+  socket = null as any;
 }
 
 export class PeerUdpMock implements Peer {
@@ -46,7 +48,7 @@ export class PeerUdpMock implements Peer {
       }
 
       const obj = this.parseRPC(message);
-      if (obj && obj.uuid === this.uuid) this.onRpc.execute(obj);
+      if (obj && (obj as any).uuid === this.uuid) this.onRpc.execute(obj);
     });
   }
 
@@ -55,15 +57,13 @@ export class PeerUdpMock implements Peer {
     try {
       const data: RPC = decode(buffer) as any;
       if (data.type) {
-        if (data.sdp) data.sdp = JSON.parse(data.sdp as any);
         return data;
       }
     } catch (error) {}
     return undefined;
   };
 
-  rpc = (send: RPCBase & ID & { [key: string]: unknown }) => {
-    if (send.sdp) send.sdp = JSON.stringify(send.sdp);
+  rpc = (send: RPC) => {
     (send as any).uuid = this.target.uuid;
     const packet = encode(send);
     socket.send(packet, this.target.port, "127.0.0.1");

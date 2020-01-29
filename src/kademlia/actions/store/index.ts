@@ -1,6 +1,9 @@
 import { DependencyInjection } from "../../di";
+import { ListenStore } from "./listen";
 import { Peer } from "../../modules/peer/base";
-import findNode from "../findnode";
+import { findNode } from "../findnode";
+import { wrap } from "../../../vendor/airpc/main";
+import { wrapper } from "../rpc";
 
 export default async function store(
   di: DependencyInjection,
@@ -8,9 +11,9 @@ export default async function store(
   value: string | ArrayBuffer,
   msg?: string
 ) {
-  const { kTable, rpcManager, jobSystem } = di;
-  const { timeout } = di.opt;
+  const { kTable, jobSystem } = di;
   const { kvs } = di.modules;
+  const { timeout } = di.opt;
 
   kvs.set(key, value, msg as any);
 
@@ -24,16 +27,11 @@ export default async function store(
 
   const peers = di.kTable.findNode(key);
 
-  const item = Store(key, value, msg);
+  const item = { key, value, msg };
 
   const onStore = async (peer: Peer) => {
-    await rpcManager
-      .getWait(
-        peer,
-        item
-      )(timeout)
-      .catch(() => {});
-    // TODO error handling
+    const actions = wrap(ListenStore, wrapper(peer), timeout);
+    await actions.store(key, value, msg);
   };
 
   await Promise.all(
@@ -42,12 +40,3 @@ export default async function store(
 
   return { item, peers };
 }
-
-const Store = (key: string, value: string | ArrayBuffer, msg?: string) => ({
-  type: "Store" as const,
-  key,
-  value,
-  msg
-});
-
-export type Store = ReturnType<typeof Store>;
