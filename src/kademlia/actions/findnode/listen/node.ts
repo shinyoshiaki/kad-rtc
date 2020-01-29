@@ -3,7 +3,7 @@ import { exposer, wrapper } from "../../rpc";
 
 import { DependencyInjection } from "../../../di";
 import { Peer } from "../../../modules/peer/base";
-import { TestFindNodePeer } from "./signaling";
+import { FindNodePeer } from "./signaling";
 
 export function listenerFindNodeProxy(listen: Peer, di: DependencyInjection) {
   expose(new FindNodeProxy(listen, di), exposer(listen));
@@ -26,7 +26,7 @@ export class FindNodeProxy {
 
     await Promise.all(
       peers.map(async peer => {
-        const actions = wrap(TestFindNodePeer, wrapper(peer), this.timeout);
+        const actions = wrap(FindNodePeer, wrapper(peer), this.timeout);
 
         const data = await actions
           .findNodeProxyOpen(this.listen.kid)
@@ -47,7 +47,7 @@ export class FindNodeProxy {
     const peer = kTable.getPeer(peerKid);
     if (!peer) return false;
 
-    const actions = wrap(TestFindNodePeer, wrapper(peer), this.timeout);
+    const actions = wrap(FindNodePeer, wrapper(peer), this.timeout);
     actions.findNodeProxyAnswer(this.listen.kid, sdp);
   }
 }

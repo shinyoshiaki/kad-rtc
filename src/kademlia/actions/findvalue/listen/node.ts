@@ -3,13 +3,13 @@ import { exposer, wrapper } from "../../rpc";
 
 import { DependencyInjection } from "../../../di";
 import { Peer } from "../../../modules/peer/base";
-import { TestFindValueSignaling } from "./signaling";
+import { FindValueSignaling } from "./signaling";
 
 export function listenerFindValueProxy(listen: Peer, di: DependencyInjection) {
-  expose(new TestFindValueProxy(listen, di), exposer(listen));
+  expose(new FindValueProxy(listen, di), exposer(listen));
 }
 
-export class TestFindValueProxy {
+export class FindValueProxy {
   timeout = this.di.opt.timeout! / 2;
   constructor(private listen: Peer, private di: DependencyInjection) {}
 
@@ -31,11 +31,7 @@ export class TestFindValueProxy {
 
       await Promise.all(
         peers.map(async peer => {
-          const actions = wrap(
-            TestFindValueSignaling,
-            wrapper(peer),
-            this.timeout
-          );
+          const actions = wrap(FindValueSignaling, wrapper(peer), this.timeout);
           const data = await actions
             .findValueProxyOpen(this.listen.kid)
             .catch(() => {});
@@ -58,7 +54,7 @@ export class TestFindValueProxy {
     const peer = kTable.getPeer(peerKid);
     if (!peer) return false;
 
-    const actions = wrap(TestFindValueSignaling, wrapper(peer), this.timeout);
+    const actions = wrap(FindValueSignaling, wrapper(peer), this.timeout);
     actions.findValueProxyAnswer(this.listen.kid, sdp);
   }
 }

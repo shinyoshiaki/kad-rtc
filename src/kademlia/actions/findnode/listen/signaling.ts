@@ -5,10 +5,10 @@ import { exposer } from "../../rpc";
 import { listeners } from "../../../listeners";
 
 export function listenerFindNodePeer(listen: Peer, di: DependencyInjection) {
-  expose(new TestFindNodePeer(di), exposer(listen));
+  expose(new FindNodePeer(di), exposer(listen));
 }
 
-export class TestFindNodePeer {
+export class FindNodePeer {
   candidates: { [key: string]: Peer } = {};
   constructor(private di: DependencyInjection) {}
 

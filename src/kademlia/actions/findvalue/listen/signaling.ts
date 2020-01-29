@@ -8,10 +8,10 @@ export function listenerFindValueSignaling(
   listen: Peer,
   di: DependencyInjection
 ) {
-  expose(new TestFindValueSignaling(di), exposer(listen));
+  expose(new FindValueSignaling(di), exposer(listen));
 }
 
-export class TestFindValueSignaling {
+export class FindValueSignaling {
   candidates: { [key: string]: Peer } = {};
 
   constructor(private di: DependencyInjection) {}

@@ -1,7 +1,7 @@
 import { DependencyInjection } from "../../di";
 import { Item } from "../../modules/kvs/base";
 import { Peer } from "../../modules/peer/base";
-import { TestFindValueProxy } from "./listen/node";
+import { FindValueProxy } from "./listen/node";
 import { listeners } from "../../listeners";
 import { wrap } from "../../../vendor/airpc/main";
 import { wrapper } from "../rpc";
@@ -25,7 +25,7 @@ export default async function findValue(
     const findValueResultResult = await Promise.all(
       kTable.findNode(key).map(async proxy => {
         const except = kTable.findNode(key).map(({ kid }) => kid);
-        const actions = wrap(TestFindValueProxy, wrapper(proxy), timeout);
+        const actions = wrap(FindValueProxy, wrapper(proxy), timeout);
 
         const data = await actions.findvalue(key, except).catch(() => {});
 
@@ -56,7 +56,7 @@ export default async function findValue(
             const { peer, candidate } = signaling.create(peerKid);
             const { proxy } = v;
 
-            const actions = wrap(TestFindValueProxy, wrapper(proxy), timeout);
+            const actions = wrap(FindValueProxy, wrapper(proxy), timeout);
 
             const _createAnswer = async (peer: Peer) => {
               const answer = await peer.setOffer(JSON.parse(sdp));
